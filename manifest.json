@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Search Immersion",
+  "version": "0.9.1",
+  "description": "リリーステスト版",
+  "permissions": [
+    "storage",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://*/*",
+    "https://raw.githubusercontent.com/*"
+  ],
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://www.google.com/*", "*://www.google.co.jp/*"],
+      "css": ["styles.css"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}
