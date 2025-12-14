@@ -492,3 +492,39 @@ body.zen-active .col-left, body.zen-active .col-right { opacity: 0 !important; t
 .st-btn-small {
   padding: 6px 12px; border-radius: 6px; border: none; background: var(--accent); color: #000; font-weight: 600; cursor: pointer;
 }
+
+.ds-move-btn {
+  display: inline-flex;
+  width: 24px; height: 24px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 0.8rem;
+  margin-left: 5px;
+  transition: 0.2s;
+}
+.ds-move-btn:hover {
+  background: var(--accent);
+  color: #000;
+}
+#cal-prev:hover, #cal-next:hover {
+  color: var(--accent);
+  opacity: 1 !important;
+  transform: scale(1.2);
+}
+#cal-prev:hover, #cal-next:hover {
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: var(--accent);
+  opacity: 1 !important;
+}
+#cal-prev:active, #cal-next:active {
+  transform: scale(0.95);
+  background: rgba(255,255,255,0.2);
+}
+
+.ds-del-inline:hover {
+  background: rgba(255, 69, 58, 0.2);
+  color: #ff453a !important;
+}
