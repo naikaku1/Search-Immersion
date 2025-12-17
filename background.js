@@ -44,6 +44,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 
+  if (request.action === "fetchCalendar") {
+    const targetUrl = request.url;
+    if (!targetUrl) {
+      sendResponse({ error: "URL not specified" });
+      return true;
+    }
+
+    const fetchUrl = targetUrl.includes('?') ? targetUrl + '&t=' + Date.now() : targetUrl + '?t=' + Date.now();
+
+    fetch(fetchUrl)
+      .then(r => r.text())
+      .then(data => sendResponse({ data }))
+      .catch(e => sendResponse({ error: e.toString() }));
+    return true;
+  }
   const getSettings = (req) => req.enabledSettings || { yt:true, ytm:true, spotify:true };
 
   if (request.action === "getYouTubeData") {
