@@ -120,7 +120,7 @@ function initNestHub() {
         </div>
       </div>
 
-      <div id="card-news" class="glass-card tilt-card" style="flex:1.2;">
+      <div id="card-news" class="glass-card tilt-card news-card" style="flex:1.2;">
         <div class="label-std">${t('news_card')}</div>
         <div id="news-list" style="display:flex; flex-direction:column; gap:4px;">${t('news_loading')}</div>
       </div>
@@ -1023,7 +1023,7 @@ function fetchNews() {
          return;
       }
 
-      for(let i=0; i<6; i++) {
+      for(let i=0; i<items.length; i++) {
         if(!items[i]) break;
         const div = document.createElement("div");
         div.className = "news-item";

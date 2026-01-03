@@ -70,6 +70,7 @@ body.zen-active .col-left, body.zen-active .col-right { opacity: 0 !important; t
 .label-std { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; font-weight: 600; display: flex; justify-content: space-between; }
 
 .weather-card { background: linear-gradient(145deg, rgba(60, 90, 140, 0.5), rgba(20, 30, 40, 0.6)); border: 1px solid rgba(255,255,255,0.15); position: relative; overflow: hidden; padding: 20px !important; }
+.news-card { overflow: auto; scrollbar-width: none; }
 .aw-header { display: flex; justify-content: space-between; align-items: center; z-index: 2; }
 .aw-city { font-size: 1.1rem; font-weight: 600; letter-spacing: 0.02em; }
 .aw-cond { font-size: 0.85rem; opacity: 0.8; font-weight: 500; }
