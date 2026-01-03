@@ -1023,7 +1023,7 @@ function fetchNews() {
          return;
       }
 
-      for(let i=0; i<6; i++) {
+      for(let i=0; i<items.length; i++) {
         if(!items[i]) break;
         const div = document.createElement("div");
         div.className = "news-item";
