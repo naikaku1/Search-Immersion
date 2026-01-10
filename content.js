@@ -233,7 +233,12 @@ root.innerHTML = `
       </div>
 
       <div id="memo-area">
-        <input type="text" id="memo-input" placeholder="${t('memo_placeholder')}" value="${savedMemo}" autocomplete="off">
+        <div class="memo-top-row">
+          <textarea id="memo-input" rows="2" placeholder="${t('memo_placeholder')}" autocomplete="off"></textarea>
+          <button id="memo-new" class="memo-mini-btn" title="メモ作成">＋</button>
+          <button id="memo-show-all" class="memo-mini-btn" title="すべてのメモ">☰</button>
+        </div>
+        <div id="memo-cards" class="memo-cards"></div>
       </div>
 
       <div class="search-wrapper">
@@ -559,6 +564,36 @@ root.innerHTML = `
               </div>
             </div>
 
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="memo-modal" class="overlay-modal">
+      <div class="memo-window glass-card modal-card">
+        <div class="memo-window-header">
+          <div class="memo-window-title">メモ</div>
+          <div class="memo-window-actions">
+            <button id="memo-modal-new" class="memo-mini-btn" title="メモ作成">＋</button>
+            <button id="memo-modal-close" class="memo-mini-btn" title="閉じる">×</button>
+          </div>
+        </div>
+        <div class="memo-window-body">
+          <div class="memo-list-pane">
+            <input type="text" id="memo-search" class="st-input memo-search" placeholder="検索…" autocomplete="off">
+            <div id="memo-list" class="memo-list"></div>
+          </div>
+          <div class="memo-editor-pane">
+            <input type="text" id="memo-editor-title" class="st-input memo-title" placeholder="タイトル" autocomplete="off">
+            <textarea id="memo-editor-text" class="memo-text" placeholder="ここにメモを書きます…"></textarea>
+            <div class="memo-editor-footer">
+              <div id="memo-updated" class="memo-meta"></div>
+              <div class="memo-editor-actions">
+                <button id="memo-editor-delete" class="st-btn danger-btn">削除</button>
+                <button id="memo-editor-save" class="st-btn primary-btn">保存</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1576,7 +1611,406 @@ function setupSearchAutocomplete(input) {
 }
 
 function setupZenMode() { const btn = document.getElementById('zen-btn'); if (btn) btn.onclick = (e) => { e.stopPropagation(); document.body.classList.toggle('zen-active'); }; }
-function setupMemo() { const input = document.getElementById('memo-input'); input.addEventListener('input', () => { localStorage.setItem('immersion_memo', input.value); }); }
+function setupMemo() {
+  const LEGACY_KEY = 'immersion_memo';                 // 後方互換（旧：単一メモ）
+  const MEMOS_KEY  = 'immersion_memos';                // 新：複数メモ
+  const ACTIVE_KEY = 'immersion_active_memo_id';       // 新：選択中メモID
+
+  const input = document.getElementById('memo-input');
+  const cards = document.getElementById('memo-cards');
+  const btnNew = document.getElementById('memo-new');
+  const btnAll = document.getElementById('memo-show-all');
+
+  const modal = document.getElementById('memo-modal');
+  const modalClose = document.getElementById('memo-modal-close');
+  const modalNew = document.getElementById('memo-modal-new');
+  const search = document.getElementById('memo-search');
+  const list = document.getElementById('memo-list');
+  const edTitle = document.getElementById('memo-editor-title');
+  const edText = document.getElementById('memo-editor-text');
+  const edSave = document.getElementById('memo-editor-save');
+  const edDelete = document.getElementById('memo-editor-delete');
+  const updatedLabel = document.getElementById('memo-updated');
+
+  if (!input || !cards) return;
+
+  const nowIso = () => new Date().toISOString();
+  const genId = () => `m_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 9)}`;
+
+  const loadMemos = () => {
+    try {
+      const raw = localStorage.getItem(MEMOS_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(arr)) return [];
+      return arr
+        .filter(m => m && typeof m === 'object')
+        .map(m => ({
+          id: String(m.id || ''),
+          title: String(m.title || 'メモ'),
+          text: String(m.text || ''),
+          createdAt: String(m.createdAt || ''),
+          updatedAt: String(m.updatedAt || '')
+        }))
+        .filter(m => m.id);
+    } catch {
+      return [];
+    }
+  };
+
+  const saveMemos = (arr) => {
+    localStorage.setItem(MEMOS_KEY, JSON.stringify(arr));
+  };
+
+  const getActiveId = () => localStorage.getItem(ACTIVE_KEY) || '';
+  const setActiveId = (id) => {
+    if (id) localStorage.setItem(ACTIVE_KEY, id);
+    else localStorage.removeItem(ACTIVE_KEY);
+  };
+
+  const findMemo = (id, memos) => (memos || loadMemos()).find(m => m.id === id) || null;
+
+  const ensureMigration = () => {
+    let memos = loadMemos();
+    let activeId = getActiveId();
+
+    // 旧キー（immersion_memo）→ 複数メモへ移行
+    if (memos.length === 0) {
+      const legacy = (localStorage.getItem(LEGACY_KEY) || '').trim();
+      if (legacy) {
+        const id = genId();
+        const t = nowIso();
+        memos = [{ id, title: 'メモ', text: legacy, createdAt: t, updatedAt: t }];
+        saveMemos(memos);
+        activeId = id;
+        setActiveId(id);
+      }
+    }
+
+    // active が無ければ先頭を選択
+    if (!activeId && memos.length > 0) {
+      activeId = memos[0].id;
+      setActiveId(activeId);
+    }
+
+    // legacy を active と同期（プロファイル保存などの互換用）
+    const active = activeId ? findMemo(activeId, memos) : null;
+    if (active) localStorage.setItem(LEGACY_KEY, active.text || '');
+  };
+
+  const ensureAtLeastOne = () => {
+    let memos = loadMemos();
+    if (memos.length === 0) {
+      const id = genId();
+      const t = nowIso();
+      memos = [{ id, title: 'メモ', text: '', createdAt: t, updatedAt: t }];
+      saveMemos(memos);
+      setActiveId(id);
+      localStorage.setItem(LEGACY_KEY, '');
+    }
+  };
+
+  const formatTime = (iso) => {
+    try {
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return '';
+      return d.toLocaleString();
+    } catch {
+      return '';
+    }
+  };
+
+  const openModal = () => {
+    if (!modal) return;
+    modal.classList.add('show');
+    renderModalList();
+    loadEditor(getActiveId());
+  };
+
+  const closeModal = () => {
+    if (!modal) return;
+    modal.classList.remove('show');
+    renderPreviewCards();
+  };
+
+  const createMemo = () => {
+    const memos = loadMemos();
+    const id = genId();
+    const t = nowIso();
+    const m = { id, title: '新規メモ', text: '', createdAt: t, updatedAt: t };
+    memos.unshift(m);
+    saveMemos(memos);
+    setActiveId(id);
+    localStorage.setItem(LEGACY_KEY, '');
+    syncInputToActive();
+    openModal();
+    setTimeout(() => edTitle && edTitle.focus(), 0);
+  };
+
+  const deleteActiveMemo = () => {
+    const memos = loadMemos();
+    const activeId = getActiveId();
+    const idx = memos.findIndex(m => m.id === activeId);
+    if (idx === -1) return;
+
+    if (!confirm('このメモを削除しますか？')) return;
+
+    memos.splice(idx, 1);
+
+    if (memos.length === 0) {
+      const id = genId();
+      const t = nowIso();
+      memos.push({ id, title: 'メモ', text: '', createdAt: t, updatedAt: t });
+      setActiveId(id);
+      localStorage.setItem(LEGACY_KEY, '');
+    } else {
+      setActiveId(memos[Math.max(0, idx - 1)].id);
+      const next = findMemo(getActiveId(), memos);
+      localStorage.setItem(LEGACY_KEY, next ? (next.text || '') : '');
+    }
+
+    saveMemos(memos);
+    syncInputToActive();
+    renderModalList();
+    loadEditor(getActiveId());
+    renderPreviewCards();
+  };
+
+  const setActiveMemo = (id) => {
+    const memos = loadMemos();
+    const memo = findMemo(id, memos);
+    if (!memo) return;
+
+    setActiveId(memo.id);
+    localStorage.setItem(LEGACY_KEY, memo.text || '');
+    syncInputToActive();
+    renderPreviewCards();
+  };
+
+  let syncing = false;
+  const syncInputToActive = () => {
+    const memos = loadMemos();
+    const active = findMemo(getActiveId(), memos);
+    syncing = true;
+    input.value = active ? (active.text || '') : '';
+    syncing = false;
+  };
+
+  const renderPreviewCards = () => {
+    const memos = loadMemos()
+      .slice()
+      .sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
+    const activeId = getActiveId();
+
+    cards.innerHTML = '';
+
+    const MAX = 4;
+    memos.slice(0, MAX).forEach(m => {
+      const card = document.createElement('div');
+      card.className = 'memo-card' + (m.id === activeId ? ' active' : '');
+
+      const title = (m.title || 'メモ').trim();
+      const text = (m.text || '').trim();
+      const snippet = text ? text.split(/\r?\n/)[0].slice(0, 80) : '（空）';
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'memo-card-title';
+      titleEl.textContent = title;
+
+      const snipEl = document.createElement('div');
+      snipEl.className = 'memo-card-snippet';
+      snipEl.textContent = snippet;
+
+      card.appendChild(titleEl);
+      card.appendChild(snipEl);
+
+      card.onclick = () => {
+        setActiveMemo(m.id);
+        openModal();
+      };
+
+      cards.appendChild(card);
+    });
+
+    if (memos.length > MAX) {
+      const more = document.createElement('div');
+      more.className = 'memo-more';
+      more.textContent = `＋${memos.length - MAX} 件`;
+      more.onclick = openModal;
+      cards.appendChild(more);
+    }
+
+    if (memos.length === 0) {
+      cards.innerHTML = `<div class=\"memo-empty\">メモがありません</div>`;
+    }
+  };
+
+  let currentEditorId = '';
+
+  const loadEditor = (id) => {
+    if (!edTitle || !edText) return;
+    const memos = loadMemos();
+    const memo = findMemo(id, memos) || memos[0] || null;
+    if (!memo) return;
+
+    currentEditorId = memo.id;
+    setActiveId(memo.id);
+    localStorage.setItem(LEGACY_KEY, memo.text || '');
+
+    edTitle.value = memo.title || 'メモ';
+    edText.value = memo.text || '';
+
+    if (updatedLabel) {
+      const when = memo.updatedAt || memo.createdAt || '';
+      updatedLabel.textContent = when ? `更新: ${formatTime(when)}` : '';
+    }
+
+    syncInputToActive();
+    renderModalList();
+  };
+
+  const commitEditor = () => {
+    if (!currentEditorId) return;
+
+    const memos = loadMemos();
+    const memo = findMemo(currentEditorId, memos);
+    if (!memo) return;
+
+    memo.title = (edTitle ? edTitle.value : memo.title) || 'メモ';
+    memo.text = (edText ? edText.value : memo.text) || '';
+    memo.updatedAt = nowIso();
+
+    // 更新順を上に
+    const idx = memos.findIndex(m => m.id === memo.id);
+    if (idx > 0) {
+      memos.splice(idx, 1);
+      memos.unshift(memo);
+    }
+
+    saveMemos(memos);
+    setActiveId(memo.id);
+    localStorage.setItem(LEGACY_KEY, memo.text || '');
+
+    if (updatedLabel) updatedLabel.textContent = `更新: ${formatTime(memo.updatedAt)}`;
+
+    syncInputToActive();
+    renderModalList();
+    renderPreviewCards();
+  };
+
+  const renderModalList = () => {
+    if (!list) return;
+
+    const q = (search && search.value ? search.value : '').trim().toLowerCase();
+    const memos = loadMemos()
+      .slice()
+      .sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
+
+    list.innerHTML = '';
+
+    memos.forEach(m => {
+      const hay = `${m.title}
+${m.text}`.toLowerCase();
+      if (q && !hay.includes(q)) return;
+
+      const item = document.createElement('div');
+      item.className = 'memo-list-item' + (m.id === getActiveId() ? ' active' : '');
+
+      const title = document.createElement('div');
+      title.className = 'memo-list-title';
+      title.textContent = (m.title || 'メモ').trim();
+
+      const meta = document.createElement('div');
+      meta.className = 'memo-list-meta';
+      meta.textContent = formatTime(m.updatedAt || m.createdAt || '');
+
+      const snip = document.createElement('div');
+      snip.className = 'memo-list-snippet';
+      snip.textContent = (m.text || '').trim().split(/\r?\n/)[0].slice(0, 90) || '（空）';
+
+      item.appendChild(title);
+      item.appendChild(meta);
+      item.appendChild(snip);
+
+      item.onclick = () => loadEditor(m.id);
+
+      list.appendChild(item);
+    });
+
+    if (!list.children.length) {
+      list.innerHTML = `<div class=\"memo-empty\">該当するメモがありません</div>`;
+    }
+  };
+
+  // ---- 初期化 ----
+  ensureMigration();
+  ensureAtLeastOne();
+  syncInputToActive();
+  renderPreviewCards();
+
+  // ---- メイン入力（アクティブメモを即時更新）----
+  let inputTimer = null;
+  input.addEventListener('input', () => {
+    if (syncing) return;
+
+    const activeId = getActiveId();
+    const memos = loadMemos();
+    const memo = findMemo(activeId, memos);
+    if (!memo) return;
+
+    memo.text = input.value || '';
+    memo.updatedAt = nowIso();
+    saveMemos(memos);
+    localStorage.setItem(LEGACY_KEY, memo.text || '');
+
+    // エディタが開いているなら同期
+    if (edText && currentEditorId === memo.id) {
+      edText.value = memo.text || '';
+      if (updatedLabel) updatedLabel.textContent = `更新: ${formatTime(memo.updatedAt)}`;
+    }
+
+    if (inputTimer) clearTimeout(inputTimer);
+    inputTimer = setTimeout(renderPreviewCards, 200);
+  });
+
+  // ---- ボタン ----
+  if (btnNew) btnNew.onclick = createMemo;
+  if (btnAll) btnAll.onclick = openModal;
+  if (modalNew) modalNew.onclick = createMemo;
+  if (modalClose) modalClose.onclick = closeModal;
+
+  // モーダル外クリックで閉じる
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  // ---- モーダル内 ----
+  if (search) search.addEventListener('input', renderModalList);
+
+  let editorTimer = null;
+  const onEditorInput = () => {
+    if (editorTimer) clearTimeout(editorTimer);
+    editorTimer = setTimeout(commitEditor, 300);
+  };
+
+  if (edTitle) edTitle.addEventListener('input', onEditorInput);
+  if (edText) edText.addEventListener('input', onEditorInput);
+
+  if (edSave) edSave.onclick = commitEditor;
+  if (edDelete) edDelete.onclick = deleteActiveMemo;
+
+  // Ctrl+S / Cmd+S で保存
+  if (modal) {
+    modal.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        commitEditor();
+      }
+      if (e.key === 'Escape') closeModal();
+    });
+  }
+}
 function updateQuote() {
   const prefs = JSON.parse(localStorage.getItem('immersion_prefs')) || defaultSettings;
   const name = prefs.userName || "Guest";
@@ -3358,7 +3792,9 @@ function setupProfileSystem() {
                     if(p.dock) localStorage.setItem('immersion_dock_items', JSON.stringify(p.dock));
                     if(p.apps) localStorage.setItem('immersion_app_order', JSON.stringify(p.apps));
                     if(p.todos) localStorage.setItem('immersion_todos', JSON.stringify(p.todos));
-                    localStorage.setItem('immersion_memo', p.memo || '');
+                    if (p.memos) localStorage.setItem('immersion_memos', JSON.stringify(p.memos));
+                    if (p.activeMemoId) localStorage.setItem('immersion_active_memo_id', p.activeMemoId);
+                    localStorage.setItem('immersion_memo', p.memo || (p.memos && p.activeMemoId ? (p.memos.find(x => x && x.id === p.activeMemoId)?.text || '') : ''));
                     localStorage.setItem('immersion_city', p.city || '');
                     
 
@@ -3430,6 +3866,8 @@ function setupProfileSystem() {
             apps: JSON.parse(localStorage.getItem('immersion_app_order')),
             todos: JSON.parse(localStorage.getItem('immersion_todos')),
             memo: localStorage.getItem('immersion_memo') || '',
+            memos: (() => { try { return JSON.parse(localStorage.getItem('immersion_memos')) || []; } catch { return []; } })(),
+            activeMemoId: localStorage.getItem('immersion_active_memo_id') || '',
             city: localStorage.getItem('immersion_city') || ''
         };
         
