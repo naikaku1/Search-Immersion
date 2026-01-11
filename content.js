@@ -1732,7 +1732,9 @@ function setupMemo() {
     renderPreviewCards();
   };
 
-  const createMemo = () => {
+  // opts.openModal: true なら一覧/編集モーダルを開く
+  // opts.focusMain: true ならメイン入力へフォーカス
+  const createMemo = (opts = { openModal: true, focusMain: false }) => {
     const memos = loadMemos();
     const id = genId();
     const t = nowIso();
@@ -1742,8 +1744,20 @@ function setupMemo() {
     setActiveId(id);
     localStorage.setItem(LEGACY_KEY, '');
     syncInputToActive();
-    openModal();
-    setTimeout(() => edTitle && edTitle.focus(), 0);
+
+    // カードを即反映
+    renderPreviewCards();
+
+    if (opts && opts.openModal) {
+      openModal();
+      setTimeout(() => edTitle && edTitle.focus(), 0);
+    } else if (opts && opts.focusMain) {
+      setTimeout(() => {
+        try {
+          input && input.focus();
+        } catch {}
+      }, 0);
+    }
   };
 
   const deleteActiveMemo = () => {
@@ -1973,9 +1987,11 @@ ${m.text}`.toLowerCase();
   });
 
   // ---- ボタン ----
-  if (btnNew) btnNew.onclick = createMemo;
+  // 「＋」(メイン) はポップアップせず、その場で新規メモを追加
+  if (btnNew) btnNew.onclick = () => createMemo({ openModal: false, focusMain: true });
   if (btnAll) btnAll.onclick = openModal;
-  if (modalNew) modalNew.onclick = createMemo;
+  // モーダル内の「＋」は従来通りモーダルで作成
+  if (modalNew) modalNew.onclick = () => createMemo({ openModal: true, focusMain: false });
   if (modalClose) modalClose.onclick = closeModal;
 
   // モーダル外クリックで閉じる
