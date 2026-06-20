@@ -6,15 +6,9 @@
     "128": "icons/icon128.png"
   },
   "name": "Search Immersion",
-  "version": "1.1.0",
-  "description": "新しいタブを『スマートディスプレイ』に変える拡張機能。天気、カレンダー、音楽、ToDoを美しく表示。透明感あるグラスから懐かしのドット絵まで、没入感のあるテーマ切り替えに対応した高機能ダッシュボードです。",
-  "permissions": [
-    "storage",
-    "tabs",
-    "scripting",
-    "history",
-    "search"
-  ],
+  "version": "26.0.0",
+  "description": "新しいタブを『スマートディスプレイ』に変える拡張機能。ベータ版",
+  "permissions": ["storage", "tabs", "scripting", "history", "search"],
   "host_permissions": [
     "https://calendar.google.com/*",
     "https://geocoding-api.open-meteo.com/*",
@@ -26,9 +20,7 @@
     "*://*.icloud.com/*",
     "https://www.google.com/*"
   ],
-  "optional_host_permissions": [
-    "*://*/*"
-  ],
+  "optional_host_permissions": ["*://*/*"],
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
@@ -37,12 +29,8 @@
   },
   "web_accessible_resources": [
     {
-      "resources": [
-        "wallpapers/*.webp"
-      ],
-      "matches": [
-        "<all_urls>"
-      ]
+      "resources": ["wallpapers/*.webp"],
+      "matches": ["<all_urls>"]
     }
   ]
 }
