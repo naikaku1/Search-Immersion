@@ -74,3 +74,7 @@
 ### 貢献について
 
 * バグ報告や機能改善の提案は、GitHubのIssuesまたはPull Requestにていつでも歓迎します。
+
+## Liquid Glass
+
+カード面へSVG変位マップの屈折、色収差、スペキュラハイライト、粒状ノイズを追加しました。未対応環境では従来のblurガラスに自動フォールバックします。参考: [Aave - Building Glass for the Web](https://aave.com/design/building-glass-for-the-web)
