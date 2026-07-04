@@ -291,65 +291,73 @@ function t(key, params = {}) {
 function buildRefractMap(w, h, opt) {
   opt = opt || {};
   const radius = opt.radius != null ? opt.radius : 28;
-  const bezel = opt.bezel != null ? opt.bezel : 16;
-  const ior = opt.ior != null ? opt.ior : 1.5;
-
+  const bezel = opt.bezel != null ? opt.bezel : Math.min(40, Math.max(10, radius * 0.9));
+  const curvature = opt.curvature != null ? opt.curvature : 2.2;
+  const scale = opt.scale != null ? opt.scale : Math.min(26, Math.max(10, Math.min(w, h) * 0.16));
   const mapScale = opt.mapScale != null ? opt.mapScale : 0.5;
-  const W = Math.max(8, Math.round(w * mapScale)),
-    H = Math.max(8, Math.round(h * mapScale));
-
-  const mradius = radius * mapScale,
-    mbezel = bezel * mapScale;
+  const W = Math.max(8, Math.round(w * mapScale));
+  const H = Math.max(8, Math.round(h * mapScale));
+  const r = Math.min(radius * mapScale, W / 2, H / 2);
+  const bez = Math.min(bezel * mapScale, W / 2, H / 2);
   const cvs = document.createElement('canvas');
   cvs.width = W;
   cvs.height = H;
   const ctx = cvs.getContext('2d');
   const img = ctx.createImageData(W, H);
   const d = img.data;
-  const hw = W / 2,
-    hh = H / 2,
-    r = Math.min(mradius, hw, hh);
-
-  const sdf = (px, py) => {
-    const qx = Math.abs(px - hw) - (hw - r);
-    const qy = Math.abs(py - hh) - (hh - r);
-    return Math.min(Math.max(qx, qy), 0) + Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) - r;
+  const halfW = Math.ceil(W / 2);
+  const halfH = Math.ceil(H / 2);
+  const cx = W / 2;
+  const cy = H / 2;
+  const ex = W / 2 - r;
+  const ey = H / 2 - r;
+  const put = (X, Y, R, G) => {
+    const i = (Y * W + X) * 4;
+    d[i] = R;
+    d[i + 1] = G;
+    d[i + 2] = 128;
+    d[i + 3] = 255;
   };
-
-  const N = 128,
-    prof = new Float32Array(N);
-  let mx = 1e-6;
-  const surf = (x) => Math.pow(1 - Math.pow(1 - x, 4), 0.25);
-  for (let i = 0; i < N; i++) {
-    const x = i / (N - 1),
-      e = 1e-3;
-    const slope = (surf(Math.min(1, x + e)) - surf(Math.max(0, x - e))) / (2 * e);
-    const t1 = Math.atan(slope);
-    const t2 = Math.asin(Math.min(1, Math.sin(t1) / ior));
-    prof[i] = Math.tan(t1 - t2);
-    if (prof[i] > mx) mx = prof[i];
-  }
-  for (let i = 0; i < N; i++) prof[i] /= mx;
-  const scale = opt.scale != null ? opt.scale : Math.min(bezel * 2.2, 46);
-  for (let py = 0; py < H; py++) {
-    for (let px = 0; px < W; px++) {
-      const i = (py * W + px) * 4;
-      let rx = 0,
-        ry = 0;
-      const dist = -sdf(px + 0.5, py + 0.5);
-      if (dist >= 0 && dist < mbezel) {
-        const mag = prof[Math.min(N - 1, Math.round((dist / mbezel) * (N - 1)))];
-        const gx = sdf(px + 1.5, py + 0.5) - sdf(px - 0.5, py + 0.5);
-        const gy = sdf(px + 0.5, py + 1.5) - sdf(px + 0.5, py - 0.5);
-        const gl = Math.hypot(gx, gy) || 1;
-
-        rx = -(gx / gl) * mag;
-        ry = -(gy / gl) * mag;
+  for (let y = 0; y < halfH; y++) {
+    for (let x = 0; x < halfW; x++) {
+      const px = x + 0.5 - cx;
+      const py = y + 0.5 - cy;
+      const qx = Math.abs(px) - ex;
+      const qy = Math.abs(py) - ey;
+      const ax = Math.max(qx, 0);
+      const ay = Math.max(qy, 0);
+      const outside = Math.hypot(ax, ay);
+      const sdf = outside + Math.min(Math.max(qx, qy), 0) - r;
+      let dx = 0;
+      let dy = 0;
+      if (sdf < 0 && -sdf < bez) {
+        const edge = 1 - -sdf / bez;
+        const m = Math.pow(edge, curvature);
+        let gx;
+        let gy;
+        if (outside > 0) {
+          gx = ax / outside;
+          gy = ay / outside;
+        } else if (qx > qy) {
+          gx = 1;
+          gy = 0;
+        } else {
+          gx = 0;
+          gy = 1;
+        }
+        gx *= Math.sign(px) || -1;
+        gy *= Math.sign(py) || -1;
+        dx = -gx * m;
+        dy = -gy * m;
       }
-      d[i] = Math.max(0, Math.min(255, 128 + rx * 127));
-      d[i + 1] = Math.max(0, Math.min(255, 128 + ry * 127));
-      d[i + 2] = 128;
-      d[i + 3] = 255;
+      const R = Math.round(128 + dx * 127);
+      const G = Math.round(128 + dy * 127);
+      const mx = W - 1 - x;
+      const my = H - 1 - y;
+      put(x, y, R, G);
+      put(mx, y, 255 - R, G);
+      put(x, my, R, 255 - G);
+      put(mx, my, 255 - R, 255 - G);
     }
   }
   ctx.putImageData(img, 0, 0);
@@ -364,17 +372,25 @@ function buildRefractMap(w, h, opt) {
 
 const __lgFilters = {};
 let __lgFid = 0;
-function lgFilterForSize(w, h, radius) {
+const LG_CHROMA = 0.2;
+try {
+  Object.keys(localStorage)
+    .filter((k) => k.startsWith('lgmap_') && !k.startsWith('lgmap_v2_'))
+    .forEach((k) => localStorage.removeItem(k));
+} catch (e) {}
+
+function lgFilterForSize(w, h, radius, live) {
   const W = Math.max(8, Math.round(w)),
     H = Math.max(8, Math.round(h));
   const key = Math.round(W / 6) * 6 + 'x' + Math.round(H / 6) * 6 + 'r' + radius;
-  if (__lgFilters[key]) return __lgFilters[key];
+  const filterKey = key + (live ? '-live' : '');
+  if (__lgFilters[filterKey]) return __lgFilters[filterKey];
   const defs = document.querySelector('#lg-svg defs');
   if (!defs) return 'none';
 
   let res;
 
-  const cacheKey = 'lgmap_v1_' + key;
+  const cacheKey = 'lgmap_v2_' + key;
   let cached = null;
   try {
     const raw = localStorage.getItem(cacheKey);
@@ -384,7 +400,7 @@ function lgFilterForSize(w, h, radius) {
     res = { url: cached.u, scale: cached.s };
   } else {
     try {
-      res = buildRefractMap(W, H, { radius: radius, bezel: 16 });
+      res = buildRefractMap(W, H, { radius: radius });
     } catch (e) {
       return 'none';
     }
@@ -403,42 +419,95 @@ function lgFilterForSize(w, h, radius) {
   const id = 'lg-f' + __lgFid++;
   const f = document.createElementNS(SVGNS, 'filter');
   f.setAttribute('id', id);
-
-  f.setAttribute('filterUnits', 'userSpaceOnUse');
-  f.setAttribute('x', '0');
-  f.setAttribute('y', '0');
-  f.setAttribute('width', W);
-  f.setAttribute('height', H);
   f.setAttribute('color-interpolation-filters', 'sRGB');
-  const fe = document.createElementNS(SVGNS, 'feImage');
-  fe.setAttribute('x', '0');
-  fe.setAttribute('y', '0');
-  fe.setAttribute('width', W);
-  fe.setAttribute('height', H);
-  fe.setAttribute('preserveAspectRatio', 'none');
-  fe.setAttribute('result', 'm');
+  const unit = live ? 1 / Math.sqrt((W * W + H * H) / 2) : 1;
+  if (live) {
+    f.setAttribute('x', '0');
+    f.setAttribute('y', '0');
+    f.setAttribute('width', '100%');
+    f.setAttribute('height', '100%');
+    f.setAttribute('primitiveUnits', 'objectBoundingBox');
+  } else {
+    f.setAttribute('filterUnits', 'userSpaceOnUse');
+    f.setAttribute('x', '0');
+    f.setAttribute('y', '0');
+    f.setAttribute('width', W);
+    f.setAttribute('height', H);
+  }
+  const prim = (name, attrs) => {
+    const el = document.createElementNS(SVGNS, name);
+    Object.keys(attrs).forEach((k) => el.setAttribute(k, attrs[k]));
+    f.appendChild(el);
+    return el;
+  };
+  const fe = prim('feImage', {
+    x: 0,
+    y: 0,
+    width: live ? 1 : W,
+    height: live ? 1 : H,
+    preserveAspectRatio: 'none',
+    result: 'm',
+  });
   fe.setAttributeNS('http://www.w3.org/1999/xlink', 'href', res.url);
   fe.setAttribute('href', res.url);
-  const dm = document.createElementNS(SVGNS, 'feDisplacementMap');
-  dm.setAttribute('in', 'SourceGraphic');
-  dm.setAttribute('in2', 'm');
-  dm.setAttribute('scale', res.scale);
-  dm.setAttribute('xChannelSelector', 'R');
-  dm.setAttribute('yChannelSelector', 'G');
-  const gb = document.createElementNS(SVGNS, 'feGaussianBlur');
-  gb.setAttribute('stdDeviation', '0.3');
-  f.appendChild(fe);
-  f.appendChild(dm);
-  f.appendChild(gb);
+  const pass = (ch, sc, matrix) => {
+    prim('feDisplacementMap', {
+      in: 'SourceGraphic',
+      in2: 'm',
+      scale: sc * unit,
+      xChannelSelector: 'R',
+      yChannelSelector: 'G',
+      result: 'd' + ch,
+    });
+    prim('feColorMatrix', { in: 'd' + ch, type: 'matrix', values: matrix, result: 'c' + ch });
+  };
+  pass('R', res.scale * (1 + LG_CHROMA), '1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0');
+  pass('G', res.scale, '0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0');
+  pass('B', res.scale * (1 - LG_CHROMA), '0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0');
+  prim('feBlend', { in: 'cR', in2: 'cG', mode: 'screen', result: 'cRG' });
+  prim('feBlend', { in: 'cRG', in2: 'cB', mode: 'screen', result: 'ref' });
+  if (live) {
+    prim('feGaussianBlur', { in: 'ref', stdDeviation: 2 * unit, result: 'fr' });
+    prim('feColorMatrix', { in: 'fr', type: 'saturate', values: '1.55' });
+  } else {
+    prim('feGaussianBlur', { in: 'ref', stdDeviation: 0.3 });
+  }
   defs.appendChild(f);
-  __lgFilters[key] = 'url(#' + id + ')';
-  return __lgFilters[key];
+  __lgFilters[filterKey] = 'url(#' + id + ')';
+  return __lgFilters[filterKey];
 }
 
-const __lg = { iw: 0, ih: 0, wallKey: '', wired: false, alignQueued: false, revealed: false };
+const __lg = {
+  iw: 0,
+  ih: 0,
+  wallKey: '',
+  wired: false,
+  alignQueued: false,
+  revealed: false,
+  probed: false,
+  dispOk: true,
+};
 
 const __lgSizeMemo = new WeakMap();
 const LG_SURFACE_SEL = '.glass-card, .dock-item, #search-input, #clock-time';
+const LG_BF_URL_OK =
+  typeof CSS !== 'undefined' &&
+  CSS.supports &&
+  (CSS.supports('backdrop-filter', 'url(#x)') ||
+    CSS.supports('-webkit-backdrop-filter', 'url(#x)'));
+
+function lgProbeDataImage() {
+  if (__lg.probed) return;
+  __lg.probed = true;
+  const img = new Image();
+  img.onerror = () => {
+    __lg.dispOk = false;
+    document.body.classList.add('lg-nodisp');
+    lgRequestAlign();
+  };
+  img.src =
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+}
 
 function lgCurrentWallUrl() {
   const bg = document.getElementById('bg-layer-original');
@@ -485,20 +554,43 @@ function lgGetScale() {
   return z && z > 0 ? z : 1;
 }
 
+function lgUpdateLiveMode() {
+  const body = document.body;
+  if (!body.classList.contains('liquidglass-mode')) {
+    body.classList.remove('lg-live');
+    return;
+  }
+  const prefs = JSON.parse(localStorage.getItem('immersion_prefs')) || defaultSettings;
+  const music = document.getElementById('music-card-container');
+  const live =
+    body.classList.contains('has-video') ||
+    (prefs.mediaBackground !== false && !!music && music.classList.contains('music-active'));
+  if (live !== body.classList.contains('lg-live')) {
+    body.classList.toggle('lg-live', live);
+    lgRequestAlign();
+  }
+}
+
 function alignLiquidGlass() {
-  if (!document.body.classList.contains('liquidglass-mode') || !__lg.iw) return;
+  if (!document.body.classList.contains('liquidglass-mode')) return;
+  const live = document.body.classList.contains('lg-live');
+  if (!__lg.iw && !live) return;
   const Z = lgGetScale();
   const vw = window.innerWidth / Z,
     vh = window.innerHeight / Z;
-  const s = Math.max(vw / __lg.iw, vh / __lg.ih);
-  const dw = __lg.iw * s,
-    dh = __lg.ih * s;
-  const ox = (vw - dw) / 2,
+  let ox = 0;
+  let oy = 0;
+  if (__lg.iw) {
+    const s = Math.max(vw / __lg.iw, vh / __lg.ih);
+    const dw = __lg.iw * s;
+    const dh = __lg.ih * s;
+    ox = (vw - dw) / 2;
     oy = (vh - dh) / 2;
-  document.documentElement.style.setProperty(
-    '--lg-w-size',
-    dw.toFixed(1) + 'px ' + dh.toFixed(1) + 'px',
-  );
+    document.documentElement.style.setProperty(
+      '--lg-w-size',
+      dw.toFixed(1) + 'px ' + dh.toFixed(1) + 'px',
+    );
+  }
   let revealIdx = 0;
   document.querySelectorAll(LG_SURFACE_SEL).forEach((el) => {
     const r = el.getBoundingClientRect();
@@ -507,14 +599,21 @@ function alignLiquidGlass() {
       ly = r.top / Z,
       lw = r.width / Z,
       lh = r.height / Z;
-    el.style.setProperty('--lg-pos', (ox - lx).toFixed(1) + 'px ' + (oy - ly).toFixed(1) + 'px');
+    if (__lg.iw) {
+      el.style.setProperty('--lg-pos', (ox - lx).toFixed(1) + 'px ' + (oy - ly).toFixed(1) + 'px');
+    }
 
     if (el.matches('.glass-card, .dock-item')) {
-      const dimKey = Math.round(lw / 6) * 6 + 'x' + Math.round(lh / 6) * 6;
-      if (__lgSizeMemo.get(el) !== dimKey) {
+      const isLensCard = el.matches('.glass-card') && !el.matches('.modal-card');
+      const dimKey =
+        Math.round(lw / 6) * 6 + 'x' + Math.round(lh / 6) * 6 + (live && isLensCard ? 'L' : '');
+      if (__lg.dispOk && !document.body.classList.contains('lg-resizing') && __lgSizeMemo.get(el) !== dimKey) {
         __lgSizeMemo.set(el, dimKey);
         const rad = Math.round(parseFloat(getComputedStyle(el).borderTopLeftRadius) || 24);
-        el.style.setProperty('--lg-disp', lgFilterForSize(lw, lh, rad));
+        el.style.setProperty('--lg-disp', lgFilterForSize(lw, lh, rad, false));
+        if (live && isLensCard && LG_BF_URL_OK) {
+          el.style.setProperty('--lg-bdisp', lgFilterForSize(lw, lh, rad, true));
+        }
       }
 
       if (!__lg.revealed) {
@@ -550,7 +649,9 @@ function applyUiScale() {
 }
 
 function setupLiquidGlass() {
+  lgProbeDataImage();
   lgLoadWallpaper();
+  lgUpdateLiveMode();
   lgRequestAlign();
   if (__lg.wired) return;
   __lg.wired = true;
@@ -591,6 +692,12 @@ function setupLiquidGlass() {
       mo.observe(bg, { attributes: true, attributeFilter: ['style', 'class'] });
       __lg.mo = mo;
     }
+
+    const liveMo = new MutationObserver(() => lgUpdateLiveMode());
+    liveMo.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    const music = document.getElementById('music-card-container');
+    if (music) liveMo.observe(music, { attributes: true, attributeFilter: ['class'] });
+    __lg.liveMo = liveMo;
   }
 }
 
