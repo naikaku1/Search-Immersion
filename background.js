@@ -222,7 +222,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (cache[cityKey]) {
         const { latitude, longitude } = cache[cityKey];
         fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`,
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto&hourly=temperature_2m,precipitation_probability&forecast_days=4`,
         )
           .then((r) => r.json())
           .then((data) => sendResponse({ data }))
@@ -238,7 +238,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             cache[cityKey] = { latitude, longitude };
             chrome.storage.local.set({ geocode_cache: cache });
             return fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`,
+              `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=auto&hourly=temperature_2m,precipitation_probability&forecast_days=4`,
             );
           })
           .then((r) => r.json())
@@ -507,7 +507,58 @@ function controlMediaTabs(settings, command) {
   });
 }
 
+/* ------------------------------------------------------------- Horizon
+   どのタブからでも呼べる入口。新しいタブが開いていればそこへ移って切り替え、
+   無ければ開いてから入る（開いた直後は受け手がまだ居ないので、印を置いて渡す）。 */
+if (chrome.commands && chrome.commands.onCommand) {
+  chrome.commands.onCommand.addListener((cmd) => {
+    if (cmd !== 'toggle-horizon') return;
+    const base = chrome.runtime.getURL('newtab.html');
+    chrome.tabs.query({}, (tabs) => {
+      const hit = (tabs || []).find((t) => t.url && t.url.indexOf(base) === 0);
+      if (hit) {
+        chrome.tabs.update(hit.id, { active: true });
+        if (hit.windowId != null) chrome.windows.update(hit.windowId, { focused: true });
+        chrome.runtime.sendMessage({ action: 'toggleHorizon' }, () => {
+          void chrome.runtime.lastError;
+        });
+      } else {
+        chrome.storage.local.set({ horizonOnOpen: Date.now() }, () => chrome.tabs.create({}));
+      }
+    });
+  });
+}
+
 function scrapeMediaPage() {
+  /* YouTube の watch ページは、アーティストとしてチャンネル名を返してくる。
+     日本のアーティストはチャンネル名がローマ字のことが多い（あいみょん → aimyon）。
+     説明欄の楽曲情報にはもとの表記が入っているので、取れるならそちらを使う。 */
+  const ytCredited = () => {
+    try {
+      const sec = document.querySelector('ytd-video-description-music-section-renderer');
+      if (!sec) return '';
+      for (const row of sec.querySelectorAll('ytd-info-row-renderer')) {
+        const label = (row.querySelector('#title')?.textContent || '').trim();
+        if (!/アーティスト|Artist|아티스트|艺术家|藝人/i.test(label)) continue;
+        const v = (row.querySelector('#default-metadata, #details')?.textContent || '').trim();
+        if (v) return v.split('\n')[0].trim();
+      }
+    } catch (e) {}
+    return '';
+  };
+
+  /* 再生位置。mediaSession からは読めないので、素の video / audio から取る。
+     生放送は duration が Infinity になるので弾く。 */
+  const clock = () => {
+    try {
+      const el = document.querySelector('video, audio');
+      if (!el || !isFinite(el.duration) || el.duration <= 0) return { position: -1, duration: -1 };
+      return { position: el.currentTime, duration: el.duration };
+    } catch (e) {
+      return { position: -1, duration: -1 };
+    }
+  };
+
   try {
     if (navigator.mediaSession && navigator.mediaSession.metadata) {
       const meta = navigator.mediaSession.metadata;
@@ -515,19 +566,26 @@ function scrapeMediaPage() {
       if (meta.artwork && meta.artwork.length > 0) {
         bestArt = meta.artwork[meta.artwork.length - 1].src;
       }
-      if (meta.title)
+      if (meta.title) {
+        const c = clock();
         return {
           title: meta.title,
-          artist: meta.artist || '',
+          artist: ytCredited() || meta.artist || '',
           artwork: bestArt,
           isPlaying: navigator.mediaSession.playbackState === 'playing',
+          position: c.position,
+          duration: c.duration,
         };
+      }
     }
   } catch (e) {}
 
   const host = window.location.hostname;
-  let d = { title: '', artist: '', artwork: '', isPlaying: false };
+  let d = { title: '', artist: '', artwork: '', isPlaying: false, position: -1, duration: -1 };
   try {
+    const c0 = clock();
+    d.position = c0.position;
+    d.duration = c0.duration;
     if (host.includes('youtube.com')) {
       const v = document.querySelector('video');
       d.isPlaying = v ? !v.paused : false;
@@ -545,7 +603,7 @@ function scrapeMediaPage() {
         let t = document.querySelector('h1.title')?.innerText || '';
         let a = document.querySelector('#upload-info #channel-name a')?.innerText || '';
         d.title = t;
-        d.artist = a;
+        d.artist = ytCredited() || a;
         const id = new URLSearchParams(window.location.search).get('v');
         d.artwork = id ? `https://img.youtube.com/vi/${id}/maxresdefault.jpg` : '';
       }
@@ -559,6 +617,17 @@ function scrapeMediaPage() {
         document.querySelector('[data-testid="context-item-info-subtitles"]')?.innerText || '';
       const img = document.querySelector('[data-testid="cover-art-image"]');
       d.artwork = img ? img.src : '';
+      if (d.duration <= 0) {
+        const bar = document.querySelector(
+          'input[data-testid="progress-bar"], [data-testid="progress-bar"] input[type="range"]',
+        );
+        const mx = bar && parseFloat(bar.max);
+        const vl = bar && parseFloat(bar.value);
+        if (mx > 0 && isFinite(vl)) {
+          d.position = vl;
+          d.duration = mx;
+        }
+      }
     }
   } catch (e) {}
   return d;
@@ -576,22 +645,22 @@ function controlMediaPage(c) {
         else document.querySelector('[data-testid="control-button-playpause"]')?.click();
       }
     }
+    /* setActionHandler は常にある関数なので、この三項は必ず null 側に倒れていた。
+       ＝次へ／前へは一度も実行されていない。条件を外して、素直にボタンを叩く。
+       （mediaSession のアクションハンドラはブラウザだけが呼ぶもので、
+         ページ側から起動する手立ては無い） */
     if (c === 'next')
-      navigator.mediaSession.setActionHandler
-        ? null
-        : document
-            .querySelector(
-              '[data-testid="control-button-skip-forward"], .ytp-next-button, .next-button',
-            )
-            ?.click();
+      document
+        .querySelector(
+          '[data-testid="control-button-skip-forward"], .ytp-next-button, .next-button',
+        )
+        ?.click();
     if (c === 'prev')
-      navigator.mediaSession.setActionHandler
-        ? null
-        : document
-            .querySelector(
-              '[data-testid="control-button-skip-back"], .ytp-prev-button, .previous-button',
-            )
-            ?.click();
+      document
+        .querySelector(
+          '[data-testid="control-button-skip-back"], .ytp-prev-button, .previous-button',
+        )
+        ?.click();
     return;
   }
   const host = window.location.hostname;

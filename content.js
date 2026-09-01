@@ -22,7 +22,8 @@ const defaultSettings = {
   showMemo: true,
   showWeather: true,
   showNews: true,
-  newsUrl: '',
+  newsUrl: 'https://news.yahoo.co.jp/rss/topics/it.xml',
+  cardTilt: false,
   showCountdown: true,
   showMusic: true,
   showCalendar: true,
@@ -32,6 +33,24 @@ const defaultSettings = {
   mediaSpotify: true,
   mediaBackground: true,
   showZenMode: true,
+  showAmbient: false,
+  ambientIdleStart: '0',
+  ambientSky: true,
+  ambientCurve: true,
+  ambientWeather: true,
+  ambientSchedule: true,
+  ambientMusic: true,
+  ambientGreeting: true,
+  ambientWakeLock: true,
+  ambientFullscreen: true,
+  ambientHideCursor: true,
+  ambientBurnIn: true,
+  ambientMotion: 'auto',
+  ambientNight: true,
+  ambientNightStart: '22',
+  ambientNightEnd: '5',
+  ambientNightColor: 'amber',
+  ambientNightBrightness: '65',
   themeMode: 'glass',
   language: 'auto',
   bgBlur: '50',
@@ -391,7 +410,6 @@ function lgFilterForSize(w, h, radius) {
     try {
       localStorage.setItem(cacheKey, JSON.stringify({ u: res.url, s: res.scale }));
     } catch (e) {
-
       try {
         Object.keys(localStorage)
           .filter((k) => k.startsWith('lgmap_'))
@@ -603,7 +621,6 @@ const defaultWallpapers = [
 ].map((path) => chrome.runtime.getURL(path));
 
 const defaultDockItems = [
-
   {
     type: 'folder',
     icon: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>',
@@ -669,6 +686,12 @@ function initNestHub() {
     }
   });
 
+  const moduleOptionsHTML = getModuleOptionsHTML();
+  const hourOptionsHTML = Array.from(
+    { length: 24 },
+    (_, i) => `<option value="${i}">${String(i).padStart(2, '0')}:00</option>`,
+  ).join('');
+
   root.innerHTML = `
     <svg id="lg-svg" width="0" height="0" aria-hidden="true" style="position:absolute;width:0;height:0;pointer-events:none;overflow:hidden;">
       <defs></defs>
@@ -706,6 +729,9 @@ function initNestHub() {
       <div class="dock" id="main-dock">
         <div class="dock-separator"></div>
         <div class="dock-item tilt-card" id="zen-btn" title="${t('zen_mode_tooltip')}" style="font-size:0.8rem; font-weight:700; letter-spacing:1px;">ZEN</div>
+        <div class="dock-item tilt-card" id="ambient-btn" title="${t('ambient_mode_tooltip')}">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.4" y="4" width="19.2" height="13" rx="2.2"/><path d="M12 17v3.4M8.4 20.4h7.2"/></svg>
+        </div>
         <div class="dock-item tilt-card" id="settings-btn" title="${t('settings_tooltip')}">
             <svg viewBox="0 0 24 24" class="icon-svg" style="width:24px; height:24px;"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.58 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
         </div>
@@ -758,13 +784,25 @@ function initNestHub() {
             <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-2.76-2.24-5-5-5zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
             ${t('settings_appearance')}
           </button>
+          <button class="st-tab-btn" data-tab="tab-widgets">
+             <svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+            ${t('settings_widgets')}
+          </button>
+          <button class="st-tab-btn" data-tab="tab-dock">
+             <svg viewBox="0 0 24 24"><path fill="currentColor" d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+            ${t('settings_dock')}
+          </button>
           <button class="st-tab-btn" data-tab="tab-media">
              <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
             ${t('settings_media')}
           </button>
-          <button class="st-tab-btn" data-tab="tab-dock">
-             <svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
-            ${t('settings_dock')}
+          <button class="st-tab-btn" data-tab="tab-ambient">
+             <svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 3H3c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 13H3V5h18v11z"/></svg>
+            ${t('settings_ambient')}
+          </button>
+          <button class="st-tab-btn" data-tab="tab-data">
+             <svg viewBox="0 0 24 24"><path fill="currentColor" d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+            ${t('settings_data')}
           </button>
           <div style="flex:1"></div>
           <button class="st-tab-btn" data-tab="tab-about">
@@ -782,16 +820,18 @@ function initNestHub() {
           <div class="st-content-scroll">
 
             <div id="tab-general" class="st-section active">
-              <div class="st-group-title">${t('profile_group')}</div>
+              <div class="st-section-sub">${t('basic_sub')}</div>
+
               <div class="st-row column-layout">
                 <span>${t('username_label')}</span>
                 <div class="input-with-btn">
                   <input type="text" id="set-user-name" placeholder="${t('username_placeholder')}" class="st-input">
                 </div>
+                <div class="st-desc">${t('desc_username')}</div>
               </div>
 
-              <div class="st-row">
-                <span>Language / 言語</span>
+              <div class="st-row column-layout">
+                <span>${t('language_label')}</span>
                 <select id="set-language" class="st-select">
                   <option value="auto">Auto (System)</option>
                   <option value="ja">日本語</option>
@@ -799,62 +839,57 @@ function initNestHub() {
                   <option value="ko">한국어</option>
                   <option value="zh_cn">简体中文</option>
                 </select>
+                <div class="st-desc">${t('desc_language')}</div>
               </div>
 
-              <div class="st-group-title">${t('behavior_group')}</div>
-             <div class="st-row">
-                <span>Slot 1 (Top)</span>
-                <select id="set-module-1" class="st-select">
-                <option value="weather">Weather</option>
-                <option value="news">News</option>
-                  <option value="countdown">Countdown</option>
-                  <option value="todo">Todo List</option>
-                  <option value="calc">Calculator</option>
-                  <option value="timer">Timer</option>
-                  <option value="japanese">Japanese Word</option>
-                  <option value="english">English Word (API)</option>
-                  <option value="earthquake">Earthquake Monitor</option>
-
-<option value="year_progress">Year Progress (Particles)</option> <option value="none">なし (None)</option>
-                </select>
+              <div class="st-row column-layout">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                  <span>${t('greeting_msg')}</span>
+                  <label class="toggle-switch"><input type="checkbox" id="set-show-quote"><span class="slider"></span></label>
+                </div>
+                <div class="st-desc">${t('desc_greeting')}</div>
               </div>
+
+              <div class="st-row column-layout">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                  <span>${t('memo_display_label')}</span>
+                  <label class="toggle-switch"><input type="checkbox" id="set-show-memo"><span class="slider"></span></label>
+                </div>
+                <div class="st-desc">${t('desc_memo')}</div>
+              </div>
+
+              <div class="st-row column-layout">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                  <span>${t('zen_mode_btn')}</span>
+                  <label class="toggle-switch"><input type="checkbox" id="set-show-zen"><span class="slider"></span></label>
+                </div>
+                <div class="st-desc">${t('desc_zen')}</div>
+              </div>
+            </div>
+
+            <div id="tab-widgets" class="st-section">
+              <div class="st-section-sub">${t('widgets_sub')}</div>
+
+              <div class="st-group-title">${t('module_group')}</div>
+              <div class="st-desc" style="margin:-8px 0 12px;">${t('module_slot_desc')}</div>
 
               <div class="st-row">
-                <span>Slot 2 (Middle)</span>
-                <select id="set-module-2" class="st-select">
-                  <option value="weather">Weather</option>
-                  <option value="news">News</option>
-                  <option value="countdown">Countdown</option>
-                  <option value="todo">Todo List</option>
-                  <option value="calc">Calculator</option>
-                  <option value="timer">Timer</option>
-                  <option value="japanese">Japanese Word</option>
-                  <option value="english">English Word (API)</option>
-                <option value="earthquake">Earthquake Monitor</option>
-
-<option value="year_progress">Year Progress (Particles)</option> <option value="none">なし (None)</option>
+                <span>${t('module_slot_1')}</span>
+                <select id="set-module-1" class="st-select">${moduleOptionsHTML}
                 </select>
               </div>
-
               <div class="st-row">
-                <span>Slot 3 (Bottom)</span>
-                <select id="set-module-3" class="st-select">
-                  <option value="weather">Weather</option>
-                  <option value="news">News</option>
-                  <option value="countdown">Countdown</option>
-                  <option value="todo">Todo List</option>
-                  <option value="calc">Calculator</option>
-                  <option value="timer">Timer</option>
-                  <option value="japanese">Japanese Word</option>
-                  <option value="english">English Word (API)</option>
-                  <option value="earthquake">Earthquake Monitor</option>
-
-<option value="year_progress">Year Progress (Particles)</option> <option value="none">なし (None)</option>
+                <span>${t('module_slot_2')}</span>
+                <select id="set-module-2" class="st-select">${moduleOptionsHTML}
+                </select>
+              </div>
+              <div class="st-row">
+                <span>${t('module_slot_3')}</span>
+                <select id="set-module-3" class="st-select">${moduleOptionsHTML}
                 </select>
               </div>
 
-                            <div class="st-row"><span>${t('greeting_msg')}</span><label class="toggle-switch"><input type="checkbox" id="set-show-quote"><span class="slider"></span></label></div>
-              <div class="st-row"><span>${t('memo_display_label')}</span><label class="toggle-switch"><input type="checkbox" id="set-show-memo"><span class="slider"></span></label></div>
+              <div class="st-group-title" style="margin-top:22px;">${t('widget_detail_group')}</div>
 
               <div class="st-row column-layout">
                 <span>${t('weather_city_label')}</span>
@@ -862,43 +897,42 @@ function initNestHub() {
                   <input type="text" id="set-weather-city" placeholder="Tokyo" class="st-input">
                   <button id="btn-apply-city" class="st-btn-small">${t('update_btn')}</button>
                 </div>
+                <div class="st-desc">${t('desc_weather_city')}</div>
               </div>
 
               <div class="st-row column-layout">
                 <span>${t('rss_url_label')}</span>
                 <input type="text" id="set-news-url" placeholder="https://news.yahoo.co.jp/rss/topics/it.xml" class="st-input">
-                <div style="font-size:0.75rem; opacity:0.6; margin-top:4px;">${t('rss_url_hint')}</div>
-              </div>
-
-              <div class="st-row"><span>${t('zen_mode_btn')}</span><label class="toggle-switch"><input type="checkbox" id="set-show-zen"><span class="slider"></span></label></div>
-
-              <div class="st-row"><span>${t('show_profile_switcher')}</span><label class="toggle-switch"><input type="checkbox" id="set-show-profile-switcher"><span class="slider"></span></label></div>
-
-              <div class="st-group-title">${t('event_settings_group')}</div>
-
-              <div class="column-layout" style="padding: 0 10px; margin-bottom: 20px;">
-                <div style="font-size:0.8rem; margin-bottom:8px; opacity:0.8;">${t('calendar_urls_label')}</div>
-                <div id="calendar-settings-list"></div>
-                <button id="add-calendar-btn" class="st-btn" style="margin-top:5px; width:100%;">${t('add_calendar_btn')}</button>
-                <div style="font-size:0.75rem; opacity:0.6; margin-top:8px; line-height:1.4;">
-                  Google: 設定 > 統合 > iCal形式の非公開URL<br>
-                  Apple: iCloudカレンダー > 共有 > 公開カレンダー > リンクをコピー
-                </div>
+                <div class="st-desc">${t('desc_news_url')}</div>
               </div>
 
               <div class="st-row column-layout">
                 <span>${t('countdown_target')}</span>
                 <input type="text" id="set-cnt-title" placeholder="${t('event_name_placeholder')}" class="st-input" style="margin-bottom:10px;">
-
                 <div class="input-with-btn">
                   <input type="datetime-local" id="set-cnt-date" class="st-input">
                   <button id="btn-apply-cnt" class="st-btn-small">${t('update_btn')}</button>
                 </div>
+                <div class="st-desc">${t('desc_countdown')}</div>
               </div>
 
-              <div class="st-group-title" style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-                ${t('profile_list_group')}
+              <div class="st-row column-layout">
+                <span>${t('calendar_urls_label')}</span>
+                <div id="calendar-settings-list"></div>
+                <button id="add-calendar-btn" class="st-btn" style="margin-top:5px; width:100%;">${t('add_calendar_btn')}</button>
+                <div class="st-desc">${t('desc_calendar')}</div>
+                <div class="st-desc" style="margin-top:6px;">
+                  Google: 設定 > 統合 > iCal形式の非公開URL<br>
+                  Apple: iCloudカレンダー > 共有 > 公開カレンダー > リンクをコピー
+                </div>
               </div>
+            </div>
+
+            <div id="tab-data" class="st-section">
+              <div class="st-section-sub">${t('data_sub')}</div>
+
+              <div class="st-group-title">${t('profile_list_group')}</div>
+              <div class="st-desc" style="margin:-8px 0 12px;">${t('desc_profiles')}</div>
 
               <div class="st-row">
                 <div class="input-with-btn">
@@ -909,12 +943,15 @@ function initNestHub() {
 
               <div id="saved-profiles-list" class="profile-grid"></div>
 
-              <div class="st-group-title" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
-  ${t('backup_group')}
-</div>
-<div style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 10px; padding: 0 5px;">
-  ${t('backup_desc')}
-</div>
+              <div class="st-row column-layout" style="margin-top:14px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                  <span>${t('show_profile_switcher')}</span>
+                  <label class="toggle-switch"><input type="checkbox" id="set-show-profile-switcher"><span class="slider"></span></label>
+                </div>
+              </div>
+
+              <div class="st-group-title" style="margin-top:22px;">${t('backup_group')}</div>
+              <div class="st-desc" style="margin:-8px 0 12px;">${t('backup_desc')}</div>
               <div class="st-row" style="justify-content: flex-start; gap: 10px;">
                 <button id="btn-export-settings" class="st-btn" style="flex:1;">
                   ${t('btn_export')}
@@ -924,11 +961,57 @@ function initNestHub() {
                 </button>
                 <input type="file" id="file-import-settings" accept=".json" style="display: none;">
               </div>
+
+              <div class="st-group-title" style="margin-top:22px;">${t('reset_group')}</div>
+              <div class="st-desc" style="margin:-8px 0 12px;">${t('reset_desc')}</div>
+              <div class="st-row" style="justify-content: flex-start;">
+                <button id="btn-reset-all" class="st-btn danger-btn" style="flex:1;">
+                  ${t('btn_reset_all')}
+                </button>
+              </div>
             </div>
 
            <div id="tab-appearance" class="st-section">
-              <div class="st-group-title">${t('clock_style_group')}</div>
+              <div class="st-section-sub">${t('appearance_sub')}</div>
 
+              <div class="st-group-title">${t('theme_group')}</div>
+              <div class="st-row column-layout">
+                <span>${t('theme_mode_label')}</span>
+                <select id="set-theme-mode" class="st-select">
+                  <option value="glass">${t('theme_glass')}</option>
+                  <option value="liquidglass">${t('theme_liquidglass')}</option>
+                  <option value="yarn">${t('theme_yarn')}</option>
+                  <option value="terminal">${t('theme_terminal')}</option>
+                  <option value="retro">${t('theme_retro')}</option>
+                  <option value="lite">${t('theme_lite')}</option>
+                  <option value="mono">${t('theme_mono')}</option>
+                </select>
+                <div class="st-desc">${t('desc_theme')}</div>
+              </div>
+              <div class="st-row"><span>${t('accent_color')}</span><input type="color" id="set-accent" class="st-color"></div>
+
+              <div class="st-group-title" style="margin-top:22px;">${t('wallpaper_group')}</div>
+              <div class="st-row column-layout">
+                <span>${t('custom_wallpaper_url')}</span>
+                <div class="input-with-btn">
+                  <input type="text" id="set-img" placeholder="https://..." class="st-input">
+                  <button id="btn-apply-img" class="st-btn-small">${t('apply_btn')}</button>
+                </div>
+              </div>
+              <div class="st-row column-layout" style="margin-top: 10px;">
+                <span>${t('wallpaper_upload_label')}</span>
+                <div style="display:flex; gap:10px; width:100%;">
+                    <label class="st-btn" style="flex:1; text-align:center; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                        <svg viewBox="0 0 24 24" style="width:18px; height:18px; fill:currentColor; flex:0 0 auto;"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                        ${t('select_file_btn')}
+                        <input type="file" id="set-local-img-file" accept="image/*,video/*" style="display:none;">
+                    </label>
+                    <button id="btn-reset-local-img" class="st-btn danger-btn" style="flex:0 0 auto;">${t('wallpaper_reset_btn')}</button>
+                </div>
+                <div id="local-img-status" style="font-size:0.75rem; opacity:0.6; margin-top:4px; height:1.2em;"></div>
+              </div>
+
+              <div class="st-group-title" style="margin-top:22px;">${t('clock_group')}</div>
               <div class="st-row">
                 <span>${t('time_format_12h')}</span>
                 <label class="toggle-switch"><input type="checkbox" id="set-use-12h"><span class="slider"></span></label>
@@ -961,11 +1044,9 @@ function initNestHub() {
                 </select>
               </div>
               <div class="st-row column-layout" id="custom-font-row" style="display:none;">
-                <span>カスタムフォント名 (Custom Font Name)</span>
+                <span>${t('custom_font_label')}</span>
                 <input type="text" id="set-custom-font" placeholder="例: 'Poppins', sans-serif" class="st-input">
-                <div style="font-size:0.75rem; opacity:0.6; margin-top:4px;">
-                  CSSフォントファミリーを入力。例: 'Poppins', sans-serif
-                </div>
+                <div class="st-desc">${t('custom_font_desc')}</div>
               </div>
               <div class="st-row column-layout">
                 <span>${t('clock_color_label')}</span>
@@ -977,53 +1058,32 @@ function initNestHub() {
               <div class="st-row"><span>${t('size_label')}</span><input type="range" id="set-size" min="4" max="20" step="0.5" class="st-range"></div>
               <div class="st-row"><span>${t('weight_label')}</span><input type="range" id="set-clock-weight" min="100" max="900" step="100" class="st-range"></div>
 
-              <div class="st-group-title">${t('theme_wallpaper_group')}</div>
-
-              <div class="st-row">
-                <span>${t('theme_mode_label')}</span>
-                <select id="set-theme-mode" class="st-select">
-                  <option value="glass">${t('theme_glass')}</option>
-                  <option value="liquidglass">${t('theme_liquidglass')}</option>
-                  <option value="yarn">${t('theme_yarn')}</option>
-                  <option value="terminal">${t('theme_terminal')}</option>
-                  <option value="retro">${t('theme_retro')}</option>
-                  <option value="lite">${t('theme_lite')}</option>
-                  <option value="mono">${t('theme_mono')}</option>
-                </select>
-              </div>
-
-              <div class="st-row"><span>${t('accent_color')}</span><input type="color" id="set-accent" class="st-color"></div>
-              <div class="st-row"><span>${t('bg_brightness')}</span><input type="range" id="set-bright" min="0.1" max="1.0" step="0.1" class="st-range"></div>
-              <div class="st-row"><span>${t('bg_blur')}</span><input type="range" id="set-blur" min="0" max="100" step="1" class="st-range"></div>
-              <div class="st-row"><span>${t('bg_opacity')}</span><input type="range" id="set-opacity" min="0" max="1.0" step="0.1" class="st-range"></div>
-              <div class="st-row"><span>${t('glass_opacity')}</span><input type="range" id="set-glass-opacity" min="0" max="0.9" step="0.05" class="st-range"></div>
-
-              <div class="st-row"><span>${t('burn_in_protection')}</span><label class="toggle-switch"><input type="checkbox" id="set-burnin"><span class="slider"></span></label></div>
-
-              <div class="st-row"><span>${t('card_tilt')}</span><label class="toggle-switch"><input type="checkbox" id="set-card-tilt"><span class="slider"></span></label></div>
-
-             <div class="st-row column-layout">
-                <span>${t('custom_wallpaper_url')}</span>
-                <div class="input-with-btn">
-                  <input type="text" id="set-img" placeholder="https://..." class="st-input">
-                  <button id="btn-apply-img" class="st-btn-small">${t('apply_btn')}</button>
+              <details class="st-advanced">
+                <summary>${t('advanced_toggle')}</summary>
+                <div class="st-desc" style="margin:6px 0 14px;">${t('desc_advanced')}</div>
+                <div class="st-row"><span>${t('bg_brightness')}</span><input type="range" id="set-bright" min="0.1" max="1.0" step="0.1" class="st-range"></div>
+                <div class="st-row"><span>${t('bg_blur')}</span><input type="range" id="set-blur" min="0" max="100" step="1" class="st-range"></div>
+                <div class="st-row"><span>${t('bg_opacity')}</span><input type="range" id="set-opacity" min="0" max="1.0" step="0.1" class="st-range"></div>
+                <div class="st-row"><span>${t('glass_opacity')}</span><input type="range" id="set-glass-opacity" min="0" max="0.9" step="0.05" class="st-range"></div>
+                <div class="st-row column-layout">
+                  <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                    <span>${t('burn_in_protection')}</span>
+                    <label class="toggle-switch"><input type="checkbox" id="set-burnin"><span class="slider"></span></label>
+                  </div>
+                  <div class="st-desc">${t('desc_burnin')}</div>
                 </div>
-              </div>
-
-              <div class="st-row column-layout" style="margin-top: 10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1);">
-                <span>${t('wallpaper_upload_label')}</span>
-                <div style="display:flex; gap:10px; width:100%;">
-                    <label class="st-btn" style="flex:1; text-align:center; cursor:pointer; display:flex; align-items:center; justify-content:center;">
-                        📁 Select File
-                        <input type="file" id="set-local-img-file" accept="image/*,video/*" style="display:none;">
-                    </label>
-                    <button id="btn-reset-local-img" class="st-btn danger-btn" style="flex:0 0 auto;">${t('wallpaper_reset_btn')}</button>
+                <div class="st-row column-layout">
+                  <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                    <span>${t('card_tilt')}</span>
+                    <label class="toggle-switch"><input type="checkbox" id="set-card-tilt"><span class="slider"></span></label>
+                  </div>
+                  <div class="st-desc">${t('desc_card_tilt')}</div>
                 </div>
-                <div id="local-img-status" style="font-size:0.75rem; opacity:0.6; margin-top:4px; height:1.2em;"></div>
-              </div>
+              </details>
             </div>
 
             <div id="tab-media" class="st-section">
+              <div class="st-section-sub">${t('media_sub')}</div>
               <div class="st-group-title">${t('service_link_group')}</div>
 
               <div class="st-row"><span>YouTube</span><label class="toggle-switch"><input type="checkbox" id="set-media-yt"><span class="slider"></span></label></div>
@@ -1044,15 +1104,136 @@ function initNestHub() {
               <div style="font-size:0.8rem; opacity:0.6; padding:10px;">${t('media_hint')}</div>
             </div>
 
+            <div id="tab-ambient" class="st-section">
+              <div class="st-section-sub">${t('ambient_sub')}</div>
+
+              <div class="st-group-title">${t('amb_group_behavior')}</div>
+
+              <div class="st-row column-layout">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                  <span>${t('ambient_mode_btn')}</span>
+                  <label class="toggle-switch"><input type="checkbox" id="set-show-ambient"><span class="slider"></span></label>
+                </div>
+                <div class="st-desc">${t('desc_ambient')}</div>
+              </div>
+
+              <div class="st-row column-layout">
+                <span>${t('amb_idle')}</span>
+                <select id="set-amb-idle" class="st-select" style="width:100%; margin-top:8px;">
+                  <option value="0">${t('amb_idle_off')}</option>
+                  <option value="1">${t('amb_idle_min', { n: 1 })}</option>
+                  <option value="3">${t('amb_idle_min', { n: 3 })}</option>
+                  <option value="5">${t('amb_idle_min', { n: 5 })}</option>
+                  <option value="10">${t('amb_idle_min', { n: 10 })}</option>
+                  <option value="30">${t('amb_idle_min', { n: 30 })}</option>
+                </select>
+                <div class="st-desc" style="margin-top:8px;">${t('amb_idle_desc')}</div>
+              </div>
+
+              <div class="st-group-title" style="margin-top:22px;">${t('amb_group_shows')}</div>
+              <div class="st-desc" style="margin:-8px 0 12px;">${t('amb_shows_desc')}</div>
+              <div class="st-row column-layout">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                  <span>${t('amb_show_sky')}</span>
+                  <label class="toggle-switch"><input type="checkbox" id="set-amb-sky"><span class="slider"></span></label>
+                </div>
+                <div class="st-desc">${t('amb_show_sky_desc')}</div>
+              </div>
+              <div class="st-row"><span>${t('amb_show_weather')}</span><label class="toggle-switch"><input type="checkbox" id="set-amb-weather"><span class="slider"></span></label></div>
+              <div class="st-row"><span>${t('amb_show_sched')}</span><label class="toggle-switch"><input type="checkbox" id="set-amb-sched"><span class="slider"></span></label></div>
+              <div class="st-row column-layout">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                  <span>${t('amb_show_ridge')}</span>
+                  <label class="toggle-switch"><input type="checkbox" id="set-amb-curve"><span class="slider"></span></label>
+                </div>
+                <div class="st-desc">${t('amb_show_ridge_desc')}</div>
+              </div>
+              <div class="st-row column-layout">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                  <span>${t('amb_show_music')}</span>
+                  <label class="toggle-switch"><input type="checkbox" id="set-amb-music"><span class="slider"></span></label>
+                </div>
+                <div class="st-desc">${t('amb_show_music_desc')}</div>
+              </div>
+              <div class="st-row"><span>${t('amb_show_greet')}</span><label class="toggle-switch"><input type="checkbox" id="set-amb-greet"><span class="slider"></span></label></div>
+
+              <div class="st-group-title" style="margin-top:22px;">${t('amb_group_screen')}</div>
+              <div class="st-row column-layout">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                  <span>${t('amb_wakelock')}</span>
+                  <label class="toggle-switch"><input type="checkbox" id="set-amb-wakelock"><span class="slider"></span></label>
+                </div>
+                <div class="st-desc">${t('amb_wakelock_desc')}</div>
+              </div>
+              <div class="st-row column-layout">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                  <span>${t('amb_fullscreen')}</span>
+                  <label class="toggle-switch"><input type="checkbox" id="set-amb-fullscreen"><span class="slider"></span></label>
+                </div>
+                <div class="st-desc">${t('amb_fullscreen_desc')}</div>
+              </div>
+              <div class="st-row"><span>${t('amb_hide_cursor')}</span><label class="toggle-switch"><input type="checkbox" id="set-amb-cursor"><span class="slider"></span></label></div>
+              <div class="st-row column-layout">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                  <span>${t('amb_burnin')}</span>
+                  <label class="toggle-switch"><input type="checkbox" id="set-amb-burnin"><span class="slider"></span></label>
+                </div>
+                <div class="st-desc">${t('amb_burnin_desc')}</div>
+              </div>
+
+              <div class="st-group-title" style="margin-top:22px;">${t('amb_group_motion')}</div>
+
+              <div class="st-row column-layout">
+                <span>${t('amb_motion')}</span>
+                <select id="set-amb-motion" class="st-select" style="width:100%; margin-top:8px;">
+                  <option value="auto">${t('amb_motion_auto')}</option>
+                  <option value="full">${t('amb_motion_full')}</option>
+                  <option value="reduced">${t('amb_motion_reduced')}</option>
+                </select>
+                <div class="st-desc" style="margin-top:8px;">${t('amb_motion_desc')}</div>
+              </div>
+
+              <div class="st-group-title" style="margin-top:22px;">${t('amb_group_night')}</div>
+              <div class="st-row column-layout">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                  <span>${t('amb_night')}</span>
+                  <label class="toggle-switch"><input type="checkbox" id="set-amb-night"><span class="slider"></span></label>
+                </div>
+                <div class="st-desc">${t('amb_night_desc')}</div>
+              </div>
+
+              <div class="st-row">
+                <span>${t('amb_night_start')}</span>
+                <select id="set-amb-night-start" class="st-select">${hourOptionsHTML}</select>
+              </div>
+              <div class="st-row">
+                <span>${t('amb_night_end')}</span>
+                <select id="set-amb-night-end" class="st-select">${hourOptionsHTML}</select>
+              </div>
+              <div class="st-row">
+                <span>${t('amb_night_color')}</span>
+                <select id="set-amb-night-color" class="st-select">
+                  <option value="amber">${t('amb_color_amber')}</option>
+                  <option value="red">${t('amb_color_red')}</option>
+                  <option value="white">${t('amb_color_white')}</option>
+                </select>
+              </div>
+              <div class="st-row"><span>${t('amb_night_bright')}</span><input type="range" id="set-amb-night-bright" min="20" max="100" step="5" class="st-range"></div>
+
+              <div style="font-size:0.8rem; opacity:0.6; padding:10px;">${t('amb_hint')}</div>
+            </div>
+
             <div id="tab-dock" class="st-section">
+              <div class="st-section-sub">${t('dock_sub')}</div>
               <div class="st-group-title">${t('shortcut_edit_group')}</div>
+              <div class="st-desc" style="margin:-8px 0 12px;">${t('desc_dock')}</div>
               <div id="dock-settings-list"></div>
               <div style="display:flex; gap:10px; margin-top:10px;">
                 <button id="add-dock-item-btn" class="st-btn" style="flex:1;">
                   ${t('add_item_btn')}
                 </button>
                 <button id="add-dock-folder-btn" class="st-btn" style="flex:1;">
-                  フォルダを追加
+                  ${t('add_folder_btn')}
                 </button>
               </div>
             </div>
@@ -1094,10 +1275,11 @@ function initNestHub() {
           <span class="close-modal-btn" id="close-dock-edit">×</span>
         </div>
         <div class="column-layout">
-          <span>${t('icon_label')}</span>
-          <input type="text" id="dock-edit-icon" class="st-input" placeholder="${t('icon_placeholder')}">
           <span>${t('url_label')}</span>
           <input type="text" id="dock-edit-url" class="st-input" placeholder="https://...">
+          <span>${t('icon_label')}</span>
+          <textarea id="dock-edit-icon" class="st-input icon-textarea" placeholder="${t('icon_placeholder')}" rows="3" spellcheck="false"></textarea>
+          <button type="button" id="dock-edit-favicon" class="st-btn-small icon-fetch-btn">${t('fetch_favicon_btn')}</button>
         </div>
         <div class="modal-actions">
           <button id="dock-edit-save" class="st-btn primary-btn">${t('save_btn')}</button>
@@ -1129,6 +1311,7 @@ function initNestHub() {
   setupMemo();
   setupCountdown();
   setupZenMode();
+  setupAmbientMode();
   setupBurnInProtection();
   renderCalendarSystem();
   fetchWeather(city);
@@ -1183,6 +1366,20 @@ function showFolderSubmenu(folderItem, dockElement) {
     if (subItem.icon && subItem.icon.trim().startsWith('<svg')) {
       itemDiv.innerHTML = subItem.icon;
       itemDiv.firstElementChild.classList.add('icon-svg');
+    } else if (
+      subItem.icon &&
+      (subItem.icon.startsWith('http') || subItem.icon.startsWith('data:image'))
+    ) {
+      const img = document.createElement('img');
+      img.src = subItem.icon;
+      img.className = 'dock-img-icon';
+      img.style.cssText =
+        'width:26px; height:26px; object-fit:contain; border-radius:6px; display:block; pointer-events:none;';
+      img.onerror = () => {
+        img.style.display = 'none';
+        itemDiv.innerText = subItem.icon;
+      };
+      itemDiv.appendChild(img);
     } else {
       itemDiv.innerText = subItem.icon;
     }
@@ -1207,7 +1404,6 @@ function showFolderSubmenu(folderItem, dockElement) {
   submenu._activeTrigger = dockElement;
 
   const closeHandler = (e) => {
-
     if (!submenu.contains(e.target) && !dockElement.contains(e.target)) {
       submenu.classList.remove('show');
       submenu._activeTrigger = null;
@@ -1250,6 +1446,22 @@ function setupDockContextMenu() {
   const modal = document.getElementById('dock-edit-modal');
   const closeBtn = document.getElementById('close-dock-edit');
   const saveBtn = document.getElementById('dock-edit-save');
+  const faviconBtn = document.getElementById('dock-edit-favicon');
+
+  if (faviconBtn)
+    faviconBtn.onclick = () => {
+      const urlVal = document.getElementById('dock-edit-url').value;
+      const fav = faviconUrlForSite(urlVal);
+      if (!urlVal.trim()) {
+        alert(t('fetch_favicon_empty_url'));
+        return;
+      }
+      if (!fav) {
+        alert(t('fetch_favicon_fail'));
+        return;
+      }
+      document.getElementById('dock-edit-icon').value = fav;
+    };
 
   if (closeBtn) closeBtn.onclick = () => modal.classList.remove('show');
   if (modal)
@@ -1326,31 +1538,7 @@ function applyPreferences() {
   }
   rootStyle.setProperty('--clock-size', (prefs.clockSize || '10') + 'rem');
 
-  document.body.classList.remove(
-    'yarn-mode',
-    'lite-mode',
-    'terminal-mode',
-    'retro-mode',
-    'mono-mode',
-    'liquidglass-mode',
-    'lg-aligned',
-  );
-
-  if (prefs.themeMode === 'yarn') {
-    document.body.classList.add('yarn-mode');
-  } else if (prefs.themeMode === 'lite') {
-    document.body.classList.add('lite-mode');
-  } else if (prefs.themeMode === 'terminal') {
-    document.body.classList.add('terminal-mode');
-  } else if (prefs.themeMode === 'retro') {
-    document.body.classList.add('retro-mode');
-  } else if (prefs.themeMode === 'mono') {
-    document.body.classList.add('mono-mode');
-  } else if (prefs.themeMode === 'liquidglass') {
-    document.body.classList.add('liquidglass-mode');
-
-    setupLiquidGlass();
-  }
+  applyThemeClass(prefs.themeMode);
 
   const themeSelect = document.getElementById('set-theme-mode');
   if (themeSelect) themeSelect.value = prefs.themeMode || 'glass';
@@ -1377,7 +1565,6 @@ function applyPreferences() {
   const customFontInput = document.getElementById('set-custom-font');
 
   if (fontSelect && customFontRow && customFontInput) {
-
     let isPreset = false;
     for (let i = 0; i < fontSelect.options.length; i++) {
       if (fontSelect.options[i].value === prefs.clockFont) {
@@ -1433,6 +1620,27 @@ function applyPreferences() {
   setCheck('set-media-spotify', prefs.mediaSpotify);
   setCheck('set-media-bg', prefs.mediaBackground);
   setCheck('set-show-zen', prefs.showZenMode);
+  setCheck('set-show-ambient', prefs.showAmbient);
+  setVal('set-amb-idle', prefs.ambientIdleStart ?? '0');
+  setCheck('set-amb-sky', prefs.ambientSky);
+  setCheck('set-amb-curve', prefs.ambientCurve);
+  setCheck('set-amb-weather', prefs.ambientWeather);
+  setCheck('set-amb-sched', prefs.ambientSchedule);
+  setCheck('set-amb-music', prefs.ambientMusic);
+  setCheck('set-amb-greet', prefs.ambientGreeting);
+  setCheck('set-amb-wakelock', prefs.ambientWakeLock);
+  setCheck('set-amb-fullscreen', prefs.ambientFullscreen);
+  setCheck('set-amb-cursor', prefs.ambientHideCursor);
+  setCheck('set-amb-burnin', prefs.ambientBurnIn);
+  setCheck('set-amb-night', prefs.ambientNight);
+  setVal(
+    'set-amb-motion',
+    { light: 'full', minimal: 'reduced' }[prefs.ambientMotion] || prefs.ambientMotion || 'auto',
+  );
+  setVal('set-amb-night-start', prefs.ambientNightStart || '22');
+  setVal('set-amb-night-end', prefs.ambientNightEnd || '5');
+  setVal('set-amb-night-color', prefs.ambientNightColor || 'amber');
+  setVal('set-amb-night-bright', prefs.ambientNightBrightness || '65');
   setCheck('set-show-profile-switcher', prefs.showProfileSwitcher);
   setupIOSFocusSwitcher();
 
@@ -1447,6 +1655,7 @@ function applyPreferences() {
   toggle('music-card-container', prefs.showMusic);
   toggle('card-calendar', prefs.showCalendar);
   toggle('zen-btn', prefs.showZenMode);
+  toggle('ambient-btn', prefs.showAmbient);
 }
 
 function savePreferences() {
@@ -1493,6 +1702,25 @@ function savePreferences() {
     mediaSpotify: getChk('set-media-spotify'),
     mediaBackground: getChk('set-media-bg'),
     showZenMode: getChk('set-show-zen'),
+    showAmbient: getChk('set-show-ambient'),
+    ambientIdleStart: getVal('set-amb-idle') ?? oldPrefs.ambientIdleStart ?? '0',
+    ambientSky: getChk('set-amb-sky'),
+    ambientCurve: getChk('set-amb-curve'),
+    ambientWeather: getChk('set-amb-weather'),
+    ambientSchedule: getChk('set-amb-sched'),
+    ambientMusic: getChk('set-amb-music'),
+    ambientGreeting: getChk('set-amb-greet'),
+    ambientWakeLock: getChk('set-amb-wakelock'),
+    ambientFullscreen: getChk('set-amb-fullscreen'),
+    ambientHideCursor: getChk('set-amb-cursor'),
+    ambientBurnIn: getChk('set-amb-burnin'),
+    ambientMotion: getVal('set-amb-motion') ?? oldPrefs.ambientMotion ?? 'auto',
+    ambientNight: getChk('set-amb-night'),
+    ambientNightStart: getVal('set-amb-night-start') ?? oldPrefs.ambientNightStart ?? '22',
+    ambientNightEnd: getVal('set-amb-night-end') ?? oldPrefs.ambientNightEnd ?? '5',
+    ambientNightColor: getVal('set-amb-night-color') ?? oldPrefs.ambientNightColor ?? 'amber',
+    ambientNightBrightness:
+      getVal('set-amb-night-bright') ?? oldPrefs.ambientNightBrightness ?? '65',
     showProfileSwitcher: getChk('set-show-profile-switcher'),
 
     calendarUrls: oldPrefs.calendarUrls || [],
@@ -1509,6 +1737,11 @@ function savePreferences() {
   }
 
   localStorage.setItem('immersion_prefs', JSON.stringify(prefs));
+
+  if (typeof AMBIENT !== 'undefined' && AMBIENT.on) {
+    ambApplyPrefs();
+    ambRender();
+  }
 
   const newMods = prefs.module1 + prefs.module2 + prefs.module3;
 
@@ -1583,12 +1816,12 @@ function initSettingsLogic() {
     'set-clock-weight',
     'set-opacity',
     'set-glass-opacity',
+    'set-amb-night-bright',
   ].forEach((id) => {
     document.getElementById(id)?.addEventListener('input', savePreferences);
   });
 
   document.getElementById('set-custom-font')?.addEventListener('input', (e) => {
-
     document.documentElement.style.setProperty('--clock-font', e.target.value);
 
     savePreferences();
@@ -1606,10 +1839,8 @@ function initSettingsLogic() {
       const isGranted = await requestRssPermission(url);
 
       if (isGranted) {
-
         savePreferences();
       } else {
-
         const prefs = JSON.parse(localStorage.getItem('immersion_prefs'));
         e.target.value = prefs.newsUrl || '';
       }
@@ -1647,6 +1878,23 @@ function initSettingsLogic() {
     'set-show-music',
     'set-show-calendar',
     'set-show-zen',
+    'set-show-ambient',
+    'set-amb-idle',
+    'set-amb-sky',
+    'set-amb-curve',
+    'set-amb-weather',
+    'set-amb-sched',
+    'set-amb-music',
+    'set-amb-greet',
+    'set-amb-wakelock',
+    'set-amb-fullscreen',
+    'set-amb-cursor',
+    'set-amb-burnin',
+    'set-amb-night',
+    'set-amb-motion',
+    'set-amb-night-start',
+    'set-amb-night-end',
+    'set-amb-night-color',
     'set-media-yt',
     'set-media-ytm',
     'set-media-spotify',
@@ -1693,7 +1941,6 @@ function initSettingsLogic() {
     const bgOriginal = document.getElementById('bg-layer-original');
     const bgBlurred = document.getElementById('bg-layer-blurred');
     if (bgOriginal && bgBlurred && prefs.idleImgUrl) {
-
       bgOriginal.style.backgroundImage = `url('${prefs.idleImgUrl}')`;
       bgOriginal.classList.add('dynamic-blur');
       bgBlurred.style.display = 'none';
@@ -1711,10 +1958,8 @@ function initSettingsLogic() {
 
   const loginBtn = document.getElementById('btn-spotify-login');
   if (loginBtn) {
-
     chrome.runtime.sendMessage({ action: 'checkSpotifyLogin' }, (res) => {
       if (res && res.loggedIn) {
-
         loginBtn.innerText = t('spotify_connected');
         loginBtn.style.backgroundColor = '#1db954';
         loginBtn.style.color = '#fff';
@@ -1806,7 +2051,6 @@ function initSettingsLogic() {
   });
 
   resetBtn.onclick = async () => {
-
     await deleteImageFromDB();
     localStorage.removeItem('immersion_local_bg_data');
 
@@ -1819,13 +2063,11 @@ function initSettingsLogic() {
 
     if (bgOriginal && bgBlurred) {
       if (prefs.idleImgUrl && prefs.idleImgUrl.startsWith('http')) {
-
         sessionIdleArt = prefs.idleImgUrl;
         bgOriginal.style.backgroundImage = `url('${prefs.idleImgUrl}')`;
         bgOriginal.classList.add('dynamic-blur');
         bgBlurred.style.display = 'none';
       } else {
-
         const defImg = defaultWallpapers[Math.floor(Math.random() * defaultWallpapers.length)];
         sessionIdleArt = defImg;
         bgOriginal.style.backgroundImage = `url('${defImg}')`;
@@ -1853,7 +2095,6 @@ function initSettingsLogic() {
   }
 
   document.querySelectorAll('.st-range').forEach((slider) => {
-
     if (slider.parentElement.classList.contains('slider-wrapper')) return;
 
     const wrapper = document.createElement('div');
@@ -1989,6 +2230,23 @@ function getDockItems() {
   const saved = localStorage.getItem('immersion_dock_items');
   return saved ? JSON.parse(saved) : defaultDockItems;
 }
+
+// サイトのURLから favicon の取得用URLを組み立てる（Googleのfaviconサービス利用）
+function faviconUrlForSite(rawUrl) {
+  if (!rawUrl) return '';
+  let value = rawUrl.trim();
+  if (!value) return '';
+  // %s 入りの検索URLなどはプレースホルダを除去してからホスト判定
+  value = value.replace('%s', '');
+  if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(value)) value = 'https://' + value;
+  try {
+    const host = new URL(value).hostname;
+    if (!host) return '';
+    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=128`;
+  } catch (e) {
+    return '';
+  }
+}
 function renderDock() {
   const dock = document.getElementById('main-dock');
   const items = getDockItems();
@@ -2000,7 +2258,6 @@ function renderDock() {
     div.className = 'dock-item tilt-card dynamic-dock-item';
 
     if (item.type === 'folder') {
-
       if (item.icon && item.icon.trim().startsWith('<svg')) {
         div.innerHTML = item.icon;
         div.firstElementChild.classList.add('icon-svg');
@@ -2028,11 +2285,12 @@ function renderDock() {
     }
 
     if (item.icon && (item.icon.startsWith('http') || item.icon.startsWith('data:image'))) {
-      div.style.overflow = 'hidden';
       const img = document.createElement('img');
       img.src = item.icon;
+      // SVGアイコン(24px・中央配置)と見た目を揃える。タイルいっぱいに広げない。
+      img.className = 'dock-img-icon';
       img.style.cssText =
-        'width:100%; height:100%; object-fit:cover; display:block; pointer-events:none;';
+        'width:28px; height:28px; object-fit:contain; border-radius:6px; display:block; pointer-events:none;';
       img.onerror = () => {
         img.style.display = 'none';
         div.innerText = item.icon;
@@ -2099,7 +2357,7 @@ function renderDockSettingsList() {
         <div class="ds-label" style="margin-bottom:4px;">フォルダ名</div>
         <input type="text" class="st-input ds-folder-name" placeholder="Folder Name" style="margin-bottom:8px;">
         <div class="ds-label" style="margin-bottom:4px;">アイコン (SVG推奨)</div>
-        <input type="text" class="st-input ds-folder-icon" placeholder="<svg>...</svg>">
+        <textarea class="st-input ds-folder-icon icon-textarea" placeholder="<svg>...</svg>" rows="3" spellcheck="false"></textarea>
         <div class="ds-label" style="margin-top:12px;">フォルダ内のアイテム</div>
         <div class="folder-items-list" style="margin-top:8px; margin-bottom:8px;"></div>
         <button class="st-btn-small" style="width:100%; font-size:0.8rem; display:flex; align-items:center; justify-content:center; gap:4px;">
@@ -2133,12 +2391,14 @@ function renderDockSettingsList() {
           subRow.innerHTML = `
             <input type="text" class="st-input" placeholder="Icon" style="flex:0 0 60px; font-size:0.8rem; padding:4px 6px;">
             <input type="text" class="st-input" placeholder="URL" style="flex:1; font-size:0.8rem; padding:4px 6px;">
+            <span class="ds-move-btn sub-favicon-btn" title="${t('fetch_favicon_btn')}" style="flex:0 0 24px; font-size:0.9rem;">★</span>
             <span class="ds-move-btn" style="color:#ff453a; flex:0 0 24px; font-size:1rem;">×</span>
           `;
 
           const subIconInput = subRow.children[0];
           const subUrlInput = subRow.children[1];
-          const subDelBtn = subRow.children[2];
+          const subFavBtn = subRow.children[2];
+          const subDelBtn = subRow.children[3];
 
           subIconInput.value = subItem.icon;
           subUrlInput.value = subItem.url;
@@ -2151,6 +2411,20 @@ function renderDockSettingsList() {
           };
           subIconInput.oninput = saveSubItem;
           subUrlInput.oninput = saveSubItem;
+
+          subFavBtn.onclick = () => {
+            const fav = faviconUrlForSite(subUrlInput.value);
+            if (!subUrlInput.value.trim()) {
+              alert(t('fetch_favicon_empty_url'));
+              return;
+            }
+            if (!fav) {
+              alert(t('fetch_favicon_fail'));
+              return;
+            }
+            subIconInput.value = fav;
+            saveSubItem();
+          };
 
           subDelBtn.onclick = () => {
             items[index].items.splice(subIndex, 1);
@@ -2181,7 +2455,6 @@ function renderDockSettingsList() {
         }
       };
     } else {
-
       row.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <span class="ds-label">${t('icon_label')}</span>
@@ -2191,9 +2464,11 @@ function renderDockSettingsList() {
              <span class="ds-move-btn ds-del-inline" style="color:#ff453a;">×</span>
           </div>
         </div>
-        <input type="text" class="ds-icon" placeholder="${t('icon_placeholder')}">
-        <div class="ds-label" style="margin-top:8px;">${t('url_label')}</div>
+        <div class="ds-label" style="margin-bottom:4px;">${t('url_label')}</div>
         <input type="text" class="ds-url" placeholder="${t('url_label')}">
+        <div class="ds-label" style="margin-top:8px; margin-bottom:4px;">${t('icon_label')}</div>
+        <textarea class="ds-icon icon-textarea" placeholder="${t('icon_placeholder')}" rows="2" spellcheck="false"></textarea>
+        <button type="button" class="st-btn-small ds-favicon-btn icon-fetch-btn">${t('fetch_favicon_btn')}</button>
       `;
 
       const iI = row.querySelector('.ds-icon');
@@ -2210,6 +2485,22 @@ function renderDockSettingsList() {
       };
       iI.oninput = save;
       uI.oninput = save;
+
+      const favBtn = row.querySelector('.ds-favicon-btn');
+      if (favBtn)
+        favBtn.onclick = () => {
+          const fav = faviconUrlForSite(uI.value);
+          if (!uI.value.trim()) {
+            alert(t('fetch_favicon_empty_url'));
+            return;
+          }
+          if (!fav) {
+            alert(t('fetch_favicon_fail'));
+            return;
+          }
+          iI.value = fav;
+          save();
+        };
 
       d.onclick = () => {
         items.splice(index, 1);
@@ -2288,13 +2579,11 @@ function setupSearch() {
     updateClearBtn();
     const container = document.getElementById('search-suggestions');
     if (container) {
-
       container.style.display = 'none';
     }
   };
 
   input.addEventListener('keydown', (e) => {
-
     if (e.isComposing) return;
 
     if (e.key === 'Enter' && input.value) {
@@ -2510,6 +2799,1474 @@ function setupZenMode() {
       document.body.classList.toggle('zen-active');
     };
 }
+/* =========================================================================
+   AMBIENT MODE — 一枚もの
+
+   面をめくらない。時計は移動しない。動くのは分の数字と、いまの位置だけ。
+   横に長い画面を活かすのは下の一本の帯で、そこに気温の推移と予定の目盛りが
+   同じ横軸で乗る。予定そのものは右の一覧が受け持つので、
+   予定が0件でも10件でもレイアウトは崩れない。
+   ========================================================================= */
+
+const AMBIENT = {
+  root: null,
+  on: false,
+  clockTimer: null,
+  dataTimer: null,
+  wakeLock: null,
+  cursorTimer: null,
+  enterTimer: null,
+  auto: false,
+  lastFace: '',
+  wasNight: null,
+  wired: false,
+};
+
+/* 時間帯で色が変わる設計なので、確認のために時刻を差し替えられる口を作る */
+function ambNow() {
+  return new Date();
+}
+
+/* 15か所から呼ばれ、毎秒2回も通る。中身が変わるのは設定を保存したときだけ */
+function ambPrefs() {
+  const raw = localStorage.getItem('immersion_prefs');
+  if (ambPrefs._raw !== raw) {
+    ambPrefs._raw = raw;
+    try {
+      ambPrefs._v = JSON.parse(raw) || defaultSettings;
+    } catch (e) {
+      ambPrefs._v = defaultSettings;
+    }
+  }
+  return ambPrefs._v;
+}
+
+function ambLang() {
+  const prefs = ambPrefs();
+  let lang = prefs.language || 'auto';
+  if (lang === 'auto') {
+    const nav = navigator.language.slice(0, 2);
+    lang = nav === 'ja' || nav === 'ko' || nav === 'zh' ? nav : 'en';
+  }
+  return lang;
+}
+
+/* --- 天気アイコン。動かすのは降ってくるものだけ --- */
+function ambWeatherVisual(code) {
+  const s = (d) =>
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+  const body =
+    '<path d="M7.5 18.5h9.5a4.2 4.2 0 0 0 .3-8.4 6.4 6.4 0 0 0-12.2 1.9 3.4 3.4 0 0 0 2.4 6.5Z"/>';
+  const bodyHi =
+    '<path d="M7.5 15.6h9.5a4.2 4.2 0 0 0 .3-8.4 6.4 6.4 0 0 0-12.2 1.9 3.4 3.4 0 0 0 2.4 6.5Z"/>';
+  const sun =
+    '<circle cx="12" cy="12" r="4.6"/><path d="M12 1.8v2.6M12 19.6v2.6M1.8 12h2.6M19.6 12h2.6M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/>';
+  const part =
+    '<circle cx="8.5" cy="8" r="3.1"/><path d="M8.5 2.4v1.6M2.9 8h1.6M4.5 4l1.1 1.1"/>' +
+    '<path d="M10.5 19.6h7.4a3.6 3.6 0 0 0 .2-7.2 5.4 5.4 0 0 0-10.3 1.6 2.9 2.9 0 0 0 2 5.6Z"/>';
+  const rain =
+    bodyHi +
+    '<path class="amb-drop amb-d1" d="M9 17.8v2"/><path class="amb-drop amb-d2" d="M13 17.8v2"/><path class="amb-drop amb-d3" d="M17 17.8v2"/>';
+  const snow =
+    bodyHi +
+    '<path class="amb-drop amb-d1" d="M9 18.6h.01"/><path class="amb-drop amb-d2" d="M13 18.6h.01"/><path class="amb-drop amb-d3" d="M17 18.6h.01"/>';
+  const storm = bodyHi + '<path d="M13.4 17.4 10.6 21h3.4l-2.6 3.2"/>';
+  const fog =
+    '<path d="M7.5 14.4h9.5a4.2 4.2 0 0 0 .3-8.4 6.4 6.4 0 0 0-12.2 1.9 3.4 3.4 0 0 0 2.4 6.5Z"/><path d="M5 18h14M7 21.4h10"/>';
+
+  if (code === 0) return { icon: s(sun), text: t('weather_clear') };
+  if (code <= 2) return { icon: s(part), text: t('weather_sunny') };
+  if (code === 3) return { icon: s(body), text: t('weather_cloudy') };
+  if (code === 45 || code === 48) return { icon: s(fog), text: t('weather_cloudy') };
+  if (code >= 51 && code <= 67) return { icon: s(rain), text: t('weather_rain') };
+  if (code >= 71 && code <= 86) return { icon: s(snow), text: t('weather_cloudy') };
+  if (code >= 95) return { icon: s(storm), text: t('weather_rain') };
+  return { icon: s(body), text: t('weather_cloudy') };
+}
+
+/* 1回の描画で5〜6か所から呼ばれる。中身は数十分に一度しか変わらないので、
+   生の文字列が同じならパースし直さない。ここが効かないと3秒ごとに
+   96時間ぶんのJSONを何度も読み直すことになる。 */
+function ambWeatherData() {
+  try {
+    const raw = localStorage.getItem('immersion_weather_cache');
+    if (!raw) return null;
+    if (ambWeatherData._raw !== raw) {
+      ambWeatherData._raw = raw;
+      const c = JSON.parse(raw);
+      ambWeatherData._v =
+        c && c.data && c.data.current_weather
+          ? {
+              city: c.city,
+              cur: c.data.current_weather,
+              daily: c.data.daily,
+              hourly: c.data.hourly,
+            }
+          : null;
+    }
+    return ambWeatherData._v;
+  } catch (e) {
+    return null;
+  }
+}
+
+/* --- その日の予定。ローカルのメモとカレンダー購読の両方から拾う --- */
+function ambDayEvents(date) {
+  const y = date.getFullYear();
+  const m = date.getMonth();
+  const d = date.getDate();
+  const key = `${y}_${m}_${d}`;
+  const raw = [googleEventsCache[key], localStorage.getItem(`event_${key}`)]
+    .filter(Boolean)
+    .join(' / ');
+  if (!raw) return [];
+
+  return raw
+    .split(' / ')
+    .map((str) => str.trim())
+    .filter(Boolean)
+    .map((str) => {
+      const mt = str.match(/^(\d{1,2}):(\d{2})\s+(.*)$/);
+      if (mt) {
+        const hh = parseInt(mt[1], 10);
+        const mm = parseInt(mt[2], 10);
+        return {
+          at: new Date(y, m, d, hh, mm),
+          hour: hh + mm / 60,
+          time: `${String(hh).padStart(2, '0')}:${mt[2]}`,
+          title: mt[3],
+          timed: true,
+        };
+      }
+      /* 時刻のない終日予定。並びの都合で一日の終わりに置く */
+      return { at: new Date(y, m, d, 23, 59), hour: 23.98, time: '', title: str, timed: false };
+    })
+    .sort((a, b) => a.at - b.at);
+}
+
+/* --- 昼の時間帯。取れないときは 6:00-18:00 で代用する --- */
+function ambDaylight() {
+  const w = ambWeatherData();
+  if (w && ambDaylight._src === w) return ambDaylight._v;
+  const fallback = { from: 6, to: 18, real: false };
+  if (!w || !w.daily || !w.daily.sunrise || !w.daily.sunset) return fallback;
+  const rise = new Date(w.daily.sunrise[0]);
+  const set = new Date(w.daily.sunset[0]);
+  if (isNaN(rise) || isNaN(set)) return fallback;
+  ambDaylight._src = w;
+  ambDaylight._v = {
+    from: rise.getHours() + rise.getMinutes() / 60,
+    to: set.getHours() + set.getMinutes() / 60,
+    real: true,
+    riseText: `${rise.getHours()}:${String(rise.getMinutes()).padStart(2, '0')}`,
+    setText: `${set.getHours()}:${String(set.getMinutes()).padStart(2, '0')}`,
+  };
+  return ambDaylight._v;
+}
+
+/* --- 今日の0時から24時まで、1時間ごとの気温と降水確率 --- */
+function ambHourlyToday() {
+  const w = ambWeatherData();
+  if (!w || !w.hourly || !w.hourly.time || !w.hourly.temperature_2m) return null;
+  const n = ambNow();
+  const ck = n.toDateString();
+  if (ambHourlyToday._src === w && ambHourlyToday._day === ck) return ambHourlyToday._v;
+  ambHourlyToday._src = w;
+  ambHourlyToday._day = ck;
+  const key = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}-${String(
+    n.getDate(),
+  ).padStart(2, '0')}`;
+  const start = w.hourly.time.findIndex((s) => s.indexOf(key) === 0);
+  if (start < 0) return null;
+
+  const pts = [];
+  for (let i = 0; i <= 24; i++) {
+    const idx = start + i;
+    if (idx >= w.hourly.time.length) break;
+    const temp = w.hourly.temperature_2m[idx];
+    if (typeof temp !== 'number') break;
+    pts.push({
+      h: i,
+      temp,
+      pop: w.hourly.precipitation_probability ? w.hourly.precipitation_probability[idx] || 0 : 0,
+    });
+  }
+  ambHourlyToday._v = pts.length >= 24 ? pts : null;
+  return ambHourlyToday._v;
+}
+
+/* --- 折れ線を角の立たない曲線にする（Catmull-Rom をベジエへ） --- */
+function ambSmoothPath(P) {
+  if (P.length < 2) return '';
+  let d = `M ${P[0].x.toFixed(1)} ${P[0].y.toFixed(1)}`;
+  for (let i = 0; i < P.length - 1; i++) {
+    const p0 = P[i - 1] || P[i];
+    const p1 = P[i];
+    const p2 = P[i + 1];
+    const p3 = P[i + 2] || P[i + 1];
+    const c1x = p1.x + (p2.x - p0.x) / 6;
+    const c1y = p1.y + (p2.y - p0.y) / 6;
+    const c2x = p2.x - (p3.x - p1.x) / 6;
+    const c2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(
+      1,
+    )}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+  }
+  return d;
+}
+
+function ambMusicData() {
+  const box = document.getElementById('music-card-container');
+  if (!box || !box.classList.contains('music-active')) return null;
+  const title = document.getElementById('track-title')?.innerText || '';
+  if (!title) return null;
+  /* 元のカードがすでに取ってきているものを読む。取得の口を二重に持たない */
+  const art = document.getElementById('album-art')?.style.backgroundImage || '';
+  return {
+    title,
+    artist: document.getElementById('track-artist')?.innerText || '',
+    art: art && art !== 'none' ? art : '',
+    playing: box.classList.contains('music-playing'),
+    pos: parseFloat(box.dataset.pos),
+    dur: parseFloat(box.dataset.dur),
+    at: parseFloat(box.dataset.at),
+  };
+}
+
+/* いま何割まで来たか。読んだ時刻からの経過を足して補う。
+   長さが取れない配信元や生放送では null を返し、線はただの区切りに戻る。 */
+function ambMusicProgress(music) {
+  if (!music || !(music.dur > 0) || !isFinite(music.pos) || music.pos < 0) return null;
+  let p = music.pos;
+  if (music.playing && isFinite(music.at)) p += (Date.now() - music.at) / 1000;
+  return Math.max(0, Math.min(1, p / music.dur));
+}
+
+function ambIsNight() {
+  const p = ambPrefs();
+  if (p.ambientNight === false) return false;
+  const h = ambNow().getHours();
+  const from = parseInt(p.ambientNightStart ?? '22', 10);
+  const to = parseInt(p.ambientNightEnd ?? '5', 10);
+  if (isNaN(from) || isNaN(to) || from === to) return false;
+  return from < to ? h >= from && h < to : h >= from || h < to;
+}
+
+const AMB_NIGHT_COLORS = { amber: '#ffb37a', red: '#ff5c47', white: '#dfe7ec' };
+
+/* 動きの量。一枚ものになったので、動くのは数字とドリフトだけ */
+function ambMotionTier() {
+  const p = ambPrefs();
+  const set = p.ambientMotion || 'auto';
+  if (set === 'full' || set === 'light') return 'full';
+  if (set === 'reduced' || set === 'minimal') return 'reduced';
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 'reduced';
+  if (p.themeMode === 'lite') return 'reduced';
+  return 'full';
+}
+
+function ambApplyPrefs() {
+  const root = AMBIENT.root;
+  if (!root) return;
+  const p = ambPrefs();
+  root.dataset.motion = ambMotionTier();
+  root.dataset.burnin = p.ambientBurnIn === false ? 'off' : 'on';
+  root.dataset.np = p.ambientMusic === false ? 'off' : 'on';
+  root.style.setProperty(
+    '--amb-night-color',
+    AMB_NIGHT_COLORS[p.ambientNightColor] || AMB_NIGHT_COLORS.amber,
+  );
+}
+
+/* =======================================================================
+   空の色
+
+   色は世界から取る。装飾からは取らない ── これが「綺麗」と「AIっぽい」の
+   分かれ目だと考えている。ここでは日の出/日の入りから太陽の高さを出し、
+   天気で彩度を落として、画面の地の色を決める。
+   明るさは常に十数%以下に抑える。OLEDで焼き付かせないためと、
+   文字のコントラストを落とさないため。
+   ======================================================================= */
+
+/* 太陽の高さの近似。1=南中、0=地平線、-1=真夜中 */
+function ambSunElev(now, light) {
+  const h = now.getHours() + now.getMinutes() / 60;
+  const sr = light.from;
+  const ss = light.to;
+  if (ss <= sr) return 0;
+  const noon = (sr + ss) / 2;
+  const half = Math.max(0.5, (ss - sr) / 2);
+  if (h >= sr && h <= ss) return Math.cos(((h - noon) / half) * (Math.PI / 2));
+  const nightHalf = Math.max(0.5, (24 - (ss - sr)) / 2);
+  const dist = h < sr ? sr - h : h - ss;
+  return -Math.min(1, dist / nightHalf);
+}
+
+/* 正なら赤へ、負なら青へ。朝と夕を分けるためだけに使う */
+function ambWarm(c, k) {
+  return [c[0] * (1 + k * 0.55), c[1] * (1 - Math.abs(k) * 0.06), c[2] * (1 - k * 0.45)].map((v) =>
+    Math.max(0, Math.min(255, Math.round(v))),
+  );
+}
+
+/* 天気でどれだけ色を抜くか */
+function ambSkyDull(code) {
+  if (code === 0) return 0.05;
+  if (code <= 2) return 0.2;
+  if (code === 3) return 0.48;
+  if (code === 45 || code === 48) return 0.62;
+  if (code >= 95) return 0.72;
+  if (code >= 51) return 0.64;
+  return 0.4;
+}
+
+const AMB_SKY_KEYS = [
+  { e: -1.0, top: [3, 4, 9], hor: [6, 7, 13] },
+  { e: -0.4, top: [5, 7, 16], hor: [12, 12, 24] },
+  { e: -0.08, top: [8, 11, 25], hor: [30, 20, 30] },
+  { e: 0.06, top: [11, 16, 38], hor: [62, 38, 40] },
+  { e: 0.22, top: [13, 20, 46], hor: [72, 44, 42] },
+  { e: 0.55, top: [14, 24, 56], hor: [34, 48, 76] },
+  { e: 1.0, top: [12, 30, 64], hor: [30, 52, 84] },
+];
+
+function ambMix(a, b, t) {
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * t),
+    Math.round(a[1] + (b[1] - a[1]) * t),
+    Math.round(a[2] + (b[2] - a[2]) * t),
+  ];
+}
+
+function ambRgb(c, a) {
+  return a === undefined ? `rgb(${c[0]},${c[1]},${c[2]})` : `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+}
+
+function ambDesaturate(c, amount) {
+  const l = Math.round(0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]);
+  return ambMix(c, [l, l, l], amount);
+}
+
+function ambSkyColors(now) {
+  const light = ambDaylight();
+  const e = ambSunElev(now, light);
+  const K = AMB_SKY_KEYS;
+  let i = 0;
+  while (i < K.length - 2 && e > K[i + 1].e) i++;
+  const span = K[i + 1].e - K[i].e;
+  const t = span ? Math.max(0, Math.min(1, (e - K[i].e) / span)) : 0;
+
+  let top = ambMix(K[i].top, K[i + 1].top, t);
+  let hor = ambMix(K[i].hor, K[i + 1].hor, t);
+
+  /* 朝と夕を同じ色にしない。太陽高度だけで引くと、5時と18時が鏡写しになる。
+     実際には日中の対流で舞い上がった塵が夕方に残るので、同じ高さでも夕焼けのほうが赤い。
+     朝はその分だけ澄んでいる。地平線に近いときほど強く効かせる。 */
+  const near = Math.max(0, 1 - Math.abs(e) / 0.45);
+  if (near > 0) {
+    const hh = now.getHours() + now.getMinutes() / 60;
+    const k = near * 0.16 * (hh >= (light.from + light.to) / 2 ? 1 : -1);
+    hor = ambWarm(hor, k);
+    top = ambWarm(top, k * 0.35);
+  }
+
+  const w = ambWeatherData();
+  if (w) {
+    const dull = ambSkyDull(w.cur.weathercode);
+    top = ambDesaturate(top, dull);
+    hor = ambDesaturate(hor, dull);
+    if (w.cur.weathercode >= 51) {
+      top = ambMix(top, [0, 0, 0], 0.2);
+      hor = ambMix(hor, [0, 0, 0], 0.2);
+    }
+  }
+  return { top, hor, elev: e, dull: w ? ambSkyDull(w.cur.weathercode) : 0 };
+}
+
+/* 地の色。いちばん明るい帯（地平線）を、下の一日の帯と同じ高さに置く */
+function ambApplySky(now) {
+  const root = AMBIENT.root;
+  const sc = ambSkyColors(now);
+  if (!root) return sc;
+  const prefs = ambPrefs();
+  if (prefs.ambientSky === false) {
+    if (root.style.backgroundImage !== 'none') root.style.backgroundImage = 'none';
+    root.style.removeProperty('--amb-fg');
+    const g0 = document.getElementById('amb-lg0');
+    if (g0) g0.setAttribute('stop-color', 'rgb(10,10,12)');
+    return sc;
+  }
+
+  const { top, hor } = sc;
+  /* 空は素直に一枚。暖色は太陽が受け持つので、ここでは横一面に敷かない */
+  const mid = ambMix(top, hor, 0.45);
+  const g =
+    `linear-gradient(180deg, ${ambRgb(top)} 0%, ${ambRgb(mid)} 46%, ` +
+    `${ambRgb(hor)} 66%, ${ambRgb(hor)} 100%)`;
+  if (root.style.backgroundImage !== g) root.style.backgroundImage = g;
+
+  /* 地面は地平線の色をぐっと落としたもの。空と地続きに見せる */
+  const g0 = document.getElementById('amb-lg0');
+  if (g0) g0.setAttribute('stop-color', ambRgb(ambMix(hor, [0, 0, 0], 0.8)));
+
+  /* 文字も同じ光を受ける。夕方はわずかに暖かい白、昼はわずかに冷たい白。
+     気づかない程度でいい ── 画面全体が一つの素材に見えることが目的 */
+  const warm = (hor[0] - hor[2]) / 255;
+  const fg =
+    warm > 0
+      ? [255, Math.round(255 - warm * 11), Math.round(255 - warm * 28)]
+      : [Math.round(255 + warm * 16), Math.round(255 + warm * 6), 255];
+  root.style.setProperty('--amb-fg', ambRgb(fg));
+  return sc;
+}
+
+/* ------------------------------------------------------------- 時刻の桁組み */
+
+function ambTimeParts() {
+  const prefs = ambPrefs();
+  const now = ambNow();
+  let h = now.getHours();
+  let suffix = '';
+  if (prefs.use12hFormat) {
+    suffix = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+  }
+  const hh = prefs.use12hFormat ? String(h) : String(h).padStart(2, '0');
+  return { text: `${hh}:${String(now.getMinutes()).padStart(2, '0')}`, suffix };
+}
+
+function ambBuildFace(el, str) {
+  el.textContent = '';
+  for (const ch of str) {
+    const cell = document.createElement('span');
+    if (ch >= '0' && ch <= '9') {
+      cell.className = 'amb-dg';
+      const a = document.createElement('i');
+      const b = document.createElement('i');
+      a.textContent = ch;
+      b.textContent = ch;
+      cell.appendChild(a);
+      cell.appendChild(b);
+    } else {
+      cell.className = 'amb-sep-ch';
+      cell.textContent = ch;
+    }
+    el.appendChild(cell);
+  }
+}
+
+function ambRollFace(el, str) {
+  if (!el) return;
+  if (el.children.length !== str.length) {
+    ambBuildFace(el, str);
+    return;
+  }
+  const still = ambMotionTier() === 'reduced';
+  for (let i = 0; i < str.length; i++) {
+    const cell = el.children[i];
+    if (!cell.classList.contains('amb-dg')) continue;
+    const ch = str[i];
+    if (cell.children[0].textContent === ch) continue;
+    if (still) {
+      cell.children[0].textContent = ch;
+      cell.children[1].textContent = ch;
+      continue;
+    }
+    cell.children[1].textContent = ch;
+    cell.classList.add('rolling');
+    setTimeout(() => {
+      cell.classList.remove('rolling');
+      cell.children[0].textContent = ch;
+      cell.children[1].textContent = ch;
+    }, 660);
+  }
+}
+
+/* ----------------------------------------------------------------- 文字組み */
+
+function ambDateText(date) {
+  const days = [t('sun'), t('mon'), t('tue'), t('wed'), t('thu'), t('fri'), t('sat')];
+  const months = [
+    t('jan'),
+    t('feb'),
+    t('mar'),
+    t('apr'),
+    t('may'),
+    t('jun'),
+    t('jul'),
+    t('aug'),
+    t('sep'),
+    t('oct'),
+    t('nov'),
+    t('dec'),
+  ];
+  const mStr = months[date.getMonth()];
+  const dStr = days[date.getDay()];
+  const lang = ambLang();
+  if (lang === 'ja' || lang === 'zh') return `${mStr}${date.getDate()}日 (${dStr})`;
+  if (lang === 'ko') return `${mStr} ${date.getDate()}일 (${dStr})`;
+  return `${mStr} ${date.getDate()} (${dStr})`;
+}
+
+function ambGreeting() {
+  const prefs = ambPrefs();
+  const name = prefs.userName || 'Guest';
+  const h = ambNow().getHours();
+  if (h >= 5 && h < 11) return t('greeting_morning', { name });
+  if (h >= 11 && h < 18) return t('greeting_afternoon', { name });
+  if (h >= 18 && h < 23) return t('greeting_evening', { name });
+  return t('greeting_night', { name });
+}
+
+function ambRelative(target) {
+  const diff = target.getTime() - ambNow().getTime();
+  if (diff <= 0) return t('amb_now');
+  const mins = Math.round(diff / 60000);
+  if (mins < 60) return t('amb_in_min', { n: mins });
+  const hours = Math.floor(mins / 60);
+  const rest = mins % 60;
+  if (hours < 24) {
+    return rest ? t('amb_in_hm', { h: hours, m: rest }) : t('amb_in_h', { h: hours });
+  }
+  return t('amb_in_d', { n: Math.round(hours / 24) });
+}
+
+/* ---------------------------------------------------------------- 組み立て */
+
+function ambBuild() {
+  if (AMBIENT.root) return AMBIENT.root;
+
+  const root = document.createElement('div');
+  root.id = 'amb-root';
+  root.setAttribute('role', 'region');
+  root.setAttribute('aria-label', t('ambient_mode_tooltip'));
+  root.innerHTML = `
+    <div class="amb-shell" id="amb-shell">
+      <div class="amb-sun" id="amb-sun"></div>
+      <div class="amb-moon" id="amb-moon"><i></i></div>
+
+      <div class="amb-landwrap" id="amb-landwrap">
+      <svg class="amb-land" id="amb-land" viewBox="0 0 ${AMB_W} ${AMB_H}"
+           preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="amb-lg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" id="amb-lg0"/>
+            <stop offset="0.3" stop-color="rgb(9,8,10)"/>
+            <stop offset="1" stop-color="rgb(4,4,6)"/>
+          </linearGradient>
+        </defs>
+        <path class="amb-land-fill" id="amb-land-fill" fill="url(#amb-lg)"/>
+        <path class="amb-land-edge" id="amb-land-edge" fill="none"
+              vector-effect="non-scaling-stroke"/>
+        <g class="amb-marks" id="amb-marks" vector-effect="non-scaling-stroke"></g>
+        <circle class="amb-next-dot" id="amb-next-dot" r="4.5" style="display:none"/>
+        <line class="amb-nowmark" id="amb-nowmark" vector-effect="non-scaling-stroke"/>
+      </svg>
+      </div>
+
+      <div class="amb-clock" id="amb-clock">
+        <div class="amb-face" id="amb-face"></div>
+        <div class="amb-ampm" id="amb-ampm"></div>
+      </div>
+      <div class="amb-line">
+        <div class="amb-date" id="amb-date"></div>
+        <div class="amb-meta" id="amb-meta"></div>
+      </div>
+      <div class="amb-greet" id="amb-greet"></div>
+
+      <span class="amb-peak amb-num" id="amb-hi"></span>
+      <span class="amb-peak amb-num" id="amb-lo"></span>
+
+      <div class="amb-ground">
+        <div class="amb-agenda">
+          <div class="amb-k" id="amb-k"></div>
+          <div class="amb-hero" id="amb-hero"></div>
+          <div class="amb-tail amb-num" id="amb-tail"></div>
+          <div class="amb-np" id="amb-np">
+            <div class="amb-np-art" id="amb-np-art"></div>
+            <div class="amb-np-t" id="amb-np-t"></div>
+            <div class="amb-np-a" id="amb-np-a"></div>
+            <div class="amb-np-ctl" id="amb-np-ctl">
+              <button type="button" class="amb-np-b" id="amb-np-prev" aria-label="${t('amb_track_prev')}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M11.22 11.15 19.3 5.76c.72-.48 1.7.04 1.7.9v10.68c0 .86-.98 1.38-1.7.9l-8.08-5.39a1.01 1.01 0 0 1 0-1.7ZM2.22 11.15 10.3 5.76c.72-.48 1.7.04 1.7.9v10.68c0 .86-.98 1.38-1.7.9L2.22 12.85a1.01 1.01 0 0 1 0-1.7Z"/></svg>
+              </button>
+              <button type="button" class="amb-np-b amb-np-play" id="amb-np-play" aria-label="${t('amb_playpause')}"></button>
+              <button type="button" class="amb-np-b" id="amb-np-next" aria-label="${t('amb_track_next')}">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.78 12.85 4.7 18.24c-.72.48-1.7-.04-1.7-.9V6.66c0-.86.98-1.38 1.7-.9l8.08 5.39a1.01 1.01 0 0 1 0 1.7ZM21.78 12.85l-8.08 5.39c-.72.48-1.7-.04-1.7-.9V6.66c0-.86.98-1.38 1.7-.9l8.08 5.39a1.01 1.01 0 0 1 0 1.7Z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="amb-ctl" id="amb-ctl">
+      <button type="button" class="amb-btn" id="amb-close" aria-label="${t('amb_exit')}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+  `;
+  document.body.appendChild(root);
+  AMBIENT.root = root;
+
+  root.querySelector('#amb-close').onclick = (e) => {
+    e.stopPropagation();
+    ambExit();
+  };
+
+  for (const [id, cmd] of [
+    ['amb-np-prev', 'prev'],
+    ['amb-np-play', 'toggle'],
+    ['amb-np-next', 'next'],
+  ]) {
+    root.querySelector('#' + id).onclick = (e) => {
+      e.stopPropagation();
+      ambMediaCommand(cmd);
+      ambWake(); /* 押したらしばらく操作を出したままにする */
+    };
+  }
+  return root;
+}
+
+function ambSet(id, html) {
+  const el = document.getElementById(id);
+  if (el && el.innerHTML !== html) el.innerHTML = html;
+}
+
+function ambSetText(id, txt) {
+  const el = document.getElementById(id);
+  if (el && el.textContent !== txt) el.textContent = txt;
+}
+
+/* 時計は tabular-nums なので全桁が同じ送り幅になる。そのぶん「1」のように
+   字面の細い数字は左右のアキが大きく、箱の左端と字の左端がずれる。
+   時刻によって見え方が変わってしまうので、
+   実際の桁幅（DOM）と字面の幅（canvas）から左アキを出して日付をそこへ寄せる。 */
+function ambAlignDate() {
+  const clock = document.getElementById('amb-clock');
+  const face = document.getElementById('amb-face');
+  const date = document.getElementById('amb-date');
+  if (!clock || !face || !date) return;
+
+  const cell = face.querySelector('.amb-dg');
+  const ch = cell ? (cell.textContent || '').charAt(0) : '';
+  const advance = cell ? cell.getBoundingClientRect().width : 0;
+  const cs = getComputedStyle(clock);
+  const size = parseFloat(cs.fontSize);
+  if (!ch || !advance || !size) return;
+
+  const key = ch + '|' + Math.round(advance) + '|' + cs.fontWeight + '|' + cs.fontFamily;
+  if (ambAlignDate._key !== key) {
+    ambAlignDate._key = key;
+    let ink = 0;
+    try {
+      const cv = (ambAlignDate._cv = ambAlignDate._cv || document.createElement('canvas'));
+      const ctx = cv.getContext('2d');
+      ctx.font = `${cs.fontWeight} ${size}px ${cs.fontFamily}`;
+      const m = ctx.measureText(ch);
+      const inkW = (m.actualBoundingBoxLeft || 0) + (m.actualBoundingBoxRight || 0);
+      /* 等幅数字は字面が送り幅の中央に置かれるので、左右のアキは半分ずつ */
+      if (inkW > 0 && inkW < advance) ink = (advance - inkW) / 2;
+    } catch (e) {
+      ink = 0;
+    }
+    if (!isFinite(ink)) ink = 0;
+    ambAlignDate._px = Math.max(0, Math.min(advance * 0.42, ink)).toFixed(1) + 'px';
+  }
+
+  const px = ambAlignDate._px;
+  const greet = document.getElementById('amb-greet');
+  if (date.style.marginLeft !== px) date.style.marginLeft = px;
+  if (greet && greet.style.marginLeft !== px) greet.style.marginLeft = px;
+}
+
+/* ================================================================= 稜線
+   画面の地平線は今日の気温の形をしている。昼に高く、朝夕に低い。
+   予定はその稜線に立つ目盛りになり、太陽は「時刻＝横、高度＝高さ」に置く。
+   数字はすべて 1600x900 のビューボックス上で持ち、表示は伸縮させる。 */
+
+const AMB_W = 1600;
+const AMB_H = 900;
+const AMB_RIDGE_BASE = 510; /* いちばん低い気温のときの地平線 */
+const AMB_RIDGE_LIFT = 62; /* 最低から最高までで持ち上がる量 */
+const AMB_SUN_RISE = 400; /* 太陽高度1.0のときの高さ */
+
+function ambRidgeX(h) {
+  return (h / 24) * AMB_W;
+}
+
+/* 今日の気温の幅を、稜線の高さに写す */
+function ambRidgeScale(pts) {
+  let lo = Infinity;
+  let hi = -Infinity;
+  let loH = 5;
+  let hiH = 14;
+  for (const p of pts) {
+    if (p.temp < lo) {
+      lo = p.temp;
+      loH = p.h;
+    }
+    if (p.temp > hi) {
+      hi = p.temp;
+      hiH = p.h;
+    }
+  }
+  const span = Math.max(1, hi - lo);
+  return { lo, hi, loH, hiH, y: (t) => AMB_RIDGE_BASE - ((t - lo) / span) * AMB_RIDGE_LIFT };
+}
+
+/* 稜線。気温が取れないとき、あるいは切ってあるときは水平にする */
+function ambRidge() {
+  const flat = {
+    pts: null,
+    y: () => AMB_RIDGE_BASE - AMB_RIDGE_LIFT * 0.5,
+    at: () => AMB_RIDGE_BASE - AMB_RIDGE_LIFT * 0.5,
+    temp: null,
+    lo: null,
+    hi: null,
+  };
+  if (ambPrefs().ambientCurve === false) return flat;
+  const pts = ambHourlyToday();
+  if (!pts || pts.length < 24) return flat;
+  const sc = ambRidgeScale(pts);
+  const temp = (h) => {
+    const i = Math.max(0, Math.min(pts.length - 2, Math.floor(h)));
+    const k = Math.max(0, Math.min(1, h - i));
+    return pts[i].temp + (pts[i + 1].temp - pts[i].temp) * (k * k * (3 - 2 * k));
+  };
+  return {
+    pts,
+    y: sc.y,
+    at: (h) => sc.y(temp(h)),
+    temp,
+    lo: sc.lo,
+    hi: sc.hi,
+    loH: sc.loH,
+    hiH: sc.hiH,
+  };
+}
+
+function ambRidgePath(ridge) {
+  if (ambRidgePath._src === ridge.pts && ambRidgePath._v) return ambRidgePath._v;
+  ambRidgePath._src = ridge.pts;
+  ambRidgePath._v = ambBuildRidgePath(ridge);
+  return ambRidgePath._v;
+}
+
+function ambBuildRidgePath(ridge) {
+  if (!ridge.pts) {
+    const y = ridge.at(0).toFixed(1);
+    return `M 0 ${y} L ${AMB_W} ${y}`;
+  }
+  return ambSmoothPath(ridge.pts.map((p) => ({ x: ambRidgeX(p.h), y: ridge.y(p.temp) })));
+}
+
+function ambRenderLand(now, events, ridge, prefs) {
+  const edge = document.getElementById('amb-land-edge');
+  const fill = document.getElementById('amb-land-fill');
+  if (!edge || !fill) return;
+
+  const d = ambRidgePath(ridge);
+  if (ambRenderLand._d !== d) {
+    ambRenderLand._d = d;
+    edge.setAttribute('d', d);
+    fill.setAttribute('d', `${d} L ${AMB_W} ${AMB_H} L 0 ${AMB_H} Z`);
+  }
+
+  /* 予定は稜線から立ち上がる短い棒。文字は下に逃がしてあるので衝突しない */
+  const timed = prefs.ambientSchedule === false ? [] : events.filter((e) => e.timed);
+  const key = timed.map((e) => e.hour.toFixed(3)).join(',') + '|' + d;
+  if (ambRenderLand._marks !== key) {
+    ambRenderLand._marks = key;
+    ambSet(
+      'amb-marks',
+      timed
+        .map((e) => {
+          const x = ambRidgeX(e.hour).toFixed(1);
+          const y = ridge.at(e.hour);
+          return `<line x1="${x}" y1="${(y - 3).toFixed(1)}" x2="${x}" y2="${(y - 21).toFixed(1)}"/>`;
+        })
+        .join(''),
+    );
+  }
+
+  const nowH = now.getHours() + now.getMinutes() / 60;
+  const nx = ambRidgeX(nowH);
+  const ny = ridge.at(nowH);
+  const mark = document.getElementById('amb-nowmark');
+  if (mark) {
+    mark.setAttribute('x1', nx.toFixed(1));
+    mark.setAttribute('x2', nx.toFixed(1));
+    mark.setAttribute('y1', ny.toFixed(1));
+    mark.setAttribute('y2', (ny - 14).toFixed(1));
+  }
+
+  const upcoming = timed.filter((e) => e.at.getTime() >= now.getTime());
+  const dot = document.getElementById('amb-next-dot');
+  if (dot) {
+    if (upcoming.length) {
+      const h = upcoming[0].hour;
+      dot.setAttribute('cx', ambRidgeX(h).toFixed(1));
+      dot.setAttribute('cy', (ridge.at(h) - 24).toFixed(1));
+      dot.style.display = '';
+    } else {
+      dot.style.display = 'none';
+    }
+  }
+
+  /* 最高と最低は、その時刻の稜線の上に置く */
+  const hi = document.getElementById('amb-hi');
+  const lo = document.getElementById('amb-lo');
+  for (const [el, h, v] of [
+    [hi, ridge.hiH, ridge.hi],
+    [lo, ridge.loH, ridge.lo],
+  ]) {
+    if (!el) continue;
+    if (v == null) {
+      el.style.display = 'none';
+      continue;
+    }
+    el.style.display = '';
+    /* 最低気温が0時や24時に来ると、中央そろえのままでは端で半分切れる。
+       端に寄ったときだけ、外側の辺で揃える。 */
+    const px = (ambRidgeX(h) / AMB_W) * 100;
+    if (px < 4) {
+      el.style.left = '0%';
+      el.style.transform = 'translate(0, -100%)';
+    } else if (px > 96) {
+      el.style.left = '100%';
+      el.style.transform = 'translate(-100%, -100%)';
+    } else {
+      el.style.left = px.toFixed(2) + '%';
+      el.style.transform = 'translate(-50%, -100%)';
+    }
+    el.style.top = (((ridge.y(v) - 13) / AMB_H) * 100).toFixed(2) + '%';
+    ambSetText(el.id, `${Math.round(v)}°`);
+    /* 一日の最低は明け方に来るので、稜線の左端 ＝ 挨拶や日付の真下に立ちやすい。
+       下へ回しても今度は下段とぶつかる。置き場所が無いときは、出さない ──
+       稜線の形がすでに同じことを言っているので、無くても困らない。 */
+    const r = el.getBoundingClientRect();
+    const pad = 6;
+    /* 日付の行は天気を右端に送るために全幅の箱になった。箱で当たりを見ると
+       空いているところでも当たってしまうので、中の文字そのものと比べる。 */
+    const hits = ['#amb-date', '#amb-meta', '.amb-greet', '.amb-ground'].some((sel) => {
+      const t2 = document.querySelector(sel);
+      if (!t2 || !t2.textContent.trim() || getComputedStyle(t2).display === 'none') return false;
+      const b = t2.getBoundingClientRect();
+      return (
+        r.left < b.right + pad &&
+        r.right > b.left - pad &&
+        r.top < b.bottom + pad &&
+        r.bottom > b.top - pad
+      );
+    });
+    if (hits) el.style.display = 'none';
+  }
+}
+
+/* --- 月。日が沈んだら、太陽と同じ仕組みで月に入れ替わる。
+       月齢は基準の新月からの日数、位置は月齢ぶんずれた南中時刻から。
+       満月なら真夜中に高く、新月なら太陽と一緒に沈んでいる。 --- */
+const AMB_SYNODIC = 29.530588853;
+const AMB_NEW_MOON = Date.UTC(2000, 0, 6, 18, 14);
+
+function ambMoon(now) {
+  const age =
+    ((((now.getTime() - AMB_NEW_MOON) / 86400000) % AMB_SYNODIC) + AMB_SYNODIC) % AMB_SYNODIC;
+  const phase = age / AMB_SYNODIC; /* 0=新月 0.5=満月 */
+  const illum = (1 - Math.cos(2 * Math.PI * phase)) / 2;
+  const light = ambDaylight();
+  const transit = ((light.from + light.to) / 2 + phase * 24) % 24;
+  const h = now.getHours() + now.getMinutes() / 60;
+  let d = h - transit;
+  while (d > 12) d -= 24;
+  while (d < -12) d += 24;
+  return { phase, illum, waxing: phase < 0.5, elev: Math.cos((d / 6.2) * (Math.PI / 2)) };
+}
+
+function ambPlaceMoon(now, ridge, sky) {
+  const el = document.getElementById('amb-moon');
+  if (!el) return;
+  const m = ambMoon(now);
+  /* 明るいうちは出さない。細すぎる月も見えないので出さない */
+  const show =
+    ambPrefs().ambientSky !== false && sky.elev <= 0.02 && m.elev > 0.02 && m.illum > 0.04;
+  if (!show) {
+    if (el.style.display !== 'none') {
+      el.style.display = 'none';
+      delete el.dataset.at;
+    }
+    return;
+  }
+  el.style.display = '';
+  const mh = now.getHours() + now.getMinutes() / 60;
+  const op = ((0.5 + 0.5 * m.illum) * (1 - sky.dull * 0.6)).toFixed(2);
+  ambMoveOrb(el, ambRidgeX(mh), ridge.at(mh) - m.elev * AMB_SUN_RISE * 0.82, op);
+  /* 影の円を、光っている側と反対へずらす。ずらし量がそのまま満ち欠け */
+  const shift = ((m.waxing ? -1 : 1) * m.illum * 100).toFixed(1);
+  if (el.dataset.ph !== shift) {
+    el.dataset.ph = shift;
+    el.firstElementChild.style.transform = `translateX(${shift}%)`;
+  }
+}
+
+/* --- 太陽。横は時刻、高さは太陽高度。低いほど大きく赤い --- */
+function ambSunColor(e) {
+  if (e < 0.16) return [255, 150, 74];
+  if (e < 0.45) return ambMix([255, 150, 74], [255, 206, 150], (e - 0.16) / 0.29);
+  return ambMix([255, 206, 150], [228, 238, 255], Math.min(1, (e - 0.45) / 0.55));
+}
+
+function ambPlaceSun(now, ridge, sky) {
+  const el = document.getElementById('amb-sun');
+  if (!el) return;
+  if (ambPrefs().ambientSky === false || sky.elev <= 0) {
+    if (el.style.display !== 'none') {
+      el.style.display = 'none';
+      delete el.dataset.at;
+    }
+    return;
+  }
+  el.style.display = '';
+  const h = now.getHours() + now.getMinutes() / 60;
+  const e = Math.max(0, Math.min(1, sky.elev));
+  const w = 44 - 20 * e;
+  const c = ambDesaturate(ambSunColor(e), sky.dull * 0.7);
+  const a = (0.58 - 0.3 * e) * (1 - sky.dull * 0.55);
+  ambMoveOrb(el, ambRidgeX(h), ridge.at(h) - e * AMB_SUN_RISE, '1');
+  /* 大きさは0.5%刻みに丸める。連続で変えるとそのたびにレイアウトが走る */
+  const ws = (Math.round(w * 2) / 2).toFixed(1);
+  if (el.dataset.w !== ws) {
+    el.dataset.w = ws;
+    el.style.width = ws + '%';
+    el.style.height = (parseFloat(ws) * (AMB_W / AMB_H)).toFixed(1) + '%';
+  }
+  const g =
+    `radial-gradient(closest-side, ${ambRgb(c, a.toFixed(2))} 0%, ` +
+    `${ambRgb(c, (a * 0.34).toFixed(2))} 26%, transparent 66%)`;
+  if (el.style.backgroundImage !== g) el.style.backgroundImage = g;
+}
+
+/* 空にあるものの置き方。％やlefttopではなく transform で動かす ──
+   合成だけで済むので、動かしてもレイアウトも再描画も起きない。 */
+function ambMoveOrb(el, vx, vy, opacity) {
+  const root = AMBIENT.root;
+  if (!root) return;
+  const x = (vx / AMB_W) * root.clientWidth;
+  const y = (vy / AMB_H) * root.clientHeight;
+  const key = Math.round(x) + ',' + Math.round(y);
+  if (el.dataset.at === key && el.style.opacity === opacity) return;
+  const tf = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0) translate(-50%, -50%)`;
+
+  /* 出てくるときは、いた場所の記録が無い。そのまま動かすと
+     前にいた位置（何時間も前）や画面の隅から2秒かけて飛んでくる。
+     位置だけ先に置いて、明るさだけを昇らせる。 */
+  if (!el.dataset.at) {
+    el.style.transition = 'none';
+    el.style.transform = tf;
+    el.style.opacity = '0';
+    void el.offsetWidth;
+    el.style.transition = '';
+  } else if (el.style.transform !== tf) {
+    el.style.transform = tf;
+  }
+  el.dataset.at = key;
+  if (el.style.opacity !== opacity) el.style.opacity = opacity;
+}
+
+/* =========================================================== 下段の文字
+   主役は1件だけ。残りは横一列に流す。縦に積まないので何件あっても崩れない。 */
+
+function ambHM(h) {
+  const hh = Math.floor(((h % 24) + 24) % 24);
+  const mm = Math.round((h - Math.floor(h)) * 60) % 60;
+  return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+}
+
+/* 予定がない日は「自分の次」ではなく「その日の次」を出す。
+   いちばん早く来るものを1つだけ。作り物は入れない。 */
+function ambDayMoment(now, ridge) {
+  const h = now.getHours() + now.getMinutes() / 60;
+  const light = ambDaylight();
+  const out = [];
+
+  if (ridge.pts) {
+    /* まとまった雨のはじまり。ぽつぽつは出さない */
+    let wet = null;
+    for (const p of ridge.pts) {
+      if (p.h > h && p.pop >= 50) {
+        wet = p.h;
+        break;
+      }
+    }
+    if (wet != null) out.push({ at: wet, name: t('amb_rain_from') });
+    if (ridge.hiH != null && h < ridge.hiH) {
+      out.push({ at: ridge.hiH, name: t('amb_day_high', { n: Math.round(ridge.hi) }) });
+    }
+  }
+  if (light.real) {
+    if (h < light.from) out.push({ at: light.from, name: t('amb_sunrise') });
+    if (h < light.to) out.push({ at: light.to, name: t('amb_sunset') });
+    out.push({ at: light.from + 24, name: t('amb_sunrise') });
+  }
+  if (!out.length) return null;
+  out.sort((x, y2) => x.at - y2.at);
+  const pick = out[0];
+  const target = new Date(now);
+  target.setHours(0, 0, 0, 0);
+  target.setMinutes(Math.round(pick.at * 60));
+  return { time: ambHM(pick.at), name: pick.name, rel: ambRelative(target) };
+}
+
+function ambRenderAgenda(now, events, ridge, prefs) {
+  const off = prefs.ambientSchedule === false;
+  const upcoming = off ? [] : events.filter((e) => e.at.getTime() >= now.getTime());
+
+  if (upcoming.length) {
+    const n = upcoming[0];
+    ambSetText('amb-k', t('amb_next_up'));
+    document.getElementById('amb-k').classList.remove('soft');
+    ambSet(
+      'amb-hero',
+      (n.time ? `<span class="amb-hero-t amb-num">${n.time}</span>` : '') +
+        `<span class="amb-hero-n">${n.title}</span>` +
+        (n.timed ? `<span class="amb-hero-r">${ambRelative(n.at)}</span>` : ''),
+    );
+    ambSet(
+      'amb-tail',
+      upcoming
+        .slice(1, 5)
+        .map((e) => `<span><b>${e.time || '—'}</b> ${e.title}</span>`)
+        .join(''),
+    );
+    return;
+  }
+
+  /* 予定がない日 */
+  const k = document.getElementById('amb-k');
+  if (k) k.classList.add('soft');
+  ambSetText('amb-k', off ? '' : events.length ? t('amb_today_done') : t('amb_today_free'));
+  const m = ambDayMoment(now, ridge);
+  ambSet(
+    'amb-hero',
+    m
+      ? `<span class="amb-hero-t amb-num">${m.time}</span>` +
+          `<span class="amb-hero-n">${m.name}</span>` +
+          `<span class="amb-hero-r">${m.rel}</span>`
+      : '',
+  );
+  ambSet('amb-tail', '');
+}
+
+/* ================================================================ 描画 */
+
+function ambRender() {
+  const root = AMBIENT.root;
+  if (!root) return;
+  const prefs = ambPrefs();
+  const now = ambNow();
+
+  /* --- 夜は時計だけに落とす。1日に2回しか変わらない --- */
+  const night = ambIsNight();
+  if (AMBIENT.wasNight !== night) {
+    root.dataset.night = night ? 'on' : 'off';
+    AMBIENT.wasNight = night;
+    if (night) {
+      const bright = parseInt(prefs.ambientNightBrightness ?? '65', 10);
+      root.style.setProperty(
+        '--amb-night-alpha',
+        Math.max(0.12, (isNaN(bright) ? 65 : bright) / 100),
+      );
+    }
+  }
+
+  ambSetText('amb-date', ambDateText(now));
+  ambAlignDate();
+
+  const h = now.getHours();
+  const greetOn = prefs.ambientGreeting !== false && h >= 5 && h < 11;
+  ambSetText('amb-greet', greetOn ? ambGreeting() : '');
+
+  if (night) return;
+
+  const ridge = ambRidge();
+  const sky = ambApplySky(now);
+  ambPlaceSun(now, ridge, sky);
+  ambPlaceMoon(now, ridge, sky);
+
+  /* --- 天気は日付と同じ一行に置く。数字だけ大きくしない --- */
+  const w = prefs.ambientWeather === false ? null : ambWeatherData();
+  if (w) {
+    const info = ambWeatherVisual(w.cur.weathercode);
+    ambSet(
+      'amb-meta',
+      `<i>${info.text}</i><span class="amb-num">${Math.round(w.cur.temperature)}°</span>`,
+    );
+  } else {
+    ambSet('amb-meta', '');
+  }
+
+  const events = ambDayEvents(now);
+  ambRenderLand(now, events, ridge, prefs);
+  ambRenderAgenda(now, events, ridge, prefs);
+  ambRenderNowPlaying(prefs);
+}
+/* 再生中。左下の空いているところに置くので、
+   曲が始まっても止まっても、時計も予定も動かない。
+   操作は画面を触ったとき（.amb-awake）だけ浮かび上がる。 */
+function ambRenderNowPlaying(prefs) {
+  const el = document.getElementById('amb-np');
+  if (!el) return;
+  const music = prefs.ambientMusic === false ? null : ambMusicData();
+  /* 設定で切ってあるときだけ場所ごと消す。曲が止まっただけなら
+     行は残しておく ── 消すと下段全体が沈んで、予定が動いてしまう */
+  el.style.display = prefs.ambientMusic === false ? 'none' : '';
+  el.style.visibility = music ? '' : 'hidden';
+  if (!music) return;
+
+  const art = document.getElementById('amb-np-art');
+  if (art && art.style.backgroundImage !== music.art) {
+    art.style.backgroundImage = music.art;
+    art.style.display = music.art ? '' : 'none';
+  }
+  ambSetText('amb-np-t', music.title);
+  ambSetText('amb-np-a', music.artist);
+
+  ambSetProgress(ambMusicProgress(music));
+  el.classList.toggle('playing', music.playing);
+  const play = document.getElementById('amb-np-play');
+  const icon = music.playing
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5.5" y="4" width="4.5" height="16" rx="2.25" fill="currentColor"/><rect x="14" y="4" width="4.5" height="16" rx="2.25" fill="currentColor"/></svg>'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 5.224v13.552a1.5 1.5 0 0 0 2.296 1.272l10.842-6.776a1.5 1.5 0 0 0 0-2.544L9.296 3.952A1.5 1.5 0 0 0 7 5.224Z"/></svg>';
+  if (play && play.innerHTML !== icon) play.innerHTML = icon;
+}
+
+/* 区切り線がそのまま再生の軌道になる。数字は出さない ──
+   毎秒動く数字を置くと、この画面でいちばん落ち着かないものになる。 */
+function ambSetProgress(frac) {
+  const el = document.getElementById('amb-np');
+  if (!el) return;
+  const v = frac == null ? '' : (frac * 100).toFixed(1) + '%';
+  if (el.dataset.prog === v) return;
+  el.dataset.prog = v;
+  if (v) el.style.setProperty('--amb-np-p', v);
+  else el.style.removeProperty('--amb-np-p');
+}
+
+/* 描き直しは15秒に1回なので、線だけは毎秒進めてやる */
+function ambTickProgress() {
+  if (!AMBIENT.on || ambIsNight()) return;
+  const p = ambPrefs();
+  if (p.ambientMusic === false) return;
+  ambSetProgress(ambMusicProgress(ambMusicData()));
+}
+
+/* 元のカードのボタンと同じ口を叩く */
+function ambMediaCommand(cmd) {
+  try {
+    chrome.runtime.sendMessage({ action: 'controlYouTube', command: cmd }, () => {
+      void chrome.runtime.lastError;
+    });
+  } catch (e) {
+    /* 拡張のコンテキストが切れているときは黙って諦める */
+  }
+}
+
+/* 「画面を消さない」の中身。呼び出しだけがあって定義が無く、
+   Horizon に入るたびここで ReferenceError になって止まっていた
+   （そのため、すぐ後ろの全画面化も実行されていない）。
+
+   Wake Lock はタブが見えているあいだしか取れず、隠れると
+   ブラウザが勝手に外す。戻ってきたときは ambOnVisibility が取り直すので、
+   外されたことを AMBIENT.wakeLock に反映しておく必要がある。 */
+function ambRequestWakeLock() {
+  if (AMBIENT.wakeLock) return;
+  try {
+    if (!navigator.wakeLock || document.visibilityState !== 'visible') return;
+    navigator.wakeLock
+      .request('screen')
+      .then((lock) => {
+        /* 取れるまでのあいだに Horizon を出ていたら、持っていても仕方がない */
+        if (!AMBIENT.on) {
+          lock.release().catch(() => {});
+          return;
+        }
+        AMBIENT.wakeLock = lock;
+        lock.addEventListener('release', () => {
+          if (AMBIENT.wakeLock === lock) AMBIENT.wakeLock = null;
+        });
+      })
+      .catch(() => {
+        /* 省電力設定などで断られることがある。景色はそのまま出しておく */
+      });
+  } catch (e) {}
+}
+
+function ambReleaseWakeLock() {
+  if (AMBIENT.wakeLock) {
+    AMBIENT.wakeLock.release().catch(() => {});
+    AMBIENT.wakeLock = null;
+  }
+}
+
+function ambOnVisibility() {
+  if (document.visibilityState === 'visible' && AMBIENT.on && !AMBIENT.wakeLock) {
+    ambRequestWakeLock();
+  }
+}
+
+function ambOnKey(e) {
+  if (!AMBIENT.on) return;
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    ambExit();
+  }
+}
+
+function ambWake() {
+  if (!AMBIENT.on) return;
+  const root = AMBIENT.root;
+  root.classList.remove('amb-hidecursor');
+  root.classList.add('amb-awake');
+  clearTimeout(AMBIENT.cursorTimer);
+  const hide = ambPrefs().ambientHideCursor !== false;
+  AMBIENT.cursorTimer = setTimeout(() => {
+    if (hide) root.classList.add('amb-hidecursor');
+    root.classList.remove('amb-awake');
+  }, 3000);
+}
+
+/* ---------------------------------------------------------------- 出入り */
+
+/* 入るときに一度だけ、画面が組み上がるところを見せる。
+   段取りは CSS 側の .amb-in に置いてある。1.8秒で外して、以降は何も動かない。 */
+function ambPlayEntrance() {
+  const root = AMBIENT.root;
+  if (!root) return;
+  root.classList.add('amb-in');
+  clearTimeout(AMBIENT.enterTimer);
+  AMBIENT.enterTimer = setTimeout(() => root.classList.remove('amb-in'), 1800);
+}
+
+function ambEnter() {
+  if (AMBIENT.on) return;
+  const prefs = ambPrefs();
+
+  ambBuild();
+  AMBIENT.on = true;
+  AMBIENT.wasNight = null;
+
+  const parts = ambTimeParts();
+  ambBuildFace(document.getElementById('amb-face'), parts.text);
+  AMBIENT.lastFace = parts.text;
+  const ampm = document.getElementById('amb-ampm');
+  if (ampm) {
+    ampm.textContent = parts.suffix;
+    ampm.style.display = parts.suffix ? '' : 'none';
+  }
+
+  document.body.classList.add('amb-on');
+  ambApplyPrefs();
+  ambRender();
+
+  /* 一度レイアウトを確定させてから .show を付ける */
+  void AMBIENT.root.offsetWidth;
+  AMBIENT.root.classList.add('show');
+  ambPlayEntrance();
+
+  AMBIENT.clockTimer = setInterval(() => {
+    const p = ambTimeParts();
+    if (p.text !== AMBIENT.lastFace) {
+      ambRollFace(document.getElementById('amb-face'), p.text);
+      AMBIENT.lastFace = p.text;
+      ambAlignDate();
+    }
+    const a = document.getElementById('amb-ampm');
+    if (a && a.textContent !== p.suffix) a.textContent = p.suffix;
+    /* 稜線の「いま」の印は1時間に画面幅の1/24しか動かない。
+       毎秒さわる意味がないので、描き直しのときだけでよい */
+    ambTickProgress();
+    if (ambIsNight() !== AMBIENT.wasNight) ambRender();
+  }, 1000);
+
+  /* 天気も予定も秒単位では変わらない。分の数字は上の1秒タイマーが持つ */
+  AMBIENT.dataTimer = setInterval(ambRender, 15000);
+
+  clearTimeout(AMB_IDLE.timer);
+  if (AMBIENT.auto) {
+    for (const ev of ['mousemove', 'mousedown', 'wheel', 'keydown']) {
+      document.addEventListener(ev, ambAutoExit, { passive: true, capture: true });
+    }
+  }
+  document.addEventListener('keydown', ambOnKey, true);
+  document.addEventListener('mousemove', ambWake, { passive: true });
+  document.addEventListener('visibilitychange', ambOnVisibility);
+  window.addEventListener('resize', ambRender);
+  ambWake();
+
+  if (prefs.ambientWakeLock !== false) ambRequestWakeLock();
+  if (prefs.ambientFullscreen !== false && !document.fullscreenElement) {
+    document.documentElement.requestFullscreen?.().catch(() => {});
+  }
+}
+
+function ambExit() {
+  if (!AMBIENT.on) return;
+  AMBIENT.on = false;
+
+  clearInterval(AMBIENT.clockTimer);
+  clearInterval(AMBIENT.dataTimer);
+  clearTimeout(AMBIENT.cursorTimer);
+  clearTimeout(AMBIENT.enterTimer);
+  AMBIENT.clockTimer = AMBIENT.dataTimer = null;
+
+  document.removeEventListener('keydown', ambOnKey, true);
+  document.removeEventListener('mousemove', ambWake);
+  document.removeEventListener('visibilitychange', ambOnVisibility);
+  window.removeEventListener('resize', ambRender);
+
+  for (const ev of ['mousemove', 'mousedown', 'wheel', 'keydown']) {
+    document.removeEventListener(ev, ambAutoExit, { capture: true });
+  }
+  AMBIENT.auto = false;
+
+  ambReleaseWakeLock();
+  if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+
+  AMBIENT.root?.classList.remove('show', 'amb-in', 'amb-hidecursor', 'amb-awake');
+  document.body.classList.remove('amb-on');
+  ambIdleReset();
+}
+
+/* ------------------------------------------------------- ひとりでに入る
+   スマートディスプレイの本体は「置きっぱなしにしていると景色になる」ことなので、
+   手で押す以外の入り方を用意する。ただし自分から入ったときは、
+   何か触られたらすぐ引っ込む ── 押して入ったときと違って、
+   ユーザーはそれを頼んでいないため。 */
+
+const AMB_IDLE = { timer: null };
+
+function ambIdleMinutes() {
+  const v = parseInt(ambPrefs().ambientIdleStart ?? '0', 10);
+  return isNaN(v) || v < 0 ? 0 : v;
+}
+
+function ambIdleOK() {
+  const a = document.activeElement;
+  if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.isContentEditable)) return false;
+  if (document.querySelector('.overlay-modal.show')) return false;
+  if (document.body.classList.contains('zen-active')) return false;
+  return true;
+}
+
+function ambIdleReset() {
+  clearTimeout(AMB_IDLE.timer);
+  const m = ambIdleMinutes();
+  if (!m || AMBIENT.on || document.hidden) return;
+  AMB_IDLE.timer = setTimeout(() => {
+    if (AMBIENT.on || document.hidden || !ambIdleOK()) return;
+    AMBIENT.auto = true;
+    ambEnter();
+  }, m * 60000);
+}
+
+/* 自分から入ったときだけ、触られたら戻る */
+function ambAutoExit(e) {
+  if (!AMBIENT.on || !AMBIENT.auto) return;
+  if (e.type === 'mousemove' && Math.abs(e.movementX || 0) + Math.abs(e.movementY || 0) < 12)
+    return;
+  ambExit();
+}
+
+function ambToggle() {
+  AMBIENT.on ? ambExit() : ambEnter();
+}
+
+function setupAmbientMode() {
+  const btn = document.getElementById('ambient-btn');
+  if (btn) {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      ambToggle();
+    };
+  }
+
+  /* 言語やモジュールを変えると initNestHub がやり直しになる。
+     開いていないときは作り直して、新しい言語で組み直せるようにする */
+  if (!AMBIENT.on && AMBIENT.root) {
+    AMBIENT.root.remove();
+    AMBIENT.root = null;
+  }
+
+  if (AMBIENT.wired) return;
+  AMBIENT.wired = true;
+
+  /* どのタブからでも呼べるショートカット（Alt+Shift+H）から届く */
+  try {
+    chrome.runtime.onMessage.addListener((msg) => {
+      if (msg && msg.action === 'toggleHorizon') {
+        AMBIENT.auto = false;
+        ambToggle();
+      }
+    });
+    chrome.storage?.local?.get(['horizonOnOpen'], (r) => {
+      const t0 = r && r.horizonOnOpen;
+      if (!t0 || Date.now() - t0 > 8000) return;
+      chrome.storage.local.remove('horizonOnOpen');
+      AMBIENT.auto = false;
+      ambEnter();
+    });
+  } catch (e) {
+    /* 拡張の外で読み込まれたとき */
+  }
+
+  /* 時計そのものを入口にする。ドックにボタンを増やさずに済み、
+     しかも「この時計が画面いっぱいになる」という動きが名前どおりになる。 */
+  const cc = document.querySelector('.clock-container');
+  if (cc) {
+    cc.classList.add('hz-launch');
+    cc.setAttribute('role', 'button');
+    cc.setAttribute('tabindex', '0');
+    cc.setAttribute('title', t('ambient_mode_tooltip'));
+    cc.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (AMBIENT.on) return;
+      AMBIENT.auto = false;
+      ambEnter();
+    });
+    cc.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      AMBIENT.auto = false;
+      ambEnter();
+    });
+  }
+
+  let idleTick = 0;
+  const poke = () => {
+    const now = Date.now();
+    if (now - idleTick < 500) return; /* mousemove は数えきれないほど飛ぶ */
+    idleTick = now;
+    if (!AMBIENT.on) ambIdleReset();
+  };
+  for (const ev of ['mousemove', 'mousedown', 'keydown', 'wheel', 'touchstart']) {
+    document.addEventListener(ev, poke, { passive: true });
+  }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) clearTimeout(AMB_IDLE.timer);
+    else if (!AMBIENT.on) ambIdleReset();
+  });
+  ambIdleReset();
+
+  document.addEventListener('fullscreenchange', () => {
+    /* ユーザーが F11 などで全画面を抜けたときは、こちらも畳む */
+    if (AMBIENT.on && !document.fullscreenElement) {
+      const prefs = ambPrefs();
+      if (prefs.ambientFullscreen !== false) ambExit();
+    }
+  });
+}
+
 function setupMemo() {
   const input = document.getElementById('memo-input');
   input.addEventListener('input', () => {
@@ -2599,13 +4356,10 @@ function startClock() {
     let dateStr = `${mStr} ${now.getDate()} (${dStr})`;
 
     if (lang === 'ja') {
-
       dateStr = `${mStr}${now.getDate()}日 (${dStr})`;
     } else if (lang === 'ko') {
-
       dateStr = `${mStr} ${now.getDate()}일 (${dStr})`;
     } else if (lang === 'zh') {
-
       dateStr = `${mStr}${now.getDate()}日 (${dStr})`;
     }
 
@@ -2618,7 +4372,6 @@ function startClock() {
   update();
 }
 function fetchNews() {
-
   const lists = document.querySelectorAll('.news-list-area');
 
   if (lists.length === 0) return;
@@ -2634,7 +4387,6 @@ function fetchNews() {
   }
 
   chrome.runtime.sendMessage({ action: 'fetchNews', url: targetUrl }, (res) => {
-
     const currentLists = document.querySelectorAll('.news-list-area');
     if (currentLists.length === 0) return;
 
@@ -2679,7 +4431,6 @@ function fetchNews() {
         list.appendChild(fragment.cloneNode(true));
       });
     } catch (e) {
-
       currentLists.forEach((list) => {
         list.innerHTML = `<div style="padding:10px; opacity:0.7; text-align:center;">${t('news_rss_error')}</div>`;
       });
@@ -2811,7 +4562,7 @@ function initTiltEffect() {
   const cards = document.querySelectorAll('.tilt-card');
   const prefs = JSON.parse(localStorage.getItem('immersion_prefs')) || defaultSettings;
 
-  if (prefs.themeMode === 'lite' || prefs.cardTilt === false) {
+  if (prefs.themeMode === 'lite' || prefs.cardTilt !== true) {
     cards.forEach((c) => {
       c.onmousemove = null;
       c.onmouseleave = null;
@@ -2930,13 +4681,11 @@ function startMediaSync() {
       if (!bgOriginal || !bgBlurred) return;
 
       if (typeof dataUrlOrObj === 'object' && dataUrlOrObj.original) {
-
         bgOriginal.style.backgroundImage = `url('${dataUrlOrObj.original}')`;
         bgBlurred.style.backgroundImage = `url('${dataUrlOrObj.blurred}')`;
         bgOriginal.classList.remove('dynamic-blur');
         bgBlurred.style.display = 'block';
       } else {
-
         bgOriginal.style.backgroundImage = `url('${dataUrlOrObj}')`;
         bgOriginal.classList.add('dynamic-blur');
         bgBlurred.style.display = 'none';
@@ -3015,6 +4764,14 @@ function startMediaSync() {
             container?.classList.remove('music-idle');
             container?.classList.add('music-active');
             const d = res.data;
+            container?.classList.toggle('music-playing', !!d.isPlaying);
+            /* 再生位置は3秒ごとにしか来ない。読んだ時刻も一緒に控えておいて、
+               表示側でその後の経過を足せるようにする */
+            if (container) {
+              container.dataset.pos = d.duration > 0 ? String(d.position) : '';
+              container.dataset.dur = d.duration > 0 ? String(d.duration) : '';
+              container.dataset.at = String(Date.now());
+            }
 
             const titleEl = document.getElementById('track-title');
             if (titleEl) {
@@ -3111,7 +4868,6 @@ function startMediaSync() {
                   v.style.opacity = '1';
                   v.play();
                 } else {
-
                   getImageFromDB().then((dbData) => {
                     if (dbData) {
                       if (typeof dbData === 'object' && dbData.original) {
@@ -3161,7 +4917,6 @@ function startMediaSync() {
               }
             }
           } else {
-
             container?.classList.remove('music-active');
             container?.classList.add('music-idle');
             const sourceEl = document.getElementById('music-source-indicator');
@@ -3222,14 +4977,12 @@ function startMediaSync() {
               const v = document.getElementById('bg-video');
 
               if (v && v.getAttribute('src')) {
-
                 document.body.classList.add('has-video');
                 v.style.opacity = '1';
                 v.play();
                 bgOriginal.style.backgroundImage = '';
                 if (bgBlurred) bgBlurred.style.backgroundImage = '';
               } else {
-
                 getImageFromDB().then((dbData) => {
                   if (dbData) {
                     if (typeof dbData === 'object' && dbData.original) {
@@ -3301,7 +5054,6 @@ function startMediaSync() {
           console.log(`Switched to ${res.deviceName}`);
         } else {
           if (res && res.error === 'no_device_found') {
-
           } else if (res && res.error === 'not_logged_in') {
             alert('Spotifyにログインしていません。設定画面から連携してください。');
           }
@@ -3373,7 +5125,6 @@ function saveCalendarUrls(urls) {
 }
 
 document.addEventListener('click', (e) => {
-
   if (e.target && e.target.closest('#add-calendar-btn')) {
     const prefs = JSON.parse(localStorage.getItem('immersion_prefs')) || defaultSettings;
     const urls = prefs.calendarUrls || [];
@@ -3457,7 +5208,6 @@ function syncGoogleCalendar() {
             }
           }
         } else if (inEvent) {
-
           const colonIndex = line.indexOf(':');
           if (colonIndex === -1) return;
 
@@ -3468,26 +5218,22 @@ function syncGoogleCalendar() {
           const key = keyParams[0];
 
           if (key === 'SUMMARY') {
-
             currentSummary = value
               .replace(/\\,/g, ',')
               .replace(/\\;/g, ';')
               .replace(/\\n/g, ' ')
               .replace(/\\N/g, ' ');
           } else if (key === 'DTSTART') {
-
             const cleanVal = value.replace('Z', '').replace('T', '');
             const isZ = value.endsWith('Z');
 
             if (cleanVal.length === 8) {
-
               const y = parseInt(cleanVal.substring(0, 4));
               const m = parseInt(cleanVal.substring(4, 6)) - 1;
               const d = parseInt(cleanVal.substring(6, 8));
 
               currentDate = `${y}_${m}_${d}`;
             } else if (cleanVal.length >= 12) {
-
               const y = parseInt(cleanVal.substring(0, 4));
               const m = parseInt(cleanVal.substring(4, 6)) - 1;
               const d = parseInt(cleanVal.substring(6, 8));
@@ -3497,10 +5243,8 @@ function syncGoogleCalendar() {
 
               let dateObj;
               if (isZ) {
-
                 dateObj = new Date(Date.UTC(y, m, d, h, min, s));
               } else {
-
                 dateObj = new Date(y, m, d, h, min, s);
               }
 
@@ -3513,7 +5257,6 @@ function syncGoogleCalendar() {
           }
         }
       });
-
     });
 
     googleEventsCache = mergedEvents;
@@ -3586,7 +5329,6 @@ function renderCalendarSystem() {
       };
       document.getElementById('cal-title').onclick = openMonthView;
     } else {
-
       const titleEl = document.getElementById('cal-title');
       titleEl.innerText = myStr;
 
@@ -3639,7 +5381,6 @@ function renderCalendarSystem() {
     const googleVal = googleEventsCache[`${year}_${month}_${d}`];
 
     if (localVal || googleVal) {
-
       const checkDate = new Date(year, month, d);
       if (checkDate < todayDate) {
         continue;
@@ -3685,7 +5426,6 @@ function renderCalendarSystem() {
   }
 
   if (!hasEvent) {
-
     eventList.innerHTML = `<div style="opacity:0.5; font-size:0.8rem; text-align:center; padding:10px;">${t('no_events')}</div>`;
   }
 }
@@ -3713,7 +5453,6 @@ function openEventModal(year, month, day, localVal, googleVal) {
   let hasExisting = false;
 
   if (googleVal) {
-
     const events = googleVal.split(' / ');
     events.forEach((evt) => {
       const row = document.createElement('div');
@@ -3725,7 +5464,6 @@ function openEventModal(year, month, day, localVal, googleVal) {
 
     input.value = '';
   } else if (localVal) {
-
     input.value = localVal;
   } else {
     input.value = '';
@@ -3751,7 +5489,6 @@ function openEventModal(year, month, day, localVal, googleVal) {
   googleBtn.title = 'Googleカレンダーに追加';
   googleBtn.style.flex = '1';
   googleBtn.onclick = () => {
-
     const text = input.value || 'New Event';
     const pad = (n) => String(n).padStart(2, '0');
     const sDate = `${year}${pad(month + 1)}${pad(day)}`;
@@ -3914,9 +5651,7 @@ function setupAppLauncher() {
       a.addEventListener('dragenter', handleDragEnter);
       a.addEventListener('dragleave', handleDragLeave);
 
-      a.addEventListener('click', (e) => {
-
-      });
+      a.addEventListener('click', (e) => {});
 
       menu.appendChild(a);
     });
@@ -3949,7 +5684,6 @@ function setupAppLauncher() {
     if (e.stopPropagation) e.stopPropagation();
 
     if (dragSrcEl !== this) {
-
       const apps = getAppItems();
       const srcIdx = parseInt(dragSrcEl.dataset.index);
       const targetIdx = parseInt(this.dataset.index);
@@ -3987,20 +5721,57 @@ function setupAppLauncher() {
   });
 }
 
+function getModuleOptionsHTML() {
+  return `
+                  <option value="weather">${t('mod_weather')}</option>
+                  <option value="news">${t('mod_news')}</option>
+                  <option value="countdown">${t('mod_countdown')}</option>
+                  <option value="todo">${t('mod_todo')}</option>
+                  <option value="calc">${t('mod_calc')}</option>
+                  <option value="timer">${t('mod_timer')}</option>
+                  <option value="japanese">${t('mod_japanese')}</option>
+                  <option value="english">${t('mod_english')}</option>
+                  <option value="earthquake">${t('mod_earthquake')}</option>
+                  <option value="year_progress">${t('mod_year_progress')}</option>
+                  <option value="none">${t('mod_none')}</option>`;
+}
+
+function applyThemeClass(themeMode) {
+  document.body.classList.remove(
+    'yarn-mode',
+    'lite-mode',
+    'terminal-mode',
+    'retro-mode',
+    'mono-mode',
+    'liquidglass-mode',
+    'lg-aligned',
+  );
+
+  if (themeMode === 'yarn') {
+    document.body.classList.add('yarn-mode');
+  } else if (themeMode === 'lite') {
+    document.body.classList.add('lite-mode');
+  } else if (themeMode === 'terminal') {
+    document.body.classList.add('terminal-mode');
+  } else if (themeMode === 'retro') {
+    document.body.classList.add('retro-mode');
+  } else if (themeMode === 'mono') {
+    document.body.classList.add('mono-mode');
+  } else if (themeMode === 'liquidglass') {
+    document.body.classList.add('liquidglass-mode');
+    setupLiquidGlass();
+  }
+}
+
 function adjustLayoutScale() {
-  const customZoom = localStorage.getItem('immersion_custom_zoom');
-  if (customZoom) {
-    document.body.style.zoom = customZoom;
-  } else {
-    document.body.style.zoom = '';
+  document.body.style.zoom = '';
+  if (localStorage.getItem('immersion_custom_zoom')) {
+    localStorage.removeItem('immersion_custom_zoom');
   }
 }
 
 function showSetupWizard() {
   if (localStorage.getItem('immersion_setup_done')) return;
-
-  const savedZoom = localStorage.getItem('immersion_custom_zoom');
-  const currentZoom = savedZoom ? parseFloat(savedZoom) : 1.0;
 
   const root = document.createElement('div');
   root.id = 'setup-wizard-overlay';
@@ -4009,6 +5780,28 @@ function showSetupWizard() {
   const currentLang = prefs.language || 'auto';
   const langLabelMap = { auto: 'Auto', ja: '日本語', en: 'English', ko: '한국어', zh_cn: '中文' };
   const currentLangLabel = langLabelMap[currentLang] || 'Language';
+
+  const currentTheme = prefs.themeMode || 'glass';
+  const wizThemes = [
+    ['glass', '#7c8aa0', 'theme_glass'],
+    ['liquidglass', '#9db4d6', 'theme_liquidglass'],
+    ['yarn', '#e6d3bd', 'theme_yarn'],
+    ['terminal', '#0e2a16', 'theme_terminal'],
+    ['retro', '#e7e3d8', 'theme_retro'],
+    ['lite', '#3a3a40', 'theme_lite'],
+    ['mono', '#d9d9d9', 'theme_mono'],
+  ];
+  const shortLabel = (s) => s.replace(/[（(].*$/, '').trim();
+  const themeCardsHTML = wizThemes
+    .map(
+      ([v, c, key]) =>
+        `<button type="button" class="wiz-theme-card${v === currentTheme ? ' selected' : ''}" data-theme="${v}">
+           <span class="wiz-theme-swatch" style="background:${c};"></span>
+           <span class="wiz-theme-name">${shortLabel(t(key))}</span>
+         </button>`,
+    )
+    .join('');
+  const moduleOptionsHTML = getModuleOptionsHTML();
 
   root.innerHTML = `
     <div class="setup-card" style="position:relative;">
@@ -4033,51 +5826,118 @@ function showSetupWizard() {
       <div class="setup-title">${t('wizard_title')}</div>
       <div class="setup-desc">${t('wizard_desc')}</div>
 
-      <div class="setup-group">
-        <label class="setup-label">${t('wizard_name_label')}</label>
-        <input type="text" id="wiz-name" class="st-input" value="${prefs.userName || ''}" placeholder="${t('wizard_name_placeholder')}">
+      <div class="wiz-progress">
+        <span class="wiz-dot active" data-dot="1"></span>
+        <span class="wiz-dot" data-dot="2"></span>
+        <span class="wiz-dot" data-dot="3"></span>
       </div>
 
-      <div class="setup-group">
-        <label class="setup-label">${t('wizard_zoom_label')}</label>
-        <input type="range" id="wiz-zoom" class="st-range" min="0.25" max="3.0" step="0.05" value="${currentZoom}" style="width:100%">
-        <div style="font-size:0.7rem; opacity:0.6; margin-top:5px; text-align:center; color:rgba(255,255,255,0.5);">
-          ${t('wizard_zoom_hint')}
+      <div class="wiz-steps">
+        <div class="wiz-step" data-step="1">
+          <div class="wiz-step-title">${t('wizard_step_name')}</div>
+          <div class="setup-group">
+            <label class="setup-label">${t('wizard_name_label')}</label>
+            <input type="text" id="wiz-name" class="st-input" value="${prefs.userName || ''}" placeholder="${t('wizard_name_placeholder')}">
+          </div>
+        </div>
+
+        <div class="wiz-step" data-step="2" style="display:none;">
+          <div class="wiz-step-title">${t('wizard_step_theme')}</div>
+          <div class="setup-group">
+            <label class="setup-label">${t('wizard_theme_label')}</label>
+            <div class="wiz-theme-grid" id="wiz-theme-grid">${themeCardsHTML}</div>
+            <input type="hidden" id="wiz-theme" value="${currentTheme}">
+          </div>
+          <div class="setup-group" style="margin-bottom:0;">
+            <label class="setup-label">${t('wizard_color_label')}</label>
+            <input type="color" id="wiz-color" class="st-color" value="${prefs.accent}" style="width:100%; height:54px; cursor:pointer;">
+          </div>
+        </div>
+
+        <div class="wiz-step" data-step="3" style="display:none;">
+          <div class="wiz-step-title">${t('wizard_step_cards')}</div>
+          <div class="wiz-desc">${t('module_slot_desc')}</div>
+          <div class="setup-group" style="margin-bottom:14px;">
+            <label class="setup-label">${t('module_slot_1')}</label>
+            <select id="wiz-mod-1" class="st-input" style="width:100%;">${moduleOptionsHTML}</select>
+          </div>
+          <div class="setup-group" style="margin-bottom:14px;">
+            <label class="setup-label">${t('module_slot_2')}</label>
+            <select id="wiz-mod-2" class="st-input" style="width:100%;">${moduleOptionsHTML}</select>
+          </div>
+          <div class="setup-group" style="margin-bottom:0;">
+            <label class="setup-label">${t('module_slot_3')}</label>
+            <select id="wiz-mod-3" class="st-input" style="width:100%;">${moduleOptionsHTML}</select>
+          </div>
         </div>
       </div>
 
-      <div class="setup-group">
-        <label class="setup-label">${t('wizard_color_label')}</label>
-        <input type="color" id="wiz-color" class="st-color" value="${prefs.accent}" style="width:100%; height:54px; cursor:pointer;">
+      <div class="wiz-nav">
+        <button id="wiz-back" class="setup-btn wiz-btn-secondary" style="display:none;">${t('wizard_back_btn')}</button>
+        <button id="wiz-next" class="setup-btn">${t('wizard_next_btn')}</button>
+        <button id="wiz-finish" class="setup-btn" style="display:none;">${t('wizard_finish_btn')}</button>
       </div>
-
-      <button id="wiz-finish" class="setup-btn">${t('wizard_finish_btn')}</button>
     </div>
   `;
 
   document.body.appendChild(root);
 
   const nameInput = document.getElementById('wiz-name');
-  const zoomInput = document.getElementById('wiz-zoom');
   const colorInput = document.getElementById('wiz-color');
+  const themeSelect = document.getElementById('wiz-theme');
   const finishBtn = document.getElementById('wiz-finish');
+  const nextBtn = document.getElementById('wiz-next');
+  const backBtn = document.getElementById('wiz-back');
   const langSelect = document.getElementById('wiz-lang');
 
-  if (zoomInput) {
-    zoomInput.addEventListener('input', (e) => {
-      document.body.style.zoom = e.target.value;
-      localStorage.setItem('immersion_custom_zoom', e.target.value);
-    });
+  if (themeSelect) themeSelect.value = prefs.themeMode || 'glass';
 
-    const togglePreview = (active) => {
-      if (active) root.classList.add('preview-mode');
-      else root.classList.remove('preview-mode');
+  const modSelects = [
+    document.getElementById('wiz-mod-1'),
+    document.getElementById('wiz-mod-2'),
+    document.getElementById('wiz-mod-3'),
+  ];
+  modSelects[0].value = prefs.module1 || 'weather';
+  modSelects[1].value = prefs.module2 || 'news';
+  modSelects[2].value = prefs.module3 || 'countdown';
+
+  root.querySelectorAll('.wiz-theme-card').forEach((cardBtn) => {
+    cardBtn.onclick = () => {
+      const value = cardBtn.dataset.theme;
+      themeSelect.value = value;
+      root
+        .querySelectorAll('.wiz-theme-card')
+        .forEach((c) => c.classList.toggle('selected', c === cardBtn));
+      try {
+        applyThemeClass(value);
+      } catch (err) {
+        console.error('theme preview failed', err);
+      }
     };
-    zoomInput.addEventListener('mousedown', () => togglePreview(true));
-    zoomInput.addEventListener('touchstart', () => togglePreview(true));
-    zoomInput.addEventListener('mouseup', () => togglePreview(false));
-    zoomInput.addEventListener('touchend', () => togglePreview(false));
-  }
+  });
+
+  const TOTAL_STEPS = 3;
+  let currentStep = 1;
+
+  const showStep = (step) => {
+    currentStep = step;
+    root.querySelectorAll('.wiz-step').forEach((el) => {
+      el.style.display = Number(el.dataset.step) === step ? 'block' : 'none';
+    });
+    root.querySelectorAll('.wiz-dot').forEach((el) => {
+      el.classList.toggle('active', Number(el.dataset.dot) <= step);
+    });
+    backBtn.style.display = step > 1 ? 'block' : 'none';
+    nextBtn.style.display = step < TOTAL_STEPS ? 'block' : 'none';
+    finishBtn.style.display = step === TOTAL_STEPS ? 'block' : 'none';
+  };
+
+  nextBtn.onclick = () => {
+    if (currentStep < TOTAL_STEPS) showStep(currentStep + 1);
+  };
+  backBtn.onclick = () => {
+    if (currentStep > 1) showStep(currentStep - 1);
+  };
 
   colorInput.addEventListener('input', (e) => {
     document.documentElement.style.setProperty('--accent', e.target.value);
@@ -4090,20 +5950,38 @@ function showSetupWizard() {
     location.reload();
   };
 
-  finishBtn.onclick = () => {
+  finishBtn.onclick = async () => {
+    const modules = [modSelects[0].value, modSelects[1].value, modSelects[2].value];
+
+    // ニュースを選んだ場合のみ、その場（ユーザー操作中）に取得元の権限を要求する。
+    // manifest に固定の権限を足すと配信時に既存ユーザーの拡張が停止されるため、任意権限で対応。
+    if (modules.includes('news')) {
+      try {
+        await new Promise((resolve) => {
+          chrome.permissions.request(
+            { origins: ['https://news.yahoo.co.jp/*'] },
+            () => resolve(),
+          );
+        });
+      } catch (e) {
+        console.error('news permission request failed', e);
+      }
+    }
+
     const newPrefs = JSON.parse(localStorage.getItem('immersion_prefs')) || defaultSettings;
     newPrefs.userName = nameInput.value || 'User';
     newPrefs.accent = colorInput.value;
     newPrefs.language = langSelect.value;
+    if (themeSelect) newPrefs.themeMode = themeSelect.value;
+    newPrefs.module1 = modules[0];
+    newPrefs.module2 = modules[1];
+    newPrefs.module3 = modules[2];
 
     localStorage.setItem('immersion_prefs', JSON.stringify(newPrefs));
     localStorage.setItem('immersion_setup_done', 'true');
 
     root.style.opacity = '0';
-    setTimeout(() => root.remove(), 500);
-
-    applyPreferences();
-    updateQuote();
+    setTimeout(() => location.reload(), 350);
   };
 }
 
@@ -4113,7 +5991,6 @@ function setupCurrency() {
 
   const update = async () => {
     try {
-
       const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
       const data = await res.json();
 
@@ -4152,7 +6029,6 @@ function setupEarthquake() {
 
   const update = async () => {
     try {
-
       const res = await fetch('https://api.p2pquake.net/v2/history?codes=551&limit=1');
       const data = await res.json();
 
@@ -4490,7 +6366,6 @@ async function requestRssPermission(url) {
   if (!url) return true;
 
   try {
-
     const urlObj = new URL(url);
     const origin = `${urlObj.protocol}//${urlObj.hostname}/*`;
 
@@ -4500,7 +6375,6 @@ async function requestRssPermission(url) {
           origins: [origin],
         },
         (result) => {
-
           resolve(result);
         },
       );
@@ -4538,7 +6412,6 @@ function openDB() {
 
 async function createBlurredImage(file) {
   return new Promise((resolve) => {
-
     if (file.type.startsWith('video/')) {
       resolve(null);
       return;
@@ -4610,10 +6483,8 @@ async function getImageFromDB(key = 'custom_bg') {
     request.onsuccess = () => {
       if (request.result) {
         if (request.result instanceof File || request.result instanceof Blob) {
-
           resolve(URL.createObjectURL(request.result));
         } else if (request.result.original) {
-
           resolve({
             original: URL.createObjectURL(request.result.original),
             blurred: request.result.blurred,
@@ -4661,7 +6532,6 @@ function setupVideoIdleHandler() {
 
     if (v && v.paused && document.body.classList.contains('has-video')) {
       v.play().catch(() => {});
-
     }
   };
 
@@ -4676,7 +6546,6 @@ function setupVideoIdleHandler() {
 
       if (v && !v.paused && document.body.classList.contains('has-video')) {
         v.pause();
-
       }
     }
   }, 1000);
@@ -4739,6 +6608,19 @@ function setupBackupSystem() {
     reader.readAsText(file);
     fileInput.value = '';
   };
+
+  const resetBtn = document.getElementById('btn-reset-all');
+  if (resetBtn) {
+    resetBtn.onclick = () => {
+      if (!confirm(t('reset_confirm'))) return;
+      // 設定のみリセットし初期セットアップを再表示する。
+      // ショートカット・プロフィール・壁紙・メモなどのユーザーデータは残す。
+      localStorage.removeItem('immersion_prefs');
+      localStorage.removeItem('immersion_setup_done');
+      localStorage.removeItem('immersion_custom_zoom');
+      location.reload();
+    };
+  }
 }
 
 function setupProfileSystem() {
@@ -4912,7 +6794,6 @@ function setupGoogleLens() {
 }
 
 function setupIOSFocusSwitcher() {
-
   const prefs = JSON.parse(localStorage.getItem('immersion_prefs')) || defaultSettings;
 
   const oldBtn = document.getElementById('ios-focus-btn');
@@ -4976,7 +6857,6 @@ function setupIOSFocusSwitcher() {
     const profiles = JSON.parse(localStorage.getItem('immersion_saved_profiles')) || [];
 
     if (profiles.length === 0) {
-
       menu.innerHTML += `<div class="no-profile-msg" style="padding:20px; text-align:center; opacity:0.6;">No profiles saved.<br>Create one in settings.</div>`;
       return;
     }
@@ -5025,7 +6905,6 @@ function setupIOSFocusSwitcher() {
         item.style.opacity = '0.7';
 
         try {
-
           if (p.prefs) localStorage.setItem('immersion_prefs', JSON.stringify(p.prefs));
           if (p.dock) localStorage.setItem('immersion_dock_items', JSON.stringify(p.dock));
           if (p.apps) localStorage.setItem('immersion_app_order', JSON.stringify(p.apps));
@@ -5092,7 +6971,6 @@ function setupEnglishWidget() {
 
       while (!found && retryCount < 5) {
         try {
-
           const rRes = await fetch('https://random-word-api.herokuapp.com/word?number=1');
           const rData = await rRes.json();
           const targetWord = rData[0];
@@ -5241,7 +7119,6 @@ function setupJapaneseWidget() {
   ];
 
   const updateWord = () => {
-
     const item = wordList[Math.floor(Math.random() * wordList.length)];
 
     ui.word.style.opacity = 0;
@@ -5351,7 +7228,6 @@ function setupParticleVoid() {
     }
 
     update() {
-
       this.vx += gravityX;
       this.vy += gravityY;
 

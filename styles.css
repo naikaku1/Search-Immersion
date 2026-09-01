@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;800&family=Noto+Sans+JP:wght@300;500;700&family=Shippori+Mincho:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Antonio:wght@400;700&family=Bebas+Neue&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Audiowide&family=Exo+2:wght@300;600;800&family=Saira:wght@300;500;700&family=Righteous&family=Monoton&family=Russo+One&family=Bungee&family=Fredoka+One&family=Ubuntu:wght@300;500;700&family=Chakra+Petch:wght@400;600;700&family=Teko:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;800&family=Noto+Sans+JP:wght@100..900&family=Shippori+Mincho:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Antonio:wght@400;700&family=Bebas+Neue&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Audiowide&family=Exo+2:wght@300;600;800&family=Saira:wght@300;500;700&family=Righteous&family=Monoton&family=Russo+One&family=Bungee&family=Fredoka+One&family=Ubuntu:wght@300;500;700&family=Chakra+Petch:wght@400;600;700&family=Teko:wght@400;600;700&display=swap');
 
 :root {
   --accent: #50e3c2;
@@ -17,7 +17,7 @@
 }
 
 body.immersion-mode
-  > *:not(#immersion-root):not(#immersion-update-banner):not(#setup-wizard-overlay) {
+  > *:not(#immersion-root):not(#immersion-update-banner):not(#setup-wizard-overlay):not(#amb-root) {
   display: none !important;
   opacity: 0 !important;
   pointer-events: none !important;
@@ -445,6 +445,22 @@ body:not(.glass-opacity-zero) .glass-card {
   font-family: 'JetBrains Mono', monospace;
   font-size: 1.1rem;
   color: var(--text-secondary);
+}
+
+/* 時計を押すと Horizon に入る。装飾は足さず、押せることだけ伝える */
+.clock-container.hz-launch {
+  cursor: pointer;
+  transition: opacity 0.25s ease;
+}
+
+.clock-container.hz-launch:hover {
+  opacity: 0.82;
+}
+
+.clock-container.hz-launch:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 10px;
+  border-radius: 12px;
 }
 
 .clock-container {
@@ -920,7 +936,6 @@ body:not(.glass-opacity-zero) .glass-card {
   overflow: hidden;
 
   min-height: 0;
-
 }
 
 .cal-grid {
@@ -984,7 +999,6 @@ body:not(.glass-opacity-zero) .glass-card {
   flex-direction: column;
   gap: 8px;
   min-height: 0;
-
 }
 
 .event-row {
@@ -1055,7 +1069,8 @@ body:not(.glass-opacity-zero) .glass-card {
   -webkit-backdrop-filter: blur(40px);
   color: #fff;
   animation: modalPop 0.3s cubic-bezier(0.19, 1, 0.22, 1);
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Yu Gothic UI', 'Noto Sans JP', sans-serif;
 }
 
 @keyframes modalPop {
@@ -1153,6 +1168,54 @@ body:not(.glass-opacity-zero) .glass-card {
   margin-top: 10px;
 }
 
+/* 各設定の1行説明・タブの見出し下の補足文。
+   色は指定せず opacity で周囲の文字色を継承するため、どのテーマ(明/暗)でも読める。 */
+.st-section-sub {
+  font-size: 0.82rem;
+  opacity: 0.55;
+  line-height: 1.5;
+  margin: 2px 0 20px;
+}
+
+.st-desc {
+  font-size: 0.75rem;
+  opacity: 0.6;
+  line-height: 1.5;
+  margin-top: 6px;
+}
+
+.st-advanced {
+  margin-top: 20px;
+  border-top: 1px solid rgba(128, 128, 128, 0.25);
+  padding-top: 6px;
+}
+
+.st-advanced > summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  opacity: 0.75;
+  padding: 8px 4px;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+.st-advanced > summary::-webkit-details-marker {
+  display: none;
+}
+
+.st-advanced > summary::before {
+  content: '▸';
+  font-size: 0.8rem;
+  transition: transform 0.2s;
+}
+
+.st-advanced[open] > summary::before {
+  transform: rotate(90deg);
+}
+
 .st-row {
   display: flex;
   justify-content: space-between;
@@ -1192,6 +1255,36 @@ body:not(.glass-opacity-zero) .glass-card {
 .st-input:focus {
   border-color: var(--accent);
   background: rgba(0, 0, 0, 0.5);
+}
+
+/* アイコン編集用の大きめテキストエリア（SVGも編集しやすいように） */
+textarea.icon-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 64px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.icon-fetch-btn {
+  margin-top: 6px;
+  width: 100%;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.sub-favicon-btn {
+  color: var(--accent);
+}
+.sub-favicon-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .st-range {
@@ -1510,7 +1603,6 @@ body:not(.glass-opacity-zero) .glass-card {
   width: 400px;
   background: rgba(30, 30, 35, 0.8);
   flex: none !important;
-
 }
 
 .modal-actions {
@@ -1700,7 +1792,6 @@ body:not(.glass-opacity-zero) .glass-card {
     transform 0.2s,
     background 0.2s;
   user-select: none;
-
 }
 
 .app-item:hover {
@@ -1784,16 +1875,16 @@ body:not(.glass-opacity-zero) .glass-card {
   width: 100%;
   height: 100%;
 
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.3);
 
-  backdrop-filter: blur(40px) saturate(110%);
-  -webkit-backdrop-filter: blur(40px) saturate(110%);
+  backdrop-filter: blur(16px) saturate(110%);
+  -webkit-backdrop-filter: blur(16px) saturate(110%);
   z-index: 2147483647;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  opacity: 0;
+  opacity: 1;
   animation: uiFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1811,24 +1902,26 @@ body:not(.glass-opacity-zero) .glass-card {
 }
 
 .setup-card {
-  width: 480px;
+  width: 460px;
 
-  background: rgba(40, 40, 45, 0.5);
+  background: rgba(26, 27, 32, 0.94);
+  backdrop-filter: blur(30px) saturate(120%);
+  -webkit-backdrop-filter: blur(30px) saturate(120%);
 
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-top: 1px solid rgba(255, 255, 255, 0.25);
 
-  border-radius: 40px;
+  border-radius: 32px;
 
-  padding: 60px 50px;
+  padding: 44px 42px;
   text-align: center;
 
   box-shadow:
     0 40px 100px -20px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 
-  opacity: 0;
-  transform: scale(0.95) translateY(10px);
+  opacity: 1;
+  transform: none;
   animation: modalPopApple 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
 
   display: flex;
@@ -1864,12 +1957,14 @@ body:not(.glass-opacity-zero) .glass-card {
 }
 
 .setup-desc {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.65);
-  margin-bottom: 40px;
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 24px;
   line-height: 1.6;
   font-weight: 400;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', 'Yu Gothic UI',
+    'Noto Sans JP', sans-serif;
 }
 
 .setup-group {
@@ -1954,9 +2049,186 @@ body:not(.glass-opacity-zero) .glass-card {
   transform: scale(0.98);
 }
 
+.wiz-progress {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin: 4px 0 26px;
+}
+
+.wiz-dot {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.18);
+  transition: background 0.3s ease;
+}
+
+.wiz-dot.active {
+  background: #50e3c2;
+}
+
+.wiz-steps {
+  width: 100%;
+}
+
+.wiz-step-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 16px;
+  text-align: center;
+  opacity: 0.95;
+}
+
+.wiz-nav {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-top: 18px;
+  align-items: stretch;
+}
+
+.wiz-nav .setup-btn {
+  margin-top: 0;
+  width: auto;
+  flex: 1 1 0;
+  white-space: nowrap;
+}
+
+.wiz-btn-secondary {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  padding-left: 32px !important;
+  padding-right: 32px !important;
+}
+
+.wiz-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  filter: none !important;
+}
+
+.wiz-desc {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.5;
+  text-align: center;
+  margin: -6px 0 16px;
+}
+
+.wiz-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.wiz-theme-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 6px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.wiz-theme-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.wiz-theme-card.selected {
+  border-color: #50e3c2;
+  background: rgba(80, 227, 194, 0.12);
+}
+
+.wiz-theme-swatch {
+  width: 100%;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.wiz-theme-name {
+  font-size: 0.72rem;
+  line-height: 1.2;
+  text-align: center;
+  opacity: 0.9;
+}
+
+/* 明るいカードのテーマ（レトロ=白 / 毛糸=クリーム）ではウィザードの白文字が読めなくなるため、
+   文字と各コントロールを暗色に上書きして可読性を保つ。 */
+body.retro-mode .setup-card .setup-title,
+body.retro-mode .setup-card .setup-desc,
+body.retro-mode .setup-card .wiz-step-title,
+body.retro-mode .setup-card .wiz-desc,
+body.retro-mode .setup-card .setup-label,
+body.retro-mode .setup-card .wiz-theme-name,
+body.retro-mode .setup-card .wiz-theme-card {
+  color: var(--retro-text) !important;
+  -webkit-text-fill-color: var(--retro-text) !important;
+  background-image: none !important;
+}
+body.retro-mode .setup-card .wiz-theme-card {
+  background: #fff !important;
+  border-color: var(--retro-border) !important;
+}
+body.retro-mode .setup-card .wiz-theme-card.selected {
+  border-color: var(--retro-accent) !important;
+  background: #ffe9f0 !important;
+}
+body.retro-mode .setup-card .wiz-btn-secondary {
+  background: #fff !important;
+  color: var(--retro-text) !important;
+  border: 2px solid var(--retro-border) !important;
+}
+body.retro-mode .setup-card .wiz-dot {
+  background: rgba(0, 0, 0, 0.18) !important;
+}
+body.retro-mode .setup-card .wiz-dot.active {
+  background: var(--retro-border) !important;
+}
+
+body.yarn-mode .setup-card .setup-title,
+body.yarn-mode .setup-card .setup-desc,
+body.yarn-mode .setup-card .wiz-step-title,
+body.yarn-mode .setup-card .wiz-desc,
+body.yarn-mode .setup-card .setup-label,
+body.yarn-mode .setup-card .wiz-theme-name,
+body.yarn-mode .setup-card .wiz-theme-card {
+  color: var(--text-primary) !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  background-image: none !important;
+}
+body.yarn-mode .setup-card .wiz-theme-card {
+  background: rgba(255, 255, 255, 0.5) !important;
+  border-color: var(--glass-border) !important;
+}
+body.yarn-mode .setup-card .wiz-theme-card.selected {
+  border-color: #6b544b !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+}
+body.yarn-mode .setup-card .wiz-btn-secondary {
+  background: rgba(255, 255, 255, 0.6) !important;
+  color: var(--text-primary) !important;
+  border: 2px dashed var(--glass-border) !important;
+}
+body.yarn-mode .setup-card .wiz-dot {
+  background: rgba(107, 84, 75, 0.2) !important;
+}
+body.yarn-mode .setup-card .wiz-dot.active {
+  background: #6b544b !important;
+}
+
 .news-list-area,
 .event-list-area {
-
   overflow-y: auto !important;
   height: 100%;
 
@@ -2001,7 +2273,6 @@ body:not(.glass-opacity-zero) .glass-card {
 }
 
 .event-list-area {
-
   flex: 1 1 0px !important;
 
   display: block !important;
@@ -2051,7 +2322,6 @@ body:not(.glass-opacity-zero) .glass-card {
 .st-tab-btn.active svg {
   opacity: 1;
   fill: var(--accent);
-
 }
 
 .slider-wrapper {
@@ -2099,7 +2369,6 @@ body:not(.glass-opacity-zero) .glass-card {
   flex-shrink: 0 !important;
 
   margin-right: 15px;
-
 }
 
 .cal-setting-row {
@@ -2152,13 +2421,103 @@ body:not(.glass-opacity-zero) .glass-card {
 
   cursor: pointer !important;
   pointer-events: auto !important;
-
 }
 
 .event-list-area {
   position: relative !important;
   z-index: 100 !important;
   pointer-events: auto !important;
+}
+
+/* -------------------------------------------------------- トグルスイッチ
+   本体のスタイルが無く、既定テーマでは素の 13px チェックボックスが
+   出ていた（yarn / terminal だけが色を上書きしていた）。
+   ここで土台を作る。当たり判定は 44px 角を確保して、指でも押せる大きさに。 */
+.toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 30px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* input 自体を当たり判定にする。見た目より上下に広げて押しやすくする */
+.toggle-switch input[type='checkbox'] {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.toggle-switch .slider {
+  position: relative;
+  display: block;
+  width: 52px;
+  height: 30px;
+  border-radius: 999px;
+  background-color: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition:
+    background-color 0.22s ease,
+    border-color 0.22s ease;
+  pointer-events: none;
+}
+
+.toggle-switch .slider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  margin-top: -11px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: transform 0.22s cubic-bezier(0.3, 0.8, 0.3, 1);
+}
+
+.toggle-switch input:checked + .slider {
+  background-color: var(--accent);
+  border-color: transparent;
+}
+
+.toggle-switch input:checked + .slider::before {
+  transform: translateX(22px);
+}
+
+.toggle-switch input:focus-visible + .slider {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.toggle-switch input:disabled + .slider {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* 行のどこを押しても切り替わるようにはしていないので、
+   せめて行にカーソルを出して、押せる場所を示す */
+.st-row:has(.toggle-switch) {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle-switch .slider,
+  .toggle-switch .slider::before {
+    transition: none;
+  }
 }
 
 .dock-item,
@@ -2263,7 +2622,6 @@ body:not(.glass-opacity-zero) .glass-card {
   flex-direction: column;
   overflow: hidden;
   min-height: 0;
-
 }
 
 .calc-grid {
@@ -2341,7 +2699,6 @@ body:not(.glass-opacity-zero) .glass-card {
   scrollbar-width: none;
 
   -ms-overflow-style: none;
-
 }
 
 #todo-list::-webkit-scrollbar {
@@ -2351,7 +2708,6 @@ body:not(.glass-opacity-zero) .glass-card {
 #card-timer {
   justify-content: space-between;
   position: relative;
-
 }
 
 .timer-display-container {
@@ -2436,7 +2792,6 @@ body:not(.glass-opacity-zero) .glass-card {
 body.has-video #bg-layer {
   background-image: none !important;
   background-color: rgba(0, 0, 0, 0.3);
-
 }
 
 .st-row:not(.column-layout) .st-select {
@@ -2538,7 +2893,6 @@ body.has-video #bg-layer {
 }
 
 body.yarn-mode {
-
   --text-primary: #6b544b;
 
   --text-secondary: #9c877e;
@@ -2607,7 +2961,6 @@ body.yarn-mode .st-group-title {
 
   font-weight: 800 !important;
   text-shadow: 2px 2px 0px #fff !important;
-
 }
 
 body.yarn-mode #clock-date,
@@ -2619,7 +2972,6 @@ body.yarn-mode .label-std,
 body.yarn-mode .aw-city,
 body.yarn-mode .aw-cond,
 body.yarn-mode .aw-footer,
-
 body.yarn-mode #cal-month,
 body.yarn-mode .app-name {
   color: #6b544b !important;
@@ -2714,6 +3066,14 @@ body.yarn-mode input:checked + .slider {
   background-color: var(--yarn-accent);
 }
 
+body.yarn-mode .slider {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.yarn-mode .slider::before {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
 body.yarn-mode .st-range {
   background: #d6c6bc !important;
   height: 8px !important;
@@ -2783,7 +3143,6 @@ body.yarn-mode .search-clear {
 
 body.yarn-mode .search-clear:hover {
   color: var(--yarn-accent) !important;
-
 }
 
 body.yarn-mode .dock-setting-row {
@@ -2807,7 +3166,6 @@ body.yarn-mode .calc-display {
   border: 2px dashed #c9b0a3 !important;
 
   color: #6b544b !important;
-
 }
 
 body.yarn-mode .calc-btn {
@@ -2815,7 +3173,6 @@ body.yarn-mode .calc-btn {
   border: 2px dashed #c9b0a3 !important;
   color: #6b544b !important;
   box-shadow: none !important;
-
 }
 
 body.yarn-mode .calc-btn:hover {
@@ -2873,7 +3230,6 @@ body.yarn-mode .event-row:hover .event-date-badge {
 }
 
 body.lite-mode {
-
   --glass-blur: 0px !important;
   --bg-blur: 0px !important;
 
@@ -2902,7 +3258,6 @@ body.lite-mode #search-input {
   background: var(--glass-bg) !important;
   border: 1px solid var(--glass-border) !important;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5) !important;
-
 }
 
 body.lite-mode * {
@@ -2948,6 +3303,7 @@ body.terminal-mode #bg-video {
 body.terminal-mode .glass-card,
 body.terminal-mode .dock-item,
 body.terminal-mode .settings-window,
+body.terminal-mode .setup-card,
 body.terminal-mode #search-input,
 body.terminal-mode .st-input,
 body.terminal-mode .st-select,
@@ -3032,6 +3388,11 @@ body.terminal-mode input:checked + .slider {
   background: var(--term-text);
 }
 
+body.terminal-mode .slider::before {
+  border-radius: 0;
+  background: #000;
+}
+
 body.terminal-mode #app-launcher-btn {
   color: var(--term-text) !important;
 }
@@ -3095,6 +3456,7 @@ body.retro-mode #bg-video {
 body.retro-mode .glass-card,
 body.retro-mode .dock-item,
 body.retro-mode .settings-window,
+body.retro-mode .setup-card,
 body.retro-mode #search-input,
 body.retro-mode .st-input,
 body.retro-mode .st-select,
@@ -3235,7 +3597,6 @@ body.retro-mode .calc-display {
   color: var(--retro-text) !important;
 
   border-radius: 0 !important;
-
 }
 
 body.retro-mode .calc-btn {
@@ -3244,7 +3605,6 @@ body.retro-mode .calc-btn {
   color: var(--retro-text) !important;
   border-radius: 0 !important;
   box-shadow: 2px 2px 0px var(--retro-border) !important;
-
 }
 
 body.retro-mode .calc-btn:hover {
@@ -3261,7 +3621,6 @@ body.retro-mode .cnt-big {
   color: var(--retro-text) !important;
 
   text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.1) !important;
-
 }
 
 body.retro-mode .cnt-unit {
@@ -3278,7 +3637,6 @@ body.retro-mode .st-row {
   border-radius: 0 !important;
 
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1) !important;
-
 }
 
 body.retro-mode .st-group-title {
@@ -3288,7 +3646,6 @@ body.retro-mode .st-group-title {
   padding-bottom: 4px !important;
   margin-bottom: 15px !important;
   display: inline-block !important;
-
 }
 
 body.retro-mode .event-date-badge {
@@ -3299,7 +3656,6 @@ body.retro-mode .event-date-badge {
   color: var(--retro-text) !important;
 
   border-radius: 0 !important;
-
 }
 
 body.retro-mode .event-row:hover .event-date-badge {
@@ -3307,14 +3663,57 @@ body.retro-mode .event-row:hover .event-date-badge {
   color: #fff !important;
 }
 
+/* 設定 > ドックの行が白い設定ウィンドウに溶けて枠が消える問題の修正 */
+body.retro-mode .dock-setting-row {
+  background: var(--retro-card) !important;
+  border: 3px solid var(--retro-border) !important;
+  border-radius: 0 !important;
+  box-shadow: 4px 4px 0 var(--retro-border) !important;
+}
+
+body.retro-mode .dock-setting-row textarea.ds-icon {
+  background: #fff !important;
+  border: 2px solid var(--retro-border) !important;
+  color: var(--retro-text) !important;
+}
+
+/* 挨拶欄・メモ入力欄の黒文字が暗い壁紙で見えない問題の修正
+   (壁紙の明暗に関わらず読めるよう白い縁取りを付与) */
+body.retro-mode #quote-text,
+body.retro-mode #quote-author,
+body.retro-mode #memo-input,
+body.retro-mode #memo-input::placeholder {
+  text-shadow:
+    -1.5px -1.5px 0 var(--retro-card),
+    1.5px -1.5px 0 var(--retro-card),
+    -1.5px 1.5px 0 var(--retro-card),
+    1.5px 1.5px 0 var(--retro-card),
+    0 2px 0 var(--retro-card),
+    0 -2px 0 var(--retro-card),
+    2px 0 0 var(--retro-card),
+    -2px 0 0 var(--retro-card) !important;
+}
+
+/* 時計も暗い壁紙で沈まないよう、白い縁取りを付与（文字が大きいので少し太め） */
+body.retro-mode #clock-time,
+body.retro-mode #clock-date {
+  text-shadow:
+    -2px -2px 0 var(--retro-card),
+    2px -2px 0 var(--retro-card),
+    -2px 2px 0 var(--retro-card),
+    2px 2px 0 var(--retro-card),
+    0 3px 0 var(--retro-card),
+    0 -3px 0 var(--retro-card),
+    3px 0 0 var(--retro-card),
+    -3px 0 0 var(--retro-card) !important;
+}
+
 #search-input {
   padding-right: 135px !important;
-
 }
 
 .search-clear {
   right: 100px !important;
-
 }
 
 #google-lens-btn {
@@ -3358,7 +3757,6 @@ body.terminal-mode #google-lens-btn {
 }
 
 body.lite-mode .track-title.scroll-active {
-
   animation: scroll-left 15s linear infinite !important;
 
   padding-left: 100%;
@@ -3403,7 +3801,6 @@ body.retro-mode.has-video .bg-layer::after {
 }
 
 #bg-video {
-
   filter: blur(var(--bg-blur)) brightness(var(--bg-brightness));
 
   transition:
@@ -3450,7 +3847,6 @@ body.retro-mode .suggestion-del:hover {
 }
 
 @media (max-width: 1150px) {
-
   #immersion-root {
     display: flex !important;
     flex-direction: column;
@@ -3470,12 +3866,10 @@ body.retro-mode .suggestion-del:hover {
     height: 100vh !important;
     justify-content: center;
     transform: scale(0.9);
-
   }
 
   #clock-time {
     font-size: 6rem !important;
-
   }
 
   .search-wrapper {
@@ -3490,7 +3884,6 @@ body.retro-mode .suggestion-del:hover {
     top: 0 !important;
     left: 0 !important;
     position: fixed !important;
-
   }
 }
 
@@ -3597,7 +3990,6 @@ body.aero-mode #memo-input:focus {
 
   border-radius: 8px !important;
   border-bottom-color: transparent !important;
-
 }
 
 body:not(.aero-mode) #memo-input:focus {
@@ -3605,7 +3997,6 @@ body:not(.aero-mode) #memo-input:focus {
 }
 
 .overlay-modal {
-
   visibility: hidden;
   pointer-events: none !important;
 
@@ -3615,7 +4006,6 @@ body:not(.aero-mode) #memo-input:focus {
 }
 
 .overlay-modal.show {
-
   visibility: visible;
   pointer-events: auto !important;
 
@@ -3628,7 +4018,6 @@ body:not(.aero-mode) #memo-input:focus {
 .calc-card,
 .todo-card,
 .countdown-card {
-
   min-height: 0 !important;
   display: flex !important;
   flex-direction: column !important;
@@ -3672,7 +4061,6 @@ body.retro-mode .calc-card button:hover {
   white-space: nowrap;
   margin: 0 !important;
   height: 38px;
-
 }
 
 #saved-profiles-list {
@@ -3716,7 +4104,6 @@ body.retro-mode .calc-card button:hover {
   opacity: 0;
   transition: 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   z-index: 10010;
-
 }
 
 #quick-profile-menu.show {
@@ -3955,7 +4342,6 @@ body.retro-mode .focus-item.selected {
 body.retro-mode .focus-indicator {
   border: 1px solid #000 !important;
   border-radius: 0 !important;
-
 }
 
 body.retro-mode .focus-item:hover .focus-indicator,
@@ -4059,12 +4445,10 @@ body.lite-mode .focus-item.selected {
 
   cursor: pointer !important;
   pointer-events: auto !important;
-
 }
 
 #ios-focus-menu {
   z-index: 2147483647 !important;
-
 }
 
 .dock {
@@ -4094,7 +4478,6 @@ body.yarn-mode .profile-del-btn {
 
 body.yarn-mode .profile-del-btn:hover {
   color: #ff453a !important;
-
 }
 
 body.retro-mode .profile-row {
@@ -4122,7 +4505,6 @@ body.retro-mode .profile-del-btn:hover {
 }
 
 .search-wrapper {
-
   z-index: 20000 !important;
 }
 
@@ -4141,7 +4523,6 @@ body.retro-mode .no-profile-msg {
   color: #000 !important;
   font-family: 'DotGothic16', sans-serif !important;
   opacity: 1 !important;
-
 }
 
 body.terminal-mode .no-profile-msg {
@@ -4289,7 +4670,6 @@ body.terminal-mode .eq-card[class*='level-5'] .eq-shindo-value {
 }
 
 .eq-source {
-
   margin-top: 0;
   padding-top: 6px;
   font-size: 0.65rem;
@@ -4297,7 +4677,6 @@ body.terminal-mode .eq-card[class*='level-5'] .eq-shindo-value {
   opacity: 0.6;
   position: relative;
   z-index: 10;
-
 }
 
 .eq-source a {
@@ -4319,7 +4698,6 @@ body.yarn-mode .eq-source a {
 body.retro-mode .eq-source {
   font-family: 'DotGothic16', sans-serif !important;
   opacity: 1 !important;
-
 }
 
 body.retro-mode .eq-source a {
@@ -4347,7 +4725,6 @@ body.terminal-mode .eq-source a:hover {
   overflow: hidden;
   justify-content: space-between;
   background: linear-gradient(135deg, rgba(30, 60, 40, 0.6), rgba(10, 20, 15, 0.7));
-
 }
 
 .curr-icon-bg {
@@ -4466,7 +4843,6 @@ body.terminal-mode .curr-value {
 .english-card {
   display: flex;
   flex-direction: column;
-
 }
 
 .eng-header {
@@ -4498,7 +4874,6 @@ body.terminal-mode .curr-value {
 .eng-reload-btn.spinning {
   animation: spin 1s linear infinite;
   pointer-events: none;
-
 }
 
 @keyframes spin {
@@ -4519,7 +4894,6 @@ body.terminal-mode .curr-value {
   position: relative;
   z-index: 2;
   padding-bottom: 20px;
-
 }
 
 .eng-loader {
@@ -4570,7 +4944,7 @@ body.terminal-mode .curr-value {
   opacity: 0.9;
   font-weight: 500;
 
-  font-family: 'Shippori Mincho', 'Hiragino Mincho ProN', serif;
+  font-family: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', 'MS PMincho', serif;
 }
 
 .eng-bg-text {
@@ -4646,7 +5020,6 @@ body.terminal-mode .eng-source {
   margin-bottom: 5px;
   z-index: 2;
   flex-shrink: 0;
-
 }
 
 .jp-reload-btn {
@@ -4678,7 +5051,6 @@ body.terminal-mode .eng-source {
 
   padding: 5px 0;
   overflow: hidden;
-
 }
 
 .jp-main-view {
@@ -4693,7 +5065,6 @@ body.terminal-mode .eng-source {
 
   gap: 15px;
   max-height: 100%;
-
 }
 
 .jp-word-container {
@@ -4709,7 +5080,6 @@ body.terminal-mode .eng-source {
 
   min-width: 60px;
   padding: 10px 0;
-
 }
 
 .jp-word {
@@ -4793,11 +5163,9 @@ body.retro-mode .jp-meaning-container {
 }
 
 @media (max-height: 800px) {
-  :root {
-    --clock-size: 8rem !important;
-  }
-
   #clock-time {
+    /* 短い画面では小さめに表示するが、ユーザー設定値(--clock-size)に比例させる */
+    font-size: calc(var(--clock-size) * 0.8) !important;
     margin-bottom: 10px !important;
   }
 }
@@ -4822,7 +5190,6 @@ body.retro-mode .jp-meaning-container {
 
   z-index: 10;
   margin-bottom: 20px;
-
 }
 
 .particle-days {
@@ -4842,7 +5209,6 @@ body.retro-mode .jp-meaning-container {
   opacity: 0.6;
   margin-top: 10px;
   letter-spacing: 0.2em;
-
 }
 
 #particle-canvas {
@@ -4930,6 +5296,7 @@ body.mono-mode .dynamic-blur {
 body.mono-mode .glass-card,
 body.mono-mode .dock-item,
 body.mono-mode .settings-window,
+body.mono-mode .setup-card,
 body.mono-mode .search-suggestions,
 body.mono-mode .modal-card,
 body.mono-mode .folder-submenu,
@@ -5291,4 +5658,805 @@ body.liquidglass-mode .settings-window,
 body.liquidglass-mode #app-launcher-menu,
 body.liquidglass-mode .modal-card {
   border-radius: 24px !important;
+}
+
+/* =========================================================================
+   AMBIENT MODE — 一枚もの
+   面をめくらない。時計は移動しない。テーマにも依存しない。
+   ========================================================================= */
+
+#amb-root {
+  --u: min(1vw, 1.7778vh);
+  --amb-fg: #ffffff;
+  --amb-dim: color-mix(in srgb, var(--amb-fg) 50%, transparent);
+  --amb-faint: color-mix(in srgb, var(--amb-fg) 32%, transparent);
+
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background-color: #000;
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: var(--amb-fg);
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    background-image 2s linear,
+    opacity 0.6s ease,
+    visibility 0s linear 0.6s;
+}
+
+#amb-root.show {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    background-image 2s linear,
+    opacity 0.7s ease,
+    visibility 0s;
+}
+
+/* 入るときだけの一幕。空が上がり、時計が起き、右列が順に灯り、
+   最後に一日の帯が左から引かれる。1.6秒で終わって、あとは静止する。 */
+@keyframes amb-rise {
+  from {
+    opacity: 0;
+    transform: translateY(calc(1 * var(--u)));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 上下は最初から開けておく。閉じると気温の頂点やマーカーの頭が切れる */
+@keyframes amb-wipe {
+  from {
+    clip-path: inset(-60% 100% -60% 0);
+  }
+  to {
+    clip-path: inset(-60% -6% -60% 0);
+  }
+}
+
+#amb-root.amb-in .amb-clock,
+#amb-root.amb-in .amb-date,
+#amb-root.amb-in .amb-meta,
+#amb-root.amb-in .amb-greet,
+#amb-root.amb-in .amb-np,
+#amb-root.amb-in .amb-k,
+#amb-root.amb-in .amb-hero,
+#amb-root.amb-in .amb-tail,
+#amb-root.amb-in .amb-peak {
+  animation: amb-rise 0.85s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+#amb-root.amb-in .amb-clock {
+  animation-delay: 0.1s;
+}
+#amb-root.amb-in .amb-date,
+#amb-root.amb-in .amb-meta {
+  animation-delay: 0.24s;
+}
+#amb-root.amb-in .amb-greet {
+  animation-delay: 0.3s;
+}
+#amb-root.amb-in .amb-k {
+  animation-delay: 0.34s;
+}
+#amb-root.amb-in .amb-hero {
+  animation-delay: 0.4s;
+}
+#amb-root.amb-in .amb-np {
+  animation-delay: 0.44s;
+}
+#amb-root.amb-in .amb-tail {
+  animation-delay: 0.48s;
+}
+/* 稜線が引かれたあとに、その上の気温が灯る。
+   位置は端で揃え直すことがあるので、動かすのは明るさだけにする */
+@keyframes amb-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+#amb-root.amb-in .amb-peak {
+  animation-name: amb-fade;
+  animation-delay: 1.05s;
+}
+
+/* 景色は朝から夜へ、光がひと掃きするように左から現れる */
+#amb-root.amb-in .amb-landwrap {
+  animation: amb-wipe 1.05s cubic-bezier(0.36, 0.7, 0.2, 1) 0.45s both;
+}
+
+/* アンビエント中は、下の画面をまるごと引っ込める。
+   #immersion-root は animation: uiFadeIn ... forwards を持っていて
+   アニメの fill が通常の宣言に勝つので、animation ごと止める。 */
+body.amb-on #immersion-root {
+  animation: none !important;
+  opacity: 0 !important;
+  filter: none !important;
+  transform: none !important;
+  pointer-events: none !important;
+}
+
+#amb-root.amb-hidecursor {
+  cursor: none;
+}
+
+/* Horizon の書体。
+   これまで inherit だけで、実際には Chrome の既定（Mac ではヒラギノ角ゴ ProN）に
+   落ちていた。font-weight:150 の細い時計はヒラギノの極細ウェイトで出ている。
+   Windows にはヒラギノが無く、既定は游ゴシック／MS Pゴシックになるため、
+   同じ細さが出ない ── いちばん軽い游ゴシック Light でも 300 までしか無い。
+   そこでヒラギノを先頭に置いたまま、次に Noto Sans JP（可変・100〜900）を控える。
+   Mac は今までどおりヒラギノ、Windows は Noto Sans JP の 150 になる。 */
+#amb-root {
+  font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif !important;
+}
+
+/* テーマ側に body.<theme>-mode * { ... !important } があり、中まで流れ込んでくる。
+   ここで断ち切って、どのテーマの上でも同じ見た目にする。 */
+#amb-root *,
+#amb-root *::before,
+#amb-root *::after {
+  font-family: inherit !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+  letter-spacing: inherit;
+  text-transform: none;
+}
+
+/* 焼き付き防止。消さずに4分かけて漂わせる。目では追えない速さ。
+   中身はすべて絶対配置なので、余白はここではなく各要素の座標で持つ。 */
+.amb-shell {
+  position: absolute;
+  inset: 0;
+}
+
+#amb-root[data-burnin='off'] .amb-shell,
+#amb-root[data-motion='reduced'] .amb-shell {
+  animation: none !important;
+}
+
+@keyframes amb-drift {
+  0% {
+    translate: -8px -6px;
+  }
+  50% {
+    translate: 8px 6px;
+  }
+  100% {
+    translate: -8px -6px;
+  }
+}
+
+/* ------------------------------------------------------------------ 本体
+   一枚の景色として組む。空・稜線・地面が縦に積まれ、
+   時計は空の中に、文字は地面の中に置く。列は作らない。 */
+
+/* 位置は transform で持つ。left/top を動かすと毎回レイアウトが走る */
+.amb-sun {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  will-change: transform;
+  transition:
+    transform 2s linear,
+    background-image 2s linear;
+}
+
+/* 月。太陽と同じ場所の考え方で置く。影の円をずらして満ち欠けを作る */
+.amb-moon {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(2.9 * var(--u));
+  height: calc(2.9 * var(--u));
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 34% 34%, #f4f6ff 0%, #d3d9ec 58%, #97a2bd 100%);
+  pointer-events: none;
+  will-change: transform;
+  transition:
+    transform 2s linear,
+    opacity 2s linear;
+}
+
+/* テーマ遮断の #amb-root * { box-shadow: none !important } に勝たせる */
+#amb-root .amb-moon {
+  box-shadow:
+    0 0 calc(4.5 * var(--u)) calc(1.2 * var(--u)) rgba(176, 196, 255, 0.13),
+    0 0 calc(1.4 * var(--u)) calc(0.2 * var(--u)) rgba(200, 215, 255, 0.24) !important;
+}
+
+.amb-moon i {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #05070f;
+}
+
+#amb-root[data-night='on'] .amb-moon {
+  display: none !important;
+}
+
+.amb-landwrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.amb-land {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+.amb-land-edge {
+  stroke: color-mix(in srgb, var(--amb-fg) 55%, transparent);
+  stroke-width: 1.4;
+}
+
+.amb-marks line {
+  stroke: color-mix(in srgb, var(--amb-fg) 48%, transparent);
+  stroke-width: 2;
+}
+
+.amb-next-dot {
+  fill: var(--amb-fg);
+}
+
+.amb-nowmark {
+  stroke: var(--amb-fg);
+  stroke-width: 1.6;
+}
+
+/* --- 空の中 --- */
+
+.amb-clock {
+  position: absolute;
+  left: calc(6 * var(--u));
+  top: calc(9 * var(--u));
+  display: flex;
+  align-items: baseline;
+  gap: 0.16em;
+  font-size: calc(14.5 * var(--u));
+  font-weight: 150;
+  line-height: 0.85;
+  letter-spacing: -0.038em;
+  color: var(--amb-fg);
+}
+
+/* 日付と天気は一行。ただし左に固めず、天気は右端へ送る ──
+   左に全部そろえると、下に音楽が無いときに画面が左へ倒れて見える。
+   本の柱のように、一本の行が画面を横切る形にする。 */
+.amb-line {
+  position: absolute;
+  left: calc(6 * var(--u));
+  right: calc(6 * var(--u));
+  top: calc(24.5 * var(--u));
+  display: flex;
+  align-items: baseline;
+  gap: calc(4 * var(--u));
+  white-space: nowrap;
+  font-size: calc(2.25 * var(--u));
+  color: color-mix(in srgb, var(--amb-fg) 60%, transparent);
+}
+
+.amb-meta {
+  margin-left: auto;
+}
+
+.amb-greet {
+  position: absolute;
+  left: calc(6 * var(--u));
+  white-space: nowrap;
+}
+
+.amb-meta {
+  display: flex;
+  align-items: baseline;
+  gap: calc(1.5 * var(--u));
+  flex: 0 0 auto;
+}
+
+.amb-meta i {
+  font-style: normal;
+  color: var(--amb-faint);
+}
+
+.amb-meta:empty {
+  display: none;
+}
+
+.amb-greet {
+  top: calc(28.4 * var(--u));
+  font-size: calc(2 * var(--u));
+  color: var(--amb-faint);
+}
+
+.amb-greet:empty {
+  display: none;
+}
+
+.amb-peak {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  font-size: calc(1.55 * var(--u));
+  color: color-mix(in srgb, var(--amb-fg) 48%, transparent);
+  pointer-events: none;
+}
+
+/* --- 地面の中 --- */
+
+.amb-ground {
+  position: absolute;
+  left: calc(6 * var(--u));
+  right: calc(6 * var(--u));
+  bottom: calc(4.5 * var(--u));
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: calc(4 * var(--u));
+}
+
+/* 内容幅に縮ませない。残りを取らせて、長い件名のときだけ端を詰める */
+.amb-agenda {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.amb-k {
+  font-size: calc(1.4 * var(--u));
+  letter-spacing: 0.2em;
+  color: color-mix(in srgb, var(--amb-fg) 25%, transparent);
+  height: calc(2 * var(--u));
+  margin-bottom: calc(0.4 * var(--u));
+}
+
+.amb-k.soft {
+  letter-spacing: 0.06em;
+  color: color-mix(in srgb, var(--amb-fg) 34%, transparent);
+}
+
+.amb-hero {
+  display: flex;
+  align-items: baseline;
+  gap: calc(1.6 * var(--u));
+  min-height: calc(5 * var(--u));
+}
+
+.amb-hero-t {
+  font-size: calc(4.4 * var(--u));
+  font-weight: 300;
+  line-height: 1;
+  color: var(--amb-fg);
+}
+
+.amb-hero-n {
+  font-size: calc(3.3 * var(--u));
+  font-weight: 400;
+  color: var(--amb-fg);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.amb-hero-r {
+  font-size: calc(1.9 * var(--u));
+  color: color-mix(in srgb, var(--amb-fg) 40%, transparent);
+  flex: 0 0 auto;
+}
+
+.amb-tail {
+  margin-top: calc(2 * var(--u));
+  display: flex;
+  gap: calc(3 * var(--u));
+  font-size: calc(1.75 * var(--u));
+  color: color-mix(in srgb, var(--amb-fg) 28%, transparent);
+  /* 高さは常に取っておく。予定がある日とない日で下段が上下しないように */
+  height: calc(2.8 * var(--u));
+  overflow: hidden;
+}
+
+.amb-tail > span {
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+/* 予定がない日は畳む。空のまま高さを取ると、下の再生中との間に穴が空く */
+.amb-tail:empty {
+  height: 0;
+  margin-top: 0;
+}
+
+.amb-tail b {
+  font-weight: 400;
+  color: color-mix(in srgb, var(--amb-fg) 46%, transparent);
+}
+
+.amb-face {
+  display: flex;
+  line-height: 1;
+}
+
+.amb-dg {
+  display: inline-block;
+  height: 1.16em;
+  line-height: 1.16em;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.amb-dg i {
+  display: block;
+  font-style: normal;
+  transform: translateY(0);
+}
+
+.amb-dg.rolling i {
+  transform: translateY(-100%);
+  transition: transform 0.64s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.amb-sep-ch {
+  display: inline-block;
+  height: 1.16em;
+  line-height: 1.16em;
+  opacity: 0.55;
+  padding: 0 0.02em;
+}
+
+.amb-ampm {
+  font-size: 0.2em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  opacity: 0.5;
+}
+
+.amb-face {
+  display: flex;
+  line-height: 1;
+}
+
+.amb-dg {
+  display: inline-block;
+  height: 1.16em;
+  line-height: 1.16em;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.amb-dg i {
+  display: block;
+  font-style: normal;
+  transform: translateY(0);
+}
+
+.amb-dg.rolling i {
+  transform: translateY(-100%);
+  transition: transform 0.64s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.amb-sep-ch {
+  display: inline-block;
+  height: 1.16em;
+  line-height: 1.16em;
+  opacity: 0.55;
+  padding: 0 0.02em;
+}
+
+.amb-ampm {
+  font-size: 0.2em;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  opacity: 0.5;
+}
+
+/* 再生中。主役の横ではなく、予定の続きの下にもう一行として置く。
+   横に並べると同じ大きさの塊が2つになって、下段が2枚のカードに見えていた。 */
+/* 予定と再生中の境。線を引いたぶん、距離は詰めてよい */
+.amb-np {
+  position: relative;
+  margin-top: calc(2.6 * var(--u));
+  display: flex;
+  align-items: center;
+  gap: calc(1.2 * var(--u));
+  min-width: 0;
+  min-height: calc(3.6 * var(--u));
+}
+
+/* 区切り線は、そのまま再生の軌道でもある。
+   --amb-np-p が無いとき（長さが取れない配信元・生放送・曲なし）は
+   ただの一本線に戻る。 */
+.amb-np::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(-1.3 * var(--u));
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--amb-fg) 40%, transparent) 0 var(--amb-np-p, 0%),
+    color-mix(in srgb, var(--amb-fg) 11%, transparent) var(--amb-np-p, 0%) 100%
+  );
+}
+
+/* 止めているあいだは、進んでいる部分も落ち着かせる */
+.amb-np:not(.playing)::before {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--amb-fg) 22%, transparent) 0 var(--amb-np-p, 0%),
+    color-mix(in srgb, var(--amb-fg) 11%, transparent) var(--amb-np-p, 0%) 100%
+  );
+}
+
+.amb-np-art {
+  flex: 0 0 auto;
+  width: calc(3.2 * var(--u));
+  height: calc(3.2 * var(--u));
+  border-radius: calc(0.55 * var(--u));
+  background-size: cover;
+  background-position: center;
+  background-color: color-mix(in srgb, var(--amb-fg) 8%, transparent);
+}
+
+.amb-np-t {
+  font-size: calc(1.85 * var(--u));
+  color: color-mix(in srgb, var(--amb-fg) 60%, transparent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 0 1 auto;
+}
+
+.amb-np-a {
+  font-size: calc(1.75 * var(--u));
+  color: color-mix(in srgb, var(--amb-fg) 30%, transparent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 0 2 auto;
+}
+
+.amb-np-a:empty {
+  display: none;
+}
+
+/* 右端に固定する。曲名の長さで位置が動かないように */
+.amb-np-ctl {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: calc(0.55 * var(--u));
+  margin-left: auto;
+  padding-left: calc(2 * var(--u));
+  opacity: 0.34;
+  transition: opacity 0.28s ease;
+}
+
+#amb-root.amb-awake .amb-np-ctl {
+  opacity: 1;
+}
+
+.amb-np-b {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(3 * var(--u));
+  height: calc(3 * var(--u));
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--amb-fg) 10%, transparent);
+  color: var(--amb-fg);
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.amb-np-b:hover {
+  background: color-mix(in srgb, var(--amb-fg) 20%, transparent);
+}
+
+.amb-np-b:active {
+  transform: scale(0.94);
+}
+
+.amb-np-b:focus-visible {
+  outline: 2px solid var(--amb-fg);
+  outline-offset: 2px;
+}
+
+.amb-np-b svg {
+  width: 45%;
+  height: 45%;
+}
+
+.amb-np-play {
+  width: calc(3.5 * var(--u));
+  height: calc(3.5 * var(--u));
+  background: color-mix(in srgb, var(--amb-fg) 16%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .amb-np-ctl,
+  .amb-np-b {
+    transition: none;
+  }
+}
+
+/* --- 夜。稜線だけ残して、あとは消す --- */
+
+#amb-root[data-night='on'] {
+  background-image: none !important;
+  background-color: #000;
+}
+
+#amb-root[data-night='on'] .amb-sun,
+#amb-root[data-night='on'] .amb-meta,
+#amb-root[data-night='on'] .amb-ground,
+#amb-root[data-night='on'] .amb-peak,
+#amb-root[data-night='on'] .amb-greet {
+  display: none !important;
+}
+
+#amb-root[data-night='on'] .amb-land-edge {
+  stroke: color-mix(in srgb, var(--amb-night-color, #ffb37a) 22%, transparent);
+}
+
+#amb-root[data-night='on'] .amb-marks line,
+#amb-root[data-night='on'] .amb-next-dot,
+#amb-root[data-night='on'] .amb-nowmark {
+  display: none;
+}
+
+#amb-root[data-night='on'] .amb-clock {
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  align-items: center;
+  justify-content: center;
+  transform: none !important;
+  transition: none !important;
+  font-size: calc(19 * var(--u));
+  color: var(--amb-night-color, #ffb37a);
+  opacity: var(--amb-night-alpha, 0.66);
+}
+
+/* 位置を持っているのは .amb-line のほう。.amb-date を動かすと行から飛び出す */
+#amb-root[data-night='on'] .amb-line {
+  left: 0;
+  right: 0;
+  top: calc(50% + 12 * var(--u));
+  justify-content: center;
+  transform: none !important;
+  transition: none !important;
+  color: var(--amb-night-color, #ffb37a);
+  opacity: calc(var(--amb-night-alpha, 0.66) * 0.55);
+}
+
+#amb-root[data-night='on'] .amb-date {
+  margin-left: 0 !important;
+}
+
+.amb-ctl {
+  position: absolute;
+  top: calc(4 * var(--u));
+  right: calc(6.5 * var(--u));
+  z-index: 6;
+  opacity: 0;
+  transform: translateY(calc(-0.8 * var(--u)));
+  pointer-events: none;
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+
+#amb-root.amb-awake .amb-ctl {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.amb-btn {
+  width: calc(4.2 * var(--u));
+  height: calc(4.2 * var(--u));
+  min-width: 34px;
+  min-height: 34px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--amb-fg) 18%, transparent);
+  background: color-mix(in srgb, var(--amb-fg) 6%, transparent);
+  color: color-mix(in srgb, var(--amb-fg) 80%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: 0.2s;
+}
+
+.amb-btn:hover {
+  background: color-mix(in srgb, var(--amb-fg) 16%, transparent);
+  color: var(--amb-fg);
+  border-color: color-mix(in srgb, var(--amb-fg) 34%, transparent);
+}
+
+.amb-btn:focus-visible {
+  outline: 2px solid var(--accent, #50e3c2);
+  outline-offset: 2px;
+}
+
+.amb-btn svg {
+  width: 45%;
+  height: 45%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ------------------------------------------------------- ドックのボタン */
+
+#ambient-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* 動きを抑える設定のときは、一幕まるごと出さずに最初から置いておく */
+#amb-root[data-motion='reduced'].amb-in .amb-clock,
+#amb-root[data-motion='reduced'].amb-in .amb-date,
+#amb-root[data-motion='reduced'].amb-in .amb-meta,
+#amb-root[data-motion='reduced'].amb-in .amb-greet,
+#amb-root[data-motion='reduced'].amb-in .amb-np,
+#amb-root[data-motion='reduced'].amb-in .amb-k,
+#amb-root[data-motion='reduced'].amb-in .amb-hero,
+#amb-root[data-motion='reduced'].amb-in .amb-tail,
+#amb-root[data-motion='reduced'].amb-in .amb-peak,
+#amb-root[data-motion='reduced'].amb-in .amb-landwrap {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #amb-root.show .amb-shell {
+    animation: none !important;
+  }
+  .amb-dg.rolling i {
+    transition: none;
+  }
+  .amb-drop {
+    animation: none;
+  }
+  #amb-root[data-motion='auto'].amb-in .amb-clock,
+  #amb-root[data-motion='auto'].amb-in .amb-date,
+  #amb-root[data-motion='auto'].amb-in .amb-meta,
+  #amb-root[data-motion='auto'].amb-in .amb-greet,
+  #amb-root[data-motion='auto'].amb-in .amb-np,
+  #amb-root[data-motion='auto'].amb-in .amb-k,
+  #amb-root[data-motion='auto'].amb-in .amb-hero,
+  #amb-root[data-motion='auto'].amb-in .amb-tail,
+  #amb-root[data-motion='auto'].amb-in .amb-peak,
+  #amb-root[data-motion='auto'].amb-in .amb-landwrap {
+    animation: none !important;
+  }
 }

@@ -6,9 +6,15 @@
     "128": "icons/icon128.png"
   },
   "name": "Search Immersion",
-  "version": "26.0.0",
+  "version": "26.1.0",
   "description": "新しいタブを『スマートディスプレイ』に変える拡張機能。ベータ版",
-  "permissions": ["storage", "tabs", "scripting", "history", "search"],
+  "permissions": [
+    "storage",
+    "tabs",
+    "scripting",
+    "history",
+    "search"
+  ],
   "host_permissions": [
     "https://calendar.google.com/*",
     "https://geocoding-api.open-meteo.com/*",
@@ -20,7 +26,9 @@
     "*://*.icloud.com/*",
     "https://www.google.com/*"
   ],
-  "optional_host_permissions": ["*://*/*"],
+  "optional_host_permissions": [
+    "*://*/*"
+  ],
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
@@ -29,8 +37,20 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["wallpapers/*.webp"],
-      "matches": ["<all_urls>"]
+      "resources": [
+        "wallpapers/*.webp"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
-  ]
+  ],
+  "commands": {
+    "toggle-horizon": {
+      "suggested_key": {
+        "default": "Alt+Shift+H"
+      },
+      "description": "Horizon"
+    }
+  }
 }
