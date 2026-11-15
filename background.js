@@ -1,3 +1,5 @@
+importScripts('features/clip-db.js');
+
 const URL_MAP = {
   yt: '*://www.youtube.com/watch*',
   ytm: '*://music.youtube.com/*',
@@ -270,10 +272,33 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse({ error: 'URL not specified' });
       return true;
     }
-    fetch(request.url)
-      .then((r) => r.text())
-      .then((data) => sendResponse({ data }))
-      .catch((e) => sendResponse({ error: e.toString() }));
+    /* 失敗の理由を分けて返す。画面側で「許可する」「再試行」「設定を開く」を出し分ける */
+    (async () => {
+      let origin;
+      try {
+        const u = new URL(request.url);
+        if (!/^https?:$/.test(u.protocol)) throw new Error('scheme');
+        origin = `${u.protocol}//${u.hostname}/*`;
+      } catch (e) {
+        sendResponse({ error: 'badurl' });
+        return;
+      }
+      const ok = await chrome.permissions.contains({ origins: [origin] }).catch(() => false);
+      if (!ok) {
+        sendResponse({ error: 'noperm', origin });
+        return;
+      }
+      try {
+        const r = await fetch(request.url);
+        if (!r.ok) {
+          sendResponse({ error: 'http', status: r.status });
+          return;
+        }
+        sendResponse({ data: await r.text() });
+      } catch (e) {
+        sendResponse({ error: 'network' });
+      }
+    })();
     return true;
   }
 
@@ -292,14 +317,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 
-  if (request.action === 'fetchCurrency') {
-    fetch('https://open.er-api.com/v6/latest/USD')
-      .then((res) => res.json())
-      .then((data) => sendResponse({ data }))
-      .catch((err) => sendResponse({ error: err.toString() }));
-    return true;
-  }
-
   if (request.action === 'loginSpotify') {
     launchSpotifyAuth()
       .then(() => {
@@ -313,7 +330,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === 'checkSpotifyLogin') {
     chrome.storage.local.get(['sp_access_token'], (res) => {
-      sendResponse({ loggedIn: !!res.sp_access_token });
+      /* クライアント ID が未設定の配布物では、ログイン自体ができない。画面側でボタンを隠す */
+      sendResponse({ loggedIn: !!res.sp_access_token, configured: SPOTIFY_CLIENT_ID !== 'non' });
     });
     return true;
   }
@@ -684,3 +702,113 @@ function controlMediaPage(c) {
     if (c === 'toggle' && v) v.paused ? v.play() : v.pause();
   }
 }
+
+
+/* =====================================================================
+   v28: 右クリックメニュー（Web Clip / あとで読む棚）
+   activeTab 権限で、メニューを押したタブにだけ一時的に触れる。
+   常にすべてのサイトを読める権限は要求しない。
+   ===================================================================== */
+const SI_MENU_TEXT = {
+  ja: { clip: 'Search Immersion に切り抜く', page: 'あとで読むに追加', link: 'リンクをあとで読むに追加' },
+  ko: { clip: 'Search Immersion으로 잘라내기', page: '나중에 읽기에 추가', link: '링크를 나중에 읽기에 추가' },
+  zh: { clip: '裁剪到 Search Immersion', page: '添加到稍后阅读', link: '将链接添加到稍后阅读' },
+  en: { clip: 'Clip to Search Immersion', page: 'Add to Read Later', link: 'Add link to Read Later' },
+};
+
+function siSetupMenus() {
+  if (!chrome.contextMenus) return;
+  const lang = (chrome.i18n && chrome.i18n.getUILanguage ? chrome.i18n.getUILanguage() : 'en').slice(0, 2);
+  const tx = SI_MENU_TEXT[lang] || SI_MENU_TEXT.en;
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({ id: 'si-clip', title: tx.clip, contexts: ['page', 'selection', 'image'], documentUrlPatterns: ['http://*/*', 'https://*/*'] });
+    chrome.contextMenus.create({ id: 'si-later-page', title: tx.page, contexts: ['page'], documentUrlPatterns: ['http://*/*', 'https://*/*'] });
+    chrome.contextMenus.create({ id: 'si-later-link', title: tx.link, contexts: ['link'], targetUrlPatterns: ['http://*/*', 'https://*/*'] });
+  });
+}
+chrome.runtime.onInstalled.addListener(siSetupMenus);
+chrome.runtime.onStartup && chrome.runtime.onStartup.addListener(siSetupMenus);
+
+function siBadge(tabId, text) {
+  try {
+    chrome.action.setBadgeBackgroundColor({ color: '#50E3C2', tabId });
+    chrome.action.setBadgeText({ text, tabId });
+    setTimeout(() => chrome.action.setBadgeText({ text: '', tabId }), 2200);
+  } catch (e) {}
+}
+
+function siAddToShelfInbox(url, title, tabId) {
+  chrome.storage.local.get(['si_shelf_inbox'], (r) => {
+    const inbox = (r.si_shelf_inbox || []).filter((x) => x.url !== url);
+    inbox.push({ url, title: (title || '').slice(0, 200), at: Date.now() });
+    chrome.storage.local.set({ si_shelf_inbox: inbox.slice(-100) }, () => tabId != null && siBadge(tabId, '✓'));
+  });
+}
+
+chrome.contextMenus &&
+  chrome.contextMenus.onClicked.addListener((info, tab) => {
+    if (!tab || tab.id == null) return;
+    if (info.menuItemId === 'si-later-page') {
+      siAddToShelfInbox(info.pageUrl || tab.url, tab.title, tab.id);
+    } else if (info.menuItemId === 'si-later-link') {
+      siAddToShelfInbox(info.linkUrl, info.selectionText || info.linkUrl, tab.id);
+    } else if (info.menuItemId === 'si-clip') {
+      chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ['features/clip-picker.js'] }).catch((e) =>
+        console.warn('[Search Immersion] clip picker could not start:', e && e.message),
+      );
+    }
+  });
+
+/* 選ばれた範囲を撮って切り出し、IndexedDB に置く */
+async function siCaptureClip(msg, sender) {
+  const tab = sender.tab;
+  if (!tab) throw new Error('no tab');
+  const dataUrl = await chrome.tabs.captureVisibleTab(tab.windowId, { format: 'png' });
+  const blob = await (await fetch(dataUrl)).blob();
+  const bmp = await createImageBitmap(blob);
+  const dpr = msg.dpr || 1;
+  /* captureVisibleTab の画素数と CSS px の比は、ページの拡大率で dpr とずれることがある。実寸から求める */
+  const scale = bmp.width / Math.max(1, msg.viewportW || bmp.width / dpr);
+  const sx = Math.max(0, Math.round(msg.rect.x * scale));
+  const sy = Math.max(0, Math.round(msg.rect.y * scale));
+  const sw = Math.max(1, Math.min(bmp.width - sx, Math.round(msg.rect.w * scale)));
+  const sh = Math.max(1, Math.min(bmp.height - sy, Math.round(msg.rect.h * scale)));
+  /* 長辺 1400px までに縮めて保存（ホームで表示するには十分で、容量を抑えられる） */
+  const k = Math.min(1, 1400 / Math.max(sw, sh));
+  const canvas = new OffscreenCanvas(Math.round(sw * k), Math.round(sh * k));
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(bmp, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+  const img = await canvas.convertToBlob({ type: 'image/webp', quality: 0.9 });
+
+  const clip = {
+    id: 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    at: Date.now(),
+    checkedAt: Date.now(),
+    url: String(msg.url || tab.url || '').slice(0, 2000),
+    title: String(msg.title || tab.title || '').slice(0, 200),
+    mode: msg.mode === 'live' && msg.selector ? 'live' : 'image',
+    selector: msg.mode === 'live' ? String(msg.selector || '').slice(0, 1000) : '',
+    text: String(msg.text || '').slice(0, 6000),
+    prevText: '',
+    links: Array.isArray(msg.links) ? msg.links.slice(0, 30) : [],
+    img,
+    w: canvas.width,
+    h: canvas.height,
+    view: msg.mode === 'live' && msg.text ? 'text' : 'image',
+  };
+  await self.SIClipDB.put(clip);
+  chrome.runtime.sendMessage({ action: 'clipAdded', id: clip.id }, () => void chrome.runtime.lastError);
+  siBadge(tab.id, '✓');
+  return clip.id;
+}
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action !== 'clipPicked') return;
+  siCaptureClip(request, sender)
+    .then((id) => sendResponse({ ok: true, id }))
+    .catch((e) => {
+      console.warn('[Search Immersion] clip failed:', e && e.message);
+      sendResponse({ ok: false });
+    });
+  return true;
+});

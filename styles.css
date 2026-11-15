@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;800&family=Noto+Sans+JP:wght@100..900&family=Shippori+Mincho:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Antonio:wght@400;700&family=Bebas+Neue&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&family=Audiowide&family=Exo+2:wght@300;600;800&family=Saira:wght@300;500;700&family=Righteous&family=Monoton&family=Russo+One&family=Bungee&family=Fredoka+One&family=Ubuntu:wght@300;500;700&family=Chakra+Petch:wght@400;600;700&family=Teko:wght@400;600;700&display=swap');
+/* Web フォントは content.js の siLoadFonts() が、使う分だけ非同期で読み込む（v28〜）。 */
 
 :root {
   --accent: #50e3c2;
@@ -647,6 +647,15 @@ body:not(.glass-opacity-zero) .glass-card {
   margin-top: 8px;
 }
 
+/* 下に入り切らないときは上へ開く。向きは placeSuggestions() が決める。
+   背の低い画面や、アートワークを展開して検索欄が下がったときに効く。 */
+.search-suggestions.drop-up {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
 .suggestion-item {
   padding: 10px 20px;
   font-size: 0.95rem;
@@ -661,6 +670,30 @@ body:not(.glass-opacity-zero) .glass-card {
 .suggestion-item.active {
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
+}
+
+/* 絵文字をやめて線画にした分の受け皿。文字と同じ色を継ぐので、
+   ホバーで行が明るくなればアイコンも一緒に明るくなる */
+.suggestion-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 12px;
+  opacity: 0.5;
+}
+
+.suggestion-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.suggestion-item:hover .suggestion-icon,
+.suggestion-item.active .suggestion-icon {
+  opacity: 0.8;
 }
 
 .suggestion-del {
@@ -1963,8 +1996,8 @@ textarea.icon-textarea {
   line-height: 1.6;
   font-weight: 400;
   font-family:
-    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', 'Yu Gothic UI',
-    'Noto Sans JP', sans-serif;
+    -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', 'Yu Gothic UI', 'Noto Sans JP',
+    sans-serif;
 }
 
 .setup-group {
@@ -2309,8 +2342,9 @@ body.yarn-mode .setup-card .wiz-dot.active {
 
   height: 70px;
   filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
-
-  fill: #fff;
+  /* 予報の小さなアイコンと同じ線画にする（以前は白で塗りつぶしていた） */
+  fill: none;
+  stroke-width: 1.3;
 }
 
 .st-tab-btn svg {
@@ -2950,7 +2984,7 @@ body.yarn-mode #clock-time {
   font-weight: 800 !important;
   text-shadow:
     3px 3px 0px rgba(180, 160, 150, 0.8),
-     5px 5px 10px rgba(0, 0, 0, 0.15) !important;
+    5px 5px 10px rgba(0, 0, 0, 0.15) !important;
 }
 
 body.yarn-mode .aw-temp,
@@ -4720,126 +4754,6 @@ body.terminal-mode .eq-source a:hover {
   background: var(--term-text);
 }
 
-.currency-card {
-  position: relative;
-  overflow: hidden;
-  justify-content: space-between;
-  background: linear-gradient(135deg, rgba(30, 60, 40, 0.6), rgba(10, 20, 15, 0.7));
-}
-
-.curr-icon-bg {
-  position: absolute;
-  top: -20px;
-  right: -10px;
-  font-size: 8rem;
-  font-weight: 800;
-  color: rgba(255, 255, 255, 0.03);
-  pointer-events: none;
-  font-family: 'Inter', sans-serif;
-  z-index: 0;
-}
-
-.curr-main-wrapper {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
-}
-
-.curr-row {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-}
-
-.curr-symbol {
-  font-size: 1.5rem;
-  opacity: 0.6;
-  font-weight: 300;
-}
-
-.curr-value {
-  font-size: 3.5rem;
-  font-weight: 700;
-  font-family: 'Inter', sans-serif;
-
-  letter-spacing: -0.05em;
-  text-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-}
-
-.curr-footer {
-  text-align: right;
-  z-index: 1;
-}
-
-.curr-update {
-  font-size: 0.7rem;
-  opacity: 0.5;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.currency-card.rate-up {
-  background: linear-gradient(135deg, rgba(30, 80, 50, 0.8), rgba(10, 30, 20, 0.9)) !important;
-  border-color: rgba(80, 227, 194, 0.3) !important;
-  transition: background 0.5s ease;
-}
-
-.currency-card.rate-up .curr-value {
-  color: #50e3c2;
-}
-
-.currency-card.rate-down {
-  background: linear-gradient(135deg, rgba(100, 30, 30, 0.8), rgba(40, 10, 10, 0.9)) !important;
-  border-color: rgba(255, 69, 58, 0.3) !important;
-  transition: background 0.5s ease;
-}
-
-.currency-card.rate-down .curr-value {
-  color: #ff453a;
-}
-
-body.yarn-mode .currency-card {
-  background: var(--glass-bg) !important;
-}
-
-body.yarn-mode .curr-value {
-  color: #6b544b !important;
-  text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8) !important;
-}
-
-body.yarn-mode .curr-icon-bg {
-  color: rgba(107, 84, 75, 0.05) !important;
-}
-
-body.retro-mode .currency-card {
-  background: #fff !important;
-}
-
-body.retro-mode .curr-value,
-body.retro-mode .curr-symbol,
-body.retro-mode .curr-update {
-  font-family: 'DotGothic16', sans-serif !important;
-  color: var(--retro-text) !important;
-  text-shadow: none !important;
-  letter-spacing: 0;
-}
-
-body.retro-mode .curr-icon-bg {
-  display: none;
-}
-
-body.terminal-mode .currency-card {
-  border-color: #ffd700 !important;
-
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.1) !important;
-}
-
-body.terminal-mode .curr-value {
-  color: #ffd700 !important;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5) !important;
-}
-
 .english-card {
   display: flex;
   flex-direction: column;
@@ -5265,19 +5179,6 @@ body.retro-mode .particle-card canvas {
   image-rendering: pixelated;
 }
 
-.tv-clock-card {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  padding: 0 !important;
-
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  overflow: visible !important;
-}
-
 body.mono-mode {
   --mono-bg: rgba(5, 5, 5, 0.65);
   --mono-border: rgba(255, 255, 255, 0.06);
@@ -5422,20 +5323,30 @@ body.mono-mode #nest-card-media .media-info-block {
   border-radius: 22px;
 }
 
+/* 歌詞はアートワークに重ねる。
+   ここは以前 display:flex !important / position:static の 250x250 だった。
+   親の .album-art-wrapper は 100x100 の overflow:hidden なので、
+   歌詞は取得できていたのに一度も画面に出ていなかった。
+   100px の絵の上に重ねても読めないので、通常表示では出さず、
+   アートワークを展開して 500px 級になったときだけ開く。 */
 .lyrics-overlay {
-  display: flex !important;
-  position: static !important;
-  width: 250px;
-  height: 250px;
-  background: transparent !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
-  padding-left: 15px !important;
+  display: none;
+  position: absolute;
+  inset: 0;
+  flex-direction: column;
+  padding: 26px 24px;
+  border-radius: inherit;
+  text-align: left;
+  background: rgba(8, 10, 14, 0.62);
+  backdrop-filter: blur(26px) saturate(1.2);
+  -webkit-backdrop-filter: blur(26px) saturate(1.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
 }
 
+/* 歌詞ボタンも同じ理由で通常表示には出さない。
+   展開中、かつ歌詞が実際に取れた曲のときだけ現れる（下の np-stage 節）。 */
 .lyrics-toggle-btn {
   display: none !important;
 }
@@ -6458,5 +6369,335 @@ body.amb-on #immersion-root {
   #amb-root[data-motion='auto'].amb-in .amb-peak,
   #amb-root[data-motion='auto'].amb-in .amb-landwrap {
     animation: none !important;
+  }
+}
+
+/* =========================================================================
+   NOW PLAYING STAGE — アートワークを真ん中に出す
+
+   別モードにはしない。全画面で覆うと検索もウィジェットも死ぬので、
+   .music-panel を中央列（検索バーの直前）へ移し、巨大な時計が上へ退いて
+   空いた場所をそのまま使う。位置と大きさの差は JS 側の npFlip() が
+   transform で埋めるので、ここには「行き先」だけを書く。
+   ========================================================================= */
+
+/* 進捗バーは展開中だけの持ち物。通常のカードには置き場所が無い */
+.np-progress {
+  display: none;
+}
+
+.np-track {
+  flex: 1;
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.26);
+  overflow: hidden;
+}
+
+.np-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 99px;
+  background: #fff;
+  transition: width 1s linear;
+}
+
+/* アートワークから抜いた色で地を染める層。
+   #immersion-root の内側に置くこと ── body には background:#000 があり、
+   body 直下の負 z-index はその黒の下に潜って見えない。
+   #immersion-root は transform を持つので重ね合わせ文脈を作り、
+   この中の負 z-index は黒より上に出る。 */
+#np-wash {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  opacity: 0;
+  pointer-events: none;
+  /* 前後の動き（480ms）に合わせて、少しだけ遅らせて追いかける。
+     地の色が先に決まると、まだ動いている手前の要素から浮いて見える。 */
+  transition: opacity 0.56s cubic-bezier(0.32, 0.72, 0, 1);
+  background:
+    radial-gradient(62% 55% at 22% 16%, var(--np-c2, #3a4a5a) 0%, transparent 62%),
+    radial-gradient(70% 60% at 80% 26%, var(--np-c1, #223040) 0%, transparent 64%),
+    radial-gradient(95% 80% at 50% 100%, var(--np-c3, #0d141b) 0%, transparent 72%),
+    var(--np-c1, #223040);
+}
+
+/* 濃く敷きすぎない。0.9 で被せると下のぼかした写真が完全に潰れ、
+   画面がのっぺりした一色の紙になってしまう（このアプリの地の魅力は
+   ぼけた大きな写真そのものなので、色だけ借りて質感は残す）。 */
+body.np-stage #np-wash {
+  opacity: 0.55;
+}
+
+/* --- 中央列 ------------------------------------------------------------ */
+
+/* 上詰めにすると時計が画面の上へ張り付き、下に大きな穴が空く */
+body.np-stage .col-center {
+  justify-content: flex-start;
+}
+
+body.np-stage .clock-container {
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 20px;
+  margin: 0 0 18px;
+}
+
+/* !important が要る ── @media (max-height: 800px) に
+   #clock-time { font-size: calc(var(--clock-size) * .8) !important }
+   があり（背の低い画面向けの縮小）、1366x768 のようなノートでは
+   そちらが勝って時計だけ 8rem のまま残ってしまう。 */
+body.np-stage #clock-time {
+  font-size: 2.6rem !important;
+  margin: 0 !important;
+  top: 0;
+  letter-spacing: -0.01em;
+}
+
+body.np-stage #clock-date {
+  font-size: 2.6rem;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+/* 引用とメモは畳む。アートワークの居場所を作るのと、
+   読み物なので大きな絵と並ぶと互いに邪魔をする */
+body.np-stage #quote-box,
+body.np-stage #memo-area {
+  opacity: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ドックは畳む。ジャケットの下に、操作ボタン・検索欄・ドックと
+   横並びのものが三段も続くと、視線の止まる場所が無くなる。
+   空けた縦幅はそのままジャケットが受け取る（.album-art-wrapper が flex:1）。
+   設定や ZEN は畳めばすぐ戻ってくるので、閉じ込めにはならない。 */
+body.np-stage .dock {
+  display: none;
+}
+
+/* 中身は中央へ出張中。空いた枠は畳む。
+   ただし np-stage が付いた瞬間に消してはいけない ── その一瞬で
+   カレンダーが 990px まで伸び、直後に引っ越しカードが入って
+   また縮む。意味のない往復が見える。
+   枠を閉じ切ってから JS（npMoveSpare）がこのクラスを付ける。
+
+   !important が要る ── applyPreferences の toggle() が
+   el.style.display = 'flex' をインラインで書いており
+   （「showMusic」の出し入れ）、インラインは通常の宣言に勝つため。 */
+#music-card-container.np-card-gone {
+  display: none !important;
+}
+
+/* 中身が抜けた枠は、畳んでいる最中だけ中身を隠しておく */
+body.np-stage #music-card-container > * {
+  visibility: hidden;
+}
+
+/* 中央へ移した .music-panel。
+   width/height を 100% で確定させておくこと ── auto のままだとパネルが
+   縮んで幅が決まり、子の max-width:% がその縮んだ幅を基準にして
+   アートワークが正方形にならない（560x448 のように潰れる）。 */
+body.np-stage .music-panel {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  height: auto;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  padding: 0;
+  margin: 0 0 20px;
+}
+
+/* 縦の余りを全部アートワークに渡す。大きさは vh/vw で持たない ──
+   vh は zoom:var(--ui-scale) の外で解決されるので、ここだけ縮み方がずれる。
+   flex で余りを取れば、どの窓の大きさでも画面の 45〜47% に収まる。 */
+/* 角丸と縁は .glass-card に合わせる（20px / var(--glass-border)）。
+   ここだけ素の写真を置くと、左右のカードと違う言葉を喋っているように見えて、
+   機能を後から貼り付けたような画面になる。
+   影も落とし過ぎない ── 明るいジャケットだと下に黒い滲みが出る。 */
+body.np-stage .album-art-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  aspect-ratio: var(--np-ar, 1);
+  align-self: center;
+  margin: 0 0 22px;
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+}
+
+body.np-stage .album-art {
+  border-radius: inherit;
+}
+
+/* 題・アーティスト・進捗はアートワークと同じ幅で揃える。
+   --np-w は npSyncWidth() が実測して入れる。固定値にすると
+   ジャケットより広がったり狭まったりして、ひとかたまりに見えない。 */
+body.np-stage .track-info-wrap {
+  flex: 0 0 auto;
+  width: var(--np-w, 100%);
+  max-width: 100%;
+  margin: 0 0 3px;
+  text-align: center;
+  mask-image: none;
+  -webkit-mask-image: none;
+  cursor: pointer;
+}
+
+body.np-stage .track-title {
+  font-size: 1.65rem;
+  letter-spacing: 0.01em;
+}
+
+/* .track-artist は素で text-align:left / width:100% / margin-left:5px を
+   持っている（カードの中では左揃えが正しいので）。中央に出すぶんだけ打ち消す。 */
+body.np-stage .track-artist {
+  flex: 0 0 auto;
+  width: var(--np-w, 100%);
+  max-width: 100%;
+  margin: 0;
+  font-size: 1rem;
+  text-align: center;
+  opacity: 0.6;
+}
+
+body.np-stage .np-progress {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+  width: var(--np-w, 100%);
+  max-width: 100%;
+  margin: 20px 0 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  opacity: 0.45;
+  font-variant-numeric: tabular-nums;
+}
+
+/* .ctrl-btn は素では背景を持たず、アイコンだけで立っている。
+   ここで塗りを足すと、100px 下のドック（hairline のチップ）と
+   別種のボタンが縦に二段並ぶことになり、いちばん「取ってつけた」感が出る。
+   素のまま大きくするだけにする。 */
+body.np-stage .controls {
+  flex: 0 0 auto;
+  margin: 14px 0 0;
+  gap: 30px;
+}
+
+body.np-stage .ctrl-btn {
+  width: 40px;
+  height: 40px;
+  background: none;
+}
+
+body.np-stage .ctrl-btn svg {
+  width: 26px;
+  height: 26px;
+}
+
+body.np-stage .ctrl-btn.play-btn svg {
+  width: 32px;
+  height: 32px;
+}
+
+/* --- 歌詞 -------------------------------------------------------------- */
+
+/* ボタンは「展開中」かつ「その曲の歌詞が実際に取れた」ときだけ出す。
+   取れなければボタンが1つ消えるだけで、他はどこも動かない。 */
+body.np-stage[data-np-lyrics='ok'] .lyrics-toggle-btn {
+  display: flex !important;
+  background: none;
+  opacity: 0.4;
+}
+
+/* 開いていることは色で示す。塗りを足すと他のボタンと形が揃わなくなる */
+body.np-stage[data-np-lyrics='ok'] .lyrics-toggle-btn.active {
+  opacity: 1;
+  color: var(--accent);
+}
+
+body.np-stage .lyrics-overlay {
+  display: flex;
+}
+
+body.np-stage .lyrics-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 500px 級の台紙に載るので、通常の 0.8rem から上げる */
+body.np-stage .lyrics-text {
+  font-size: 1rem;
+  line-height: 2.1;
+}
+
+/* --- 左右の列 ---------------------------------------------------------- */
+
+/* 音楽カードが抜けると右列がカレンダー1枚になって左と釣り合わない。
+   左列の最後の1枚をこちらへ引っ越させて 2枚 + 2枚 にする。
+   引っ越しは JS 側（npApplyStage）が DOM ごと動かす ── 作り直さないので
+   タイマーや ToDo の状態、貼ってあるハンドラはそのまま生きる。
+   幅は左右とも 310px なので、寸法は変わらない。 */
+/* 引っ越してきたカードは、カレンダーと縦を分け合う。
+   flex:0 0 auto にすると flex-grow を渡す開き方が使えず、
+   入ってきた瞬間にカレンダーが跳ねる。 */
+body.np-stage .col-right > .module-card {
+  flex: 1 1 0%;
+}
+
+/* 引っ越すカードの明滅は npMoveSpare() が Web Animations で描く。
+   ここに opacity の transition は置かない ── クラスで動かそうとしたら
+   左列では効かず、右列では一瞬で 0 になり、場所によって挙動が違った。 */
+
+/* 開け閉めしている最中の2枚だけ、重い描画を外す。
+   flex-grow と max-height はレイアウトを動かすプロパティなので、
+   毎フレーム組み直しが走る。そのたびに backdrop-filter の
+   ぼかしと大きな影を引き直していては、滑らかになりようがない。
+   どちらも畳まれていく途中の姿なので、外しても目では分からない。 */
+.np-anim {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+/* 出入りのあいだは、要素が自前で持っている transition を止める。
+   こちらのアニメーションと二重に走るうえ、寸法が遅れて変わると
+   FLIP の前提（動く前と後の姿）が崩れて最後に跳ねが出る。
+
+   とくに #clock-time の transition: all .3s が効いていた。
+   np-stage で 10rem → 2.6rem に変わるとき font-size がゆっくり縮み、
+   時計の箱が 154px → 60px と遅れて詰まる。その 94px をジャケットが
+   後から吸収して 504px → 598px と育ち、動きが終わったあとに
+   幅を合わせ直す一拍（かくっ）が生まれていた。 */
+.np-anim,
+body.np-flipping .glass-card,
+body.np-flipping .clock-container,
+body.np-flipping #clock-time,
+body.np-flipping #clock-date {
+  transition: none !important;
+}
+
+/* FLIP が走っているあいだは既存の transition を黙らせる */
+body.np-flipping .col {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #np-wash,
+  .lyrics-overlay {
+    transition: none;
   }
 }

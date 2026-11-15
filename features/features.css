@@ -1,0 +1,2562 @@
+/* =====================================================================
+   Search Immersion v28 — 新機能のスタイル
+   既存テーマ（ガラス・毛糸・ターミナル…）の変数を使い、どのテーマでも馴染むようにする。
+   ===================================================================== */
+
+/* ---------------------------------------------------------- 共通部品 */
+.si-ic {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.14em;
+  flex-shrink: 0;
+}
+.si-icon-btn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-primary);
+  opacity: 0.62;
+  cursor: pointer;
+  transition: opacity 0.18s, background 0.18s, border-color 0.18s, transform 0.12s;
+  flex-shrink: 0;
+}
+.si-icon-btn .si-ic {
+  width: 15px;
+  height: 15px;
+}
+.si-icon-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.si-icon-btn:active {
+  transform: scale(0.92);
+}
+.si-icon-btn:focus-visible,
+.si-head-btn:focus-visible,
+.si-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.si-card-head {
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+}
+.si-card-head > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.si-head-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-radius: 999px;
+  font: 600 0.68rem/1 inherit;
+  letter-spacing: 0.04em;
+  padding: 5px 9px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  flex-shrink: 0;
+}
+.si-head-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.si-head-btn .si-ic {
+  width: 12px;
+  height: 12px;
+}
+.si-head-btn:active {
+  transform: scale(0.94);
+}
+.si-chip {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.si-chip:hover {
+  border-color: var(--accent);
+}
+.rl-empty,
+.fg-empty {
+  opacity: 0.5;
+  font-size: 0.8rem;
+  padding: 10px 2px;
+  line-height: 1.5;
+}
+
+#si-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 36px;
+  transform: translate(-50%, 20px);
+  background: rgba(18, 18, 20, 0.92);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font: 500 0.85rem/1.3 -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  z-index: 2147483647;
+  display: block !important;
+}
+#si-toast.show {
+  opacity: 1 !important;
+  transform: translate(-50%, 0);
+}
+
+#si-quick-timer {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483647;
+  display: block !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  background: rgba(18, 18, 20, 0.85);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 7px 16px;
+  font: 500 0.95rem/1 'Inter', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  align-items: center;
+  gap: 8px;
+}
+#si-quick-timer {
+  display: inline-flex !important;
+}
+#si-quick-timer .si-ic {
+  width: 15px;
+  height: 15px;
+  color: var(--accent);
+}
+#si-quick-timer.done .si-ic {
+  color: #000;
+}
+#si-quick-timer:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+#si-quick-timer.done {
+  background: var(--accent);
+  color: #000;
+  animation: siPulse 1s ease-in-out infinite;
+}
+@keyframes siPulse {
+  50% {
+    transform: translateX(-50%) scale(1.06);
+  }
+}
+
+/* ---------------------------------------------------------- 検索候補 */
+.suggestion-item .sg-main {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+.suggestion-item .sg-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.suggestion-item .sg-title,
+.suggestion-item .sg-sub {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.suggestion-item .sg-sub {
+  font-size: 0.72rem;
+  opacity: 0.5;
+  margin-top: 1px;
+}
+.suggestion-item .sg-favicon {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+}
+.suggestion-item .sg-badge {
+  margin-left: 10px;
+  flex-shrink: 0;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.45;
+}
+.suggestion-item .suggestion-del {
+  opacity: 0.4;
+  padding: 0 10px;
+  cursor: pointer;
+}
+.suggestion-item .suggestion-del:hover {
+  opacity: 1;
+}
+.suggestion-item.sg-calc .sg-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  color: var(--accent);
+}
+.suggestion-item.sg-cmd .suggestion-icon,
+.suggestion-item.sg-bang .suggestion-icon,
+.suggestion-item.sg-calc .suggestion-icon {
+  opacity: 0.45;
+}
+.search-suggestions {
+  max-height: min(420px, 55vh) !important;
+}
+
+/* ---------------------------------------------------------- 設定: 検索 */
+.si-bang-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.si-bang-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.8rem;
+}
+.si-bang-row code {
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  min-width: 44px;
+}
+.si-bang-row span {
+  flex: 1;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.si-bang-row .st-btn-small {
+  padding: 2px 8px;
+}
+.si-bang-add {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 8px;
+}
+.si-bang-add #si-bang-url {
+  grid-column: 1 / -1;
+}
+.si-bang-add .st-btn {
+  grid-column: 1 / -1;
+}
+.si-keys kbd {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  padding: 1px 6px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  margin: 0 2px;
+}
+
+/* ---------------------------------------------------------- 今日の一つ
+   時計の日付と同じ扱いの、背景のない一行。 */
+#si-today-focus {
+  order: 3;
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  max-width: 90%;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  align-self: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+#si-today-focus:hover .si-tf-text {
+  text-decoration: line-through;
+  text-decoration-color: var(--accent);
+  opacity: 0.7;
+}
+.si-tf-tag {
+  color: var(--accent);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.si-tf-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------------------------------------------------------- ToDo */
+.todo-item .todo-check {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+.todo-item:hover .todo-check {
+  border-color: var(--accent);
+}
+.todo-item.checked .todo-check {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+}
+.todo-item .todo-check .si-ic {
+  width: 11px;
+  height: 11px;
+  stroke-width: 3;
+}
+.todo-item .todo-star .si-ic,
+.todo-item .todo-del .si-ic {
+  width: 14px;
+  height: 14px;
+}
+.todo-item .todo-text {
+  flex: 1;
+  min-width: 0;
+  margin-left: 6px;
+  overflow-wrap: anywhere;
+}
+.todo-item .todo-star,
+.todo-item .todo-del {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0;
+  padding: 2px 4px;
+  display: inline-flex;
+  transition: opacity 0.15s;
+}
+.todo-item:hover .todo-star,
+.todo-item:hover .todo-del,
+.todo-item.starred .todo-star {
+  opacity: 0.7;
+}
+.todo-item.starred .todo-star {
+  color: #f2c14e;
+  opacity: 1;
+}
+.todo-item.checked .todo-text {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+.todo-clear-done {
+  margin-top: 8px;
+  align-self: flex-end;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* ---------------------------------------------------------- v28 のカード：共通
+   元のカードの作法に揃える。英字の小見出し、主役は大きく細い数字か言葉、
+   説明文は置かない。操作ボタンはカードに乗せたときだけ見せる。 */
+.module-card {
+  position: relative;
+}
+.si-quiet {
+  opacity: 0 !important;
+}
+.module-card:hover .si-quiet,
+.si-quiet:focus-visible {
+  opacity: 0.5 !important;
+}
+.module-card .si-quiet:hover {
+  opacity: 1 !important;
+}
+.si-card-empty {
+  margin: auto;
+  text-align: center;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  opacity: 0.75;
+  padding: 12px 6px;
+}
+.si-card-form {
+  display: none;
+  margin: -2px 0 8px;
+}
+.adding .si-card-form {
+  display: block;
+}
+.si-card-form input {
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 22%, transparent) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 6px 0 !important;
+  outline: 0;
+}
+.si-card-form input:focus {
+  border-bottom-color: var(--accent) !important;
+}
+.si-card-form input.bad {
+  border-bottom-color: #ff6b6b !important;
+}
+.si-card-foot {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  padding: 2px 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.4;
+  cursor: pointer;
+  z-index: 5;
+}
+.si-card-foot:hover {
+  opacity: 0.9;
+}
+.rl-list,
+.ss-list,
+.wc-list {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.rl-list::-webkit-scrollbar,
+.ss-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------------------------------------------------------- 世界時計 */
+.wc-list {
+  justify-content: space-evenly;
+}
+.wc-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 8%, transparent);
+}
+.wc-row:last-child {
+  border-bottom: 0;
+}
+.wc-left {
+  flex: 1;
+  min-width: 0;
+}
+.wc-name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wc-sub {
+  margin-top: 3px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.wc-time {
+  font-family: 'Inter', sans-serif;
+  font-size: 2.15rem;
+  font-weight: 200;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  transition: margin 0.15s;
+}
+.wc-row.is-night .wc-time {
+  opacity: 0.5;
+}
+.wc-del,
+.rl-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.wc-del .si-ic,
+.rl-btn .si-ic {
+  width: 14px;
+  height: 14px;
+}
+.wc-del {
+  position: absolute;
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.wc-row:hover .wc-time {
+  margin-right: 22px;
+}
+.wc-row:hover .wc-del,
+.rl-item:hover .rl-btn,
+.ss-item:hover .rl-btn {
+  opacity: 0.5;
+}
+.wc-del:hover,
+.rl-btn:hover {
+  opacity: 1 !important;
+}
+
+/* ---------------------------------------------------------- あとで読む / タブの保存 */
+.rl-count {
+  margin-left: 8px;
+  color: var(--accent);
+}
+.readlater-card .rl-list {
+  padding-bottom: 14px;
+}
+.rl-item,
+.ss-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 0;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 8%, transparent);
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  outline: 0;
+}
+.rl-item:last-child,
+.ss-item:last-child {
+  border-bottom: 0;
+}
+.rl-txt {
+  flex: 1;
+  min-width: 0;
+}
+.rl-title {
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.15s;
+}
+.rl-item:hover .rl-title,
+.ss-item:hover .rl-title,
+.ss-item:focus-visible .rl-title {
+  color: var(--accent);
+}
+.rl-sub {
+  margin-top: 3px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rl-item.read .rl-title {
+  opacity: 0.45;
+}
+.ss-count {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.ss-count b {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.9rem;
+  font-weight: 200;
+  line-height: 1;
+}
+.ss-count span {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------- 集中 */
+.fg-head-r {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.fg-len {
+  padding: 2px 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+.fg-len:hover:not(:disabled) {
+  color: var(--accent);
+}
+.fg-len:disabled {
+  cursor: default;
+}
+.focus-card .fg-sound {
+  width: 24px;
+  height: 24px;
+}
+.focus-card .fg-sound.on {
+  opacity: 0.9 !important;
+  color: var(--accent);
+}
+.fg-plant {
+  position: absolute;
+  right: -4px;
+  bottom: 6px;
+  width: 128px;
+  height: 136px;
+  color: var(--accent);
+  opacity: 0.16;
+  pointer-events: none;
+  transition: opacity 0.6s;
+}
+.fg-plant svg {
+  width: 100%;
+  height: 100%;
+}
+.focus-card[data-mode='focus'] .fg-plant,
+.focus-card[data-mode='break'] .fg-plant {
+  opacity: 0.42;
+}
+.fg-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+.fg-time {
+  font-family: 'Inter', sans-serif;
+  font-size: 4.3rem;
+  font-weight: 200;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  width: max-content;
+  transition: text-shadow 0.4s;
+}
+.focus-card[data-mode='focus'] .fg-time {
+  text-shadow: 0 0 22px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.focus-card[data-mode='paused'] .fg-time {
+  opacity: 0.55;
+}
+.fg-state {
+  min-height: 1.3em;
+  margin-top: 8px;
+  max-width: 70%;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fg-state.is-goal {
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+}
+.fg-btns {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+.focus-card .fg-btns .si-icon-btn {
+  width: 34px;
+  height: 34px;
+  opacity: 0.85;
+  border-color: color-mix(in srgb, currentColor 20%, transparent);
+}
+.focus-card .fg-btns .fg-start {
+  opacity: 1;
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.fg-foot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  min-height: 20px;
+  max-width: 62%;
+}
+.fg-garden {
+  display: flex;
+  color: var(--accent);
+  opacity: 0.8;
+}
+.fg-pot svg {
+  display: block;
+  width: 18px;
+  height: 22px;
+}
+.fg-stats {
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.4;
+  white-space: nowrap;
+}
+.fg-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: color-mix(in srgb, currentColor 6%, transparent);
+}
+.fg-bar i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s linear;
+}
+.focus-card[data-mode='break'] .fg-bar i {
+  background: var(--text-secondary);
+}
+.focus-card.fg-bloom .fg-plant {
+  animation: fgBloom 1.6s ease;
+}
+@keyframes fgBloom {
+  35% {
+    opacity: 0.9;
+    transform: scale(1.06);
+  }
+}
+
+/* ---------------------------------------------------------- 環境音
+   7 本の縦のフェーダー。上の大きな文字はいまの配合の名前。 */
+.sounds-card .snd-play.si-icon-btn {
+  opacity: 0.7;
+}
+.sounds-card.playing .snd-play.si-icon-btn {
+  opacity: 1;
+  color: var(--accent);
+}
+.snd-hero {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.snd-name {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 2rem;
+  font-weight: 200;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity 0.3s;
+}
+.sounds-card:not(.playing) .snd-name {
+  opacity: 0.55;
+}
+.snd-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  height: 112px;
+  max-height: 52%;
+  margin-bottom: 2px;
+}
+.snd-ch {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  outline: 0;
+}
+.snd-track {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  cursor: ns-resize;
+  touch-action: none;
+}
+.snd-track::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  border-radius: 2px;
+  background: color-mix(in srgb, currentColor 13%, transparent);
+}
+.snd-track i {
+  position: absolute;
+  bottom: 0;
+  width: 2px;
+  height: calc(var(--v, 0) * 100%);
+  border-radius: 2px;
+  background: var(--accent);
+  transition: height 0.12s;
+}
+.snd-track i::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  width: 12px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.snd-ch.on .snd-track i::after,
+.snd-ch:hover .snd-track i::after {
+  opacity: 0.9;
+}
+.snd-ch:focus-visible .snd-track::before {
+  background: var(--accent);
+}
+.snd-ic {
+  padding: 0;
+  display: inline-flex;
+  background: none;
+  border: 0;
+  color: inherit;
+  opacity: 0.35;
+  cursor: pointer;
+  transition: opacity 0.15s, color 0.15s;
+}
+.snd-ic .si-ic {
+  width: 15px;
+  height: 15px;
+}
+.snd-ch:hover .snd-ic {
+  opacity: 0.8;
+}
+.snd-ch.on .snd-ic {
+  opacity: 1;
+  color: var(--accent);
+}
+.sounds-card:not(.playing) .snd-ch.on .snd-ic,
+.sounds-card:not(.playing) .snd-track i {
+  opacity: 0.5;
+}
+
+/* ---------------------------------------------------------- Web Clip */
+.webclip-card {
+  padding-bottom: 12px;
+}
+.wcp-actions {
+  display: flex;
+  gap: 0;
+  margin-right: -6px;
+}
+.wcp-refresh.spin {
+  animation: siSpin 0.9s linear infinite;
+}
+@keyframes siSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.wcp-body {
+  flex: 1 1 0;
+  min-height: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wcp-img {
+  /* 画像の実寸でカードが伸びないよう、枠の中に絶対配置で収める */
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+}
+.wcp-text {
+  align-self: stretch;
+  width: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.wcp-line {
+  display: block;
+  padding: 3px 6px;
+  border-radius: 6px;
+  color: inherit;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+a.wcp-line:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+a.wcp-line {
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.18);
+  text-underline-offset: 3px;
+}
+.wcp-line.is-new {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.wcp-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+.wcp-dots {
+  display: flex;
+  gap: 5px;
+}
+.wcp-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+}
+.wcp-dots i.on {
+  background: var(--accent);
+}
+.wcp-status {
+  font-size: 0.66rem;
+  opacity: 0.5;
+  text-align: center;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wcp-status.hot {
+  opacity: 1;
+  color: var(--accent);
+}
+.webclip-card .wcp-actions .si-icon-btn,
+.webclip-card .wcp-prev,
+.webclip-card .wcp-next {
+  opacity: 0;
+}
+.webclip-card:hover .wcp-actions .si-icon-btn,
+.webclip-card:hover .wcp-prev,
+.webclip-card:hover .wcp-next {
+  opacity: 0.55;
+}
+.webclip-card .si-icon-btn:hover {
+  opacity: 1 !important;
+}
+
+/* ---------------------------------------------------------- 雨窓 */
+#si-rain {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  /* 壁紙と同じ明るさにそろえる。拭いた跡が暗い筋に見えないように */
+  filter: brightness(var(--bg-brightness));
+}
+/* 窓の外の景色はくっきり見せ、ぼかしは曇り（canvas）が受け持つ */
+body.rain-active #bg-layer-original {
+  filter: brightness(var(--bg-brightness)) !important;
+}
+body.rain-active #bg-layer-blurred {
+  opacity: 0 !important;
+}
+body.rain-active #immersion-root {
+  cursor: default;
+}
+body.rain-wiping,
+body.rain-wiping * {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+body.rain-mode .glass-card {
+  background: rgba(16, 20, 26, calc(var(--glass-opacity) * 0.75));
+  border-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+}
+body.rain-mode #clock-time {
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.45);
+}
+
+/* ---------------------------------------------------------- Paper テーマ
+   和紙のような生成りの紙面。インクの色で読み、罫線で区切る。 */
+body.paper-mode {
+  --paper: #f3eee3;
+  --paper-2: #ebe4d4;
+  --ink: #2a2620;
+  --ink-2: #6f665a;
+  --rule: rgba(42, 38, 32, 0.16);
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-2);
+  --glass-bg: rgba(255, 253, 247, 0.72);
+  --glass-border: var(--rule);
+  background: var(--paper) !important;
+}
+body.paper-mode .bg-layer,
+body.paper-mode #bg-video,
+body.paper-mode #np-wash {
+  opacity: 0 !important;
+}
+body.paper-mode #immersion-root {
+  color: var(--ink);
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(255, 255, 255, 0.55), transparent 60%),
+    radial-gradient(ellipse at 100% 100%, rgba(196, 176, 140, 0.18), transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .3 0 0 0 0 .22 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    var(--paper);
+}
+body.paper-mode .glass-card {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--rule) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 12px 30px -18px rgba(60, 45, 20, 0.35) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: var(--ink);
+}
+body.paper-mode .glass-card *:not(.st-btn-small):not(.st-btn):not(input):not(select):not(option) {
+  color: inherit;
+  text-shadow: none !important;
+}
+body.paper-mode .label-std {
+  color: var(--ink-2) !important;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 6px;
+  font-family: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  letter-spacing: 0.18em;
+}
+body.paper-mode #clock-time {
+  font-family: 'Fraunces', 'Shippori Mincho', serif !important;
+  color: var(--ink) !important;
+  font-weight: 300 !important;
+  text-shadow: none !important;
+  letter-spacing: -0.02em;
+}
+body.paper-mode #clock-date,
+body.paper-mode #quote-box,
+body.paper-mode #quote-text,
+body.paper-mode #quote-author {
+  color: var(--ink) !important;
+  text-shadow: none !important;
+  font-family: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+}
+body.paper-mode #search-input,
+body.paper-mode #memo-input {
+  background: rgba(255, 253, 247, 0.85) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--rule) !important;
+  box-shadow: 0 8px 24px -16px rgba(60, 45, 20, 0.4) !important;
+  backdrop-filter: none !important;
+}
+body.paper-mode #search-input::placeholder,
+body.paper-mode #memo-input::placeholder {
+  color: var(--ink-2) !important;
+}
+body.paper-mode .search-icon,
+body.paper-mode .search-clear {
+  color: var(--ink-2) !important;
+  filter: none !important;
+}
+body.paper-mode .search-suggestions {
+  background: rgba(255, 253, 247, 0.97) !important;
+  border-color: var(--rule) !important;
+  backdrop-filter: none !important;
+}
+body.paper-mode .suggestion-item {
+  color: var(--ink) !important;
+}
+body.paper-mode .suggestion-item.active,
+body.paper-mode .suggestion-item:hover {
+  background: rgba(42, 38, 32, 0.06) !important;
+}
+body.paper-mode .dock {
+  background: rgba(255, 253, 247, 0.8) !important;
+  border: 1px solid var(--rule) !important;
+  backdrop-filter: none !important;
+}
+body.paper-mode .dock-item {
+  color: var(--ink) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+}
+body.paper-mode .dock-item svg {
+  fill: var(--ink);
+  stroke: var(--ink);
+}
+body.paper-mode .dock-item:hover {
+  background: rgba(42, 38, 32, 0.07) !important;
+}
+body.paper-mode .si-head-btn,
+body.paper-mode .si-chip,
+body.paper-mode .rl-btn,
+body.paper-mode .fg-len {
+  background: transparent;
+  border-color: var(--rule);
+  color: var(--ink);
+}
+body.paper-mode .st-input {
+  background: rgba(255, 255, 255, 0.7) !important;
+  color: var(--ink) !important;
+  border-color: var(--rule) !important;
+}
+body.paper-mode .todo-item {
+  border-color: var(--rule) !important;
+}
+body.paper-mode .rl-item:hover,
+body.paper-mode .ss-item:hover {
+  background: rgba(42, 38, 32, 0.05);
+}
+body.paper-mode .wcp-dots i {
+  background: var(--rule);
+}
+
+/* ---------------------------------------------------------- 更新のお知らせ
+   日付カードと同じ作法。細く大きな数字、英字の小見出し、罫線で区切った短い行。 */
+#si-whatsnew {
+  z-index: 100000;
+}
+.si-wn-card {
+  width: min(460px, 92vw) !important;
+  max-width: 460px !important;
+  flex: none !important;
+  height: auto !important;
+  margin: auto;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 30px 32px 24px !important;
+  background: rgba(16, 16, 20, 0.92) !important;
+  color: #fff;
+  border-radius: 26px !important;
+  text-align: left;
+}
+.si-wn-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+.si-wn-ver {
+  margin: 6px 0 18px -4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 6.5rem;
+  font-weight: 200;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+.si-wn-list {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 24px;
+}
+.si-wn-item {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.si-wn-name {
+  width: 7.5em;
+  flex-shrink: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.si-wn-desc {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  opacity: 0.6;
+}
+.si-wn-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+body.paper-mode .si-wn-card.glass-card {
+  background: var(--paper) !important;
+  border-radius: 10px !important;
+}
+body.paper-mode .si-wn-ver {
+  font-family: 'Fraunces', 'Shippori Mincho', serif;
+  font-weight: 300;
+}
+body.paper-mode .si-wn-list,
+body.paper-mode .si-wn-item {
+  border-color: var(--rule);
+}
+
+/* ---------------------------------------------------------- 既存部品の線画アイコン */
+.eng-reload-btn .si-ic,
+.jp-reload-btn .si-ic {
+  width: 16px;
+  height: 16px;
+}
+.eq-status-icon .si-ic {
+  width: 24px;
+  height: 24px;
+}
+.dock-context-item .si-ic {
+  width: 15px;
+  height: 15px;
+  opacity: 0.8;
+}
+.ds-move-btn .si-ic {
+  width: 14px;
+  height: 14px;
+}
+#cal-prev .si-ic,
+#cal-next .si-ic {
+  width: 18px;
+  height: 18px;
+  vertical-align: -3px;
+}
+.focus-check .si-ic {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------------------------------------------------------- Paper 仕上げ */
+body.paper-mode {
+  --accent: #b4442c; /* 朱 */
+}
+body.paper-mode #memo-area {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+body.paper-mode #memo-input {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px dashed rgba(42, 38, 32, 0.28) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  font-family: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  max-width: 420px;
+  margin: 0 auto;
+  display: block;
+}
+body.paper-mode #google-lens-btn,
+body.paper-mode #app-launcher-btn,
+body.paper-mode #google-lens-btn *,
+body.paper-mode #app-launcher-btn * {
+  color: var(--ink-2) !important;
+  fill: var(--ink-2) !important;
+  filter: none !important;
+  opacity: 0.85;
+}
+body.paper-mode .dock {
+  border-radius: 16px !important;
+  box-shadow: 0 10px 30px -18px rgba(60, 45, 20, 0.45) !important;
+}
+body.paper-mode .dock-separator {
+  background: var(--rule) !important;
+}
+body.paper-mode #si-quick-timer {
+  background: rgba(255, 253, 247, 0.92);
+  color: var(--ink);
+  border-color: var(--rule);
+  backdrop-filter: none;
+}
+body.paper-mode .todo-item .todo-check {
+  border-color: rgba(42, 38, 32, 0.35);
+}
+body.paper-mode .todo-item.checked .todo-check {
+  color: #fff;
+}
+body.paper-mode .si-icon-btn:hover {
+  background: rgba(42, 38, 32, 0.06);
+  border-color: var(--rule);
+}
+body.paper-mode .st-btn-small {
+  color: #fff !important;
+}
+body.paper-mode #si-today-focus {
+  color: var(--ink);
+  text-shadow: none;
+}
+body.paper-mode .wcp-line.is-new {
+  background: rgba(180, 68, 44, 0.08);
+}
+body.paper-mode a.wcp-line {
+  text-decoration-color: var(--rule);
+}
+
+/* ---------------------------------------------------------- 既存テーマとのなじみ */
+#si-today-focus {
+  color: #fff;
+}
+body.yarn-mode #si-today-focus,
+body.yarn-mode #si-today-focus .si-tf-text {
+  color: #5e4639 !important;
+  text-shadow: none;
+}
+body.terminal-mode .si-icon-btn,
+body.terminal-mode .si-head-btn,
+body.terminal-mode .si-chip {
+  border-radius: 0;
+}
+body.retro-mode .si-icon-btn,
+body.retro-mode .si-head-btn,
+body.retro-mode .si-chip {
+  border-radius: 0;
+}
+body.mono-mode .snd-ch.on .snd-ic,
+body.mono-mode .wcp-status.hot {
+  color: inherit;
+}
+
+/* ---------------------------------------------------------- カードを選ぶ画面
+   左に左列の縮図、右にカードの縮小見本。見本は本物のカードと同じ作法
+   （英字の小見出し、細く大きな数字）で描き、説明文は置かない。
+   線や塗りは currentColor から作り、暗いテーマでも紙でも馴染ませる。 */
+#si-wg {
+  z-index: 100001;
+  animation: si-wg-in 0.18s ease both;
+}
+#si-wg.closing {
+  animation: si-wg-out 0.16s ease both;
+}
+@keyframes si-wg-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes si-wg-out {
+  to {
+    opacity: 0;
+  }
+}
+.si-wg-card {
+  --wg-line: color-mix(in srgb, currentColor 10%, transparent);
+  --wg-fill: color-mix(in srgb, currentColor 5%, transparent);
+  --wg-mute: color-mix(in srgb, currentColor 55%, transparent);
+  width: min(940px, 94vw) !important;
+  max-width: 940px !important;
+  height: min(680px, 88vh) !important;
+  flex: none !important;
+  margin: auto;
+  display: flex !important;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px 26px 20px !important;
+  background: rgba(16, 16, 20, 0.92) !important;
+  color: #fff;
+  border-radius: 26px !important;
+  overflow: hidden;
+  text-align: left;
+  animation: si-wg-pop 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes si-wg-pop {
+  from {
+    transform: translateY(8px) scale(0.985);
+  }
+}
+.si-wg-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.si-wg-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wg-mute);
+}
+.si-wg-x {
+  color: inherit !important;
+  margin-right: -6px;
+}
+.si-wg-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 26px;
+}
+
+/* 左：左列の縮図 */
+.si-wg-column {
+  width: 168px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px;
+  margin: -4px;
+}
+.si-wg-slot {
+  position: relative;
+  flex: 1;
+  text-align: left;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  outline: 0;
+  transition: transform 0.15s;
+}
+.si-wg-slot .wg-th {
+  height: 100%;
+  aspect-ratio: auto;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.si-wg-slot:hover .wg-th {
+  border-color: color-mix(in srgb, currentColor 22%, transparent);
+}
+.si-wg-slot.active .wg-th {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.si-wg-slot:focus-visible .wg-th {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.si-wg-slot.changed::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* 右：見本の一覧 */
+.si-wg-grid {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  align-content: start;
+  gap: 18px 14px;
+  padding: 4px 6px 8px 4px;
+  margin: -4px -6px -8px -4px;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, currentColor 20%, transparent) transparent;
+}
+.si-wg-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  outline: 0;
+}
+.si-wg-tile .wg-th {
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.15s, box-shadow 0.15s;
+}
+.si-wg-tile:hover .wg-th {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, currentColor 22%, transparent);
+}
+.si-wg-tile:focus-visible .wg-th {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.si-wg-tile.current .wg-th {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.si-wg-tile.in-use .wg-th {
+  opacity: 0.55;
+}
+.si-wg-tile.just .wg-th {
+  animation: si-wg-just 0.35s ease;
+}
+@keyframes si-wg-just {
+  40% {
+    transform: scale(1.03);
+  }
+}
+.si-wg-name {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 2px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.si-wg-tile.in-use .si-wg-name {
+  color: var(--wg-mute);
+}
+.si-wg-pos {
+  flex-shrink: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+/* 見本そのもの（本物のカードの縮図） */
+.wg-th {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 11px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--wg-line);
+  background: linear-gradient(160deg, color-mix(in srgb, currentColor 8%, transparent), color-mix(in srgb, currentColor 3%, transparent));
+  overflow: hidden;
+  font-size: 12px;
+}
+.wg-th.mini {
+  font-size: 10px;
+  padding: 9px 10px;
+}
+.wg-th.is-none {
+  background: none;
+  border-style: dashed;
+}
+.wg-th .l {
+  font-size: 0.56em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--wg-mute);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wg-th .big {
+  margin-top: auto;
+  font-family: 'Inter', sans-serif;
+  font-size: 2.5em;
+  font-weight: 200;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.wg-th .big.r {
+  text-align: right;
+}
+.wg-th .big em {
+  margin-left: 0.3em;
+  font-style: normal;
+  font-size: 0.26em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+.wg-th .ic {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  font-size: 1.7em;
+  opacity: 0.85;
+}
+.wg-th .word {
+  margin-top: auto;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.7em;
+  font-weight: 700;
+  color: var(--accent);
+}
+.wg-th .word.jp {
+  font-family: 'Shippori Mincho', 'Hiragino Mincho ProN', serif;
+  font-size: 1.35em;
+  letter-spacing: 0.08em;
+}
+.wg-th .lines {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+}
+.wg-th .b {
+  display: block;
+  height: 0.42em;
+  border-radius: 1em;
+  background: color-mix(in srgb, currentColor 22%, transparent);
+}
+.wg-th .gap {
+  height: 0.2em;
+}
+.wg-th .row {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.wg-th .row .b {
+  flex: none;
+}
+.wg-th .o {
+  width: 0.8em;
+  height: 0.8em;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, currentColor 45%, transparent);
+}
+.wg-th .row.sp {
+  justify-content: space-between;
+}
+.wg-th .row .s {
+  font-size: 0.6em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.wg-th .row .t {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.3em;
+  font-weight: 200;
+}
+.wg-th .bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 38%;
+  height: 2px;
+  background: var(--accent);
+}
+.wg-th .faders {
+  margin-top: auto;
+  height: 46%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0.3em;
+}
+.wg-th .faders i {
+  position: relative;
+  width: 2px;
+  border-radius: 2px;
+  background: color-mix(in srgb, currentColor 16%, transparent);
+}
+.wg-th .faders i::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--v);
+  border-radius: 2px;
+  background: var(--accent);
+}
+.wg-th .shot {
+  margin-top: 0.6em;
+  flex: 1;
+  border-radius: 0.5em;
+  background:
+    linear-gradient(color-mix(in srgb, currentColor 22%, transparent), color-mix(in srgb, currentColor 22%, transparent)) 0.7em 0.8em / 55% 0.4em no-repeat,
+    linear-gradient(color-mix(in srgb, currentColor 14%, transparent), color-mix(in srgb, currentColor 14%, transparent)) 0.7em 1.8em / 75% 0.4em no-repeat,
+    color-mix(in srgb, currentColor 7%, transparent);
+}
+
+.si-wg-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.si-wg-foot .primary-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* 設定のウィジェットタブ */
+.si-wg-set {
+  display: grid;
+  gap: 0;
+  margin-bottom: 8px;
+  border-top: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+}
+.si-wg-set-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 13px 4px;
+  border: 0;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.si-wg-set-pos {
+  width: 3.2em;
+  flex-shrink: 0;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, currentColor 50%, transparent);
+}
+.si-wg-set-name {
+  flex: 1;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+.si-wg-set-go {
+  display: inline-flex;
+  opacity: 0.4;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.si-wg-set-go .si-ic {
+  width: 15px;
+  height: 15px;
+}
+.si-wg-set-row:hover .si-wg-set-go {
+  opacity: 1;
+  transform: translateX(2px);
+}
+.si-wg-set-row:hover .si-wg-set-name {
+  color: var(--accent);
+}
+
+/* ホームの「入れ替え」 */
+.si-wg-swap {
+  position: fixed;
+  z-index: 9000;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 11px 0 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(18, 18, 22, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  font: 600 0.72rem/1 Inter, system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 4px);
+  transition: opacity 0.16s ease, transform 0.16s ease, background 0.15s;
+}
+.si-wg-swap.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+.si-wg-swap:hover {
+  background: rgba(30, 30, 36, 0.95);
+}
+.si-wg-swap .si-ic {
+  width: 13px;
+  height: 13px;
+  color: var(--accent);
+}
+body.paper-mode .si-wg-swap {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--rule);
+  box-shadow: 0 6px 18px -8px rgba(60, 45, 20, 0.4);
+  backdrop-filter: none;
+}
+body.paper-mode .si-wg-card.glass-card {
+  background: var(--paper) !important;
+  border-radius: 10px !important;
+}
+body.paper-mode .si-wg-foot .st-btn:not(.primary-btn) {
+  background: transparent !important;
+  border: 1px solid var(--rule) !important;
+  color: var(--ink) !important;
+}
+body.paper-mode .wg-th {
+  border-radius: 6px;
+  background: rgba(255, 253, 247, 0.7);
+}
+body.paper-mode .wg-th .word.jp,
+body.paper-mode .wg-th .big {
+  font-family: 'Shippori Mincho', 'Hiragino Mincho ProN', serif;
+}
+body.terminal-mode .wg-th,
+body.retro-mode .wg-th,
+body.terminal-mode .si-wg-swap {
+  border-radius: 0;
+}
+@media (max-width: 680px) {
+  .si-wg-body {
+    flex-direction: column;
+  }
+  .si-wg-column {
+    width: auto;
+    height: 92px;
+    flex-direction: row;
+  }
+  .si-wg-card {
+    padding: 20px 16px 16px !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #si-wg,
+  .si-wg-card,
+  .si-wg-tile.just .wg-th {
+    animation: none !important;
+  }
+}
+
+/* ---------------------------------------------------------- 使い方
+   更新のお知らせと同じ作法。番号は細く大きな数字。 */
+#si-howto {
+  z-index: 100000;
+}
+.si-ht-card {
+  width: min(440px, 92vw) !important;
+  max-width: 440px !important;
+}
+.si-ht-title {
+  margin: 6px 0 18px;
+  font-family: 'Inter', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 200;
+  letter-spacing: -0.01em;
+}
+.si-ht-step {
+  align-items: flex-start;
+  padding: 14px 0;
+}
+.si-ht-n {
+  width: 1.4em;
+  flex-shrink: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.9rem;
+  font-weight: 200;
+  line-height: 1;
+  color: var(--accent);
+}
+.si-ht-text {
+  font-size: 0.86rem;
+  line-height: 1.65;
+  opacity: 0.85;
+}
+.si-ht-link {
+  display: block;
+  margin: 6px auto 0;
+  padding: 2px 0;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  font-size: 0.72rem;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.si-ht-link:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+body.paper-mode .si-ht-title {
+  font-family: 'Shippori Mincho', 'Hiragino Mincho ProN', serif;
+  font-weight: 400;
+}
+body.paper-mode .si-wn-foot .primary-btn,
+body.paper-mode .si-wg-foot .primary-btn {
+  color: #fff !important;
+}
+
+/* ---------------------------------------------------------- 縦長の時計
+   iOS 26 のように、線の太さを保ったまま数字を縦に伸ばす。
+   数字は features/tall-clock.js が線画で組み立て、元の文字は隠す。 */
+#clock-tall {
+  display: none;
+  order: 1;
+  position: relative;
+  top: -8px;
+  align-items: flex-end;
+  justify-content: center;
+  margin: 0 0 18px;
+  cursor: pointer;
+  filter: drop-shadow(0 6px 26px rgba(0, 0, 0, 0.3));
+}
+#clock-tall svg {
+  display: block;
+  overflow: visible;
+}
+body.clock-tall:not(.np-stage) #clock-tall {
+  display: flex;
+}
+body.clock-tall:not(.np-stage) #clock-time {
+  display: none;
+}
+.clock-tall-suffix {
+  align-self: flex-end;
+  margin-left: 0.3em;
+  font-size: 1.6rem;
+  font-weight: 600;
+  opacity: 0.6;
+}
+body.paper-mode #clock-tall,
+body.yarn-mode #clock-tall {
+  filter: none;
+}
+body.terminal-mode #clock-tall {
+  filter: drop-shadow(0 0 10px currentColor);
+}
+
+/* ================================================================ 見た目の試作（features/lab.js） */
+
+/* 1. 一日で移ろう壁紙 */
+#si-sky {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+#si-sky::before,
+#si-sky .tint,
+#si-sky .shade {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+#si-sky::before {
+  background: linear-gradient(to bottom, var(--sky-top), var(--sky-bottom));
+  opacity: 0.35;
+}
+#si-sky .tint {
+  background: linear-gradient(to bottom, var(--sky-top), var(--sky-bottom));
+  mix-blend-mode: soft-light;
+}
+#si-sky .shade {
+  background: radial-gradient(ellipse 70% 60% at 50% 42%, rgba(4, 6, 18, calc(var(--sky-dark) * 0.55)), rgba(4, 6, 18, var(--sky-dark)));
+}
+
+/* 3. 画面の配置 */
+body.layout-minimal .col-left,
+body.layout-minimal .col-right {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+body.layout-minimal #clock-time {
+  font-size: calc(var(--clock-size) * 1.25);
+}
+body.layout-left #immersion-root {
+  grid-template-columns: 1fr 310px 310px;
+}
+body.layout-left .col-center {
+  order: -1;
+  justify-content: flex-end;
+  align-items: flex-start;
+  text-align: left;
+  padding: 0 0 26px 34px;
+}
+body.layout-left .clock-container {
+  align-items: flex-start;
+  text-align: left;
+}
+body.layout-left #clock-time {
+  font-size: calc(var(--clock-size) * 1.45);
+  letter-spacing: -0.05em;
+  margin-left: -0.04em;
+}
+body.layout-left #clock-tall {
+  justify-content: flex-start;
+}
+body.layout-left #quote-box,
+body.layout-left #memo-area {
+  text-align: left;
+  align-self: flex-start;
+}
+body.layout-left #memo-area {
+  width: min(560px, 100%);
+}
+body.layout-left #memo-input {
+  display: block;
+  width: 100%;
+  margin: 0;
+  text-align: left;
+}
+body.layout-left .search-wrapper {
+  align-self: flex-start;
+  width: min(560px, 100%);
+}
+body.layout-left #main-dock {
+  align-self: flex-start;
+}
+
+/* 4. 曲の色を画面全体に（色は Now Playing と同じ --np-c1〜3） */
+body.si-music-wash.si-playing #np-wash {
+  z-index: -1;
+  opacity: 0.62;
+  transition: opacity 1.2s ease;
+}
+/* --np-c1 は #immersion-root に付くので、そこで混ぜる */
+body.si-music-wash.si-playing #immersion-root {
+  --accent: color-mix(in srgb, var(--np-c1, #50e3c2) 62%, #fff);
+}
+body.si-music-wash.si-playing .glass-card {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--np-c1, #fff) 30%, transparent), 0 18px 50px -24px var(--np-c1, transparent) !important;
+}
+
+/* 5. 窓の外の天気 */
+#si-window {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+#si-window canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+#si-window.wx-night canvas {
+  mix-blend-mode: screen;
+  will-change: opacity;
+  animation: wxTwinkle 7s ease-in-out infinite alternate;
+}
+/* 瞬きは不透明度だけで動かす（filter を動かすと毎フレーム描き直しになり、待機中でも CPU 3% 前後かかった） */
+@keyframes wxTwinkle {
+  to {
+    opacity: 0.68;
+  }
+}
+#si-window .glow {
+  position: absolute;
+  right: -12vw;
+  top: -28vh;
+  width: 75vw;
+  height: 75vw;
+  background: radial-gradient(circle, rgba(255, 240, 205, 0.85), rgba(255, 216, 150, 0.32) 30%, rgba(255, 200, 130, 0.08) 50%, transparent 66%);
+  mix-blend-mode: screen;
+}
+#si-window .ray {
+  position: absolute;
+  top: -40%;
+  right: 12%;
+  width: 16vw;
+  height: 190%;
+  background: linear-gradient(to bottom, rgba(255, 242, 206, 0.42), rgba(255, 242, 206, 0) 75%);
+  transform-origin: 50% 0;
+  transform: rotate(32deg);
+  filter: blur(22px);
+  mix-blend-mode: screen;
+  animation: wxRay 16s ease-in-out infinite alternate;
+}
+#si-window .ray.r2 {
+  right: 24%;
+  width: 8vw;
+  transform: rotate(38deg);
+  animation-duration: 21s;
+  opacity: 0.8;
+}
+#si-window .ray.r3 {
+  right: 2%;
+  width: 11vw;
+  transform: rotate(26deg);
+  animation-duration: 26s;
+  opacity: 0.6;
+}
+@keyframes wxRay {
+  to {
+    opacity: 0.35;
+    translate: -3vw 0;
+  }
+}
+#si-window .fog {
+  position: absolute;
+  inset: -20% -40%;
+  background:
+    radial-gradient(ellipse 40% 30% at 30% 62%, rgba(226, 232, 238, 0.42), transparent 70%),
+    radial-gradient(ellipse 36% 26% at 72% 46%, rgba(226, 232, 238, 0.34), transparent 70%);
+  filter: blur(26px);
+  animation: wxFog 70s linear infinite alternate;
+}
+#si-window .fog.f2 {
+  animation-duration: 95s;
+  animation-direction: alternate-reverse;
+  opacity: 0.75;
+  top: 10%;
+}
+@keyframes wxFog {
+  to {
+    translate: 18% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #si-window *,
+  #si-window canvas {
+    animation: none !important;
+  }
+}
+
+/* ================================================================ Line テーマ
+   ガラスと同じ写真・同じ形のまま、ガラスの質感（すりガラスの塗り・ぼかし・影）を抜き、
+   輪郭の線だけを残す。時計の数字も一本の線で描く（features/tall-clock.js）。
+   選ばれている・押されているは、塗りではなく線の色（アクセント色）で示す。 */
+body.line-mode {
+  --line: rgba(255, 255, 255, 0.78);
+  --line-soft: rgba(255, 255, 255, 0.36);
+  --line-faint: rgba(255, 255, 255, 0.16);
+  --glass-bg: transparent;
+  --glass-border: var(--line);
+}
+
+/* 面：塗り・ぼかし・影を抜いて、輪郭だけ */
+body.line-mode .glass-card,
+body.line-mode .dock-item,
+body.line-mode .search-suggestions,
+body.line-mode .folder-submenu,
+body.line-mode .dock-context-menu,
+body.line-mode #app-launcher-menu,
+body.line-mode #si-quick-timer {
+  background: transparent !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+/* 写真の上の文字は、線を邪魔しない程度の淡い影で読ませる */
+body.line-mode .glass-card,
+body.line-mode #clock-date,
+body.line-mode #quote-box,
+body.line-mode .dock-item {
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
+}
+body.line-mode .glass-card:hover {
+  border-color: #fff !important;
+}
+
+/* 重なる画面（設定・カード選び・お知らせ）：下を暗く沈め、面は線だけ */
+body.line-mode .overlay-modal {
+  background: rgba(0, 0, 0, 0.78) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body.line-mode .overlay-modal .glass-card,
+body.line-mode .settings-window,
+body.line-mode .setup-card,
+body.line-mode .modal-card {
+  /* 透かすと後ろの時計やカードの線と重なって読めないので、ここだけは暗い面で隠す */
+  background: rgba(8, 9, 12, 0.94) !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body.line-mode .search-suggestions,
+body.line-mode .folder-submenu,
+body.line-mode .dock-context-menu,
+body.line-mode #app-launcher-menu {
+  background: rgba(0, 0, 0, 0.55) !important;
+}
+
+/* 時計：数字を一本の線で描く */
+body.line-mode:not(.np-stage) #clock-tall {
+  display: flex;
+  filter: drop-shadow(0 2px 14px rgba(0, 0, 0, 0.35));
+}
+body.line-mode:not(.np-stage) #clock-time {
+  display: none;
+}
+body.line-mode .clock-tall-suffix {
+  font-weight: 300;
+}
+
+/* 区切り線 */
+body.line-mode .aw-forecast,
+body.line-mode .todo-item,
+body.line-mode .si-card-foot {
+  border-color: var(--line-faint) !important;
+}
+body.line-mode .dock-separator {
+  background: var(--line-soft) !important;
+}
+
+/* 検索：同じ丸い形の、線だけ */
+body.line-mode #search-input {
+  background: transparent !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body.line-mode #search-input:focus {
+  border-color: var(--accent) !important;
+}
+body.line-mode #memo-input {
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+body.line-mode .suggestion-item.active,
+body.line-mode .suggestion-item:hover {
+  background: transparent !important;
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+}
+
+/* アイコン：塗りの絵も、輪郭の線として描く */
+body.line-mode .dock-item svg,
+body.line-mode .dock-item svg *,
+body.line-mode #google-lens-btn svg,
+body.line-mode #google-lens-btn svg *,
+body.line-mode #app-launcher-btn svg,
+body.line-mode #app-launcher-btn svg *,
+body.line-mode .st-tab-btn svg,
+body.line-mode .st-tab-btn svg * {
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.2px;
+}
+body.line-mode .dock-item svg,
+body.line-mode #google-lens-btn svg,
+body.line-mode #app-launcher-btn svg {
+  overflow: visible;
+}
+body.line-mode .dock-item {
+  color: #fff !important;
+}
+body.line-mode .dock-item:hover {
+  border-color: #fff !important;
+  background: transparent !important;
+}
+
+/* 入力・ボタン：塗らずに枠だけ */
+body.line-mode .st-input,
+body.line-mode .st-select,
+body.line-mode .st-btn,
+body.line-mode .st-btn-small,
+body.line-mode .setup-btn,
+body.line-mode .play-btn,
+body.line-mode .close-modal-btn,
+body.line-mode .todo-input,
+body.line-mode .timer-input,
+body.line-mode .lang-selector-container {
+  background: transparent !important;
+  border: 1px solid var(--line-soft) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  color: #fff !important;
+}
+body.line-mode .st-select option {
+  background: #111;
+}
+body.line-mode .st-input:focus,
+body.line-mode .st-select:focus,
+body.line-mode .st-btn:hover,
+body.line-mode .st-btn-small:hover,
+body.line-mode .setup-btn:hover,
+body.line-mode .play-btn:hover,
+body.line-mode .close-modal-btn:hover {
+  background: transparent !important;
+  border-color: #fff !important;
+  opacity: 1;
+}
+body.line-mode .st-btn.primary-btn,
+body.line-mode .setup-btn.primary-btn,
+body.line-mode .primary-btn {
+  background: transparent !important;
+  border: 1px solid var(--accent) !important;
+  color: var(--accent) !important;
+}
+body.line-mode .st-btn.danger-btn {
+  background: transparent !important;
+  border-color: rgba(255, 69, 58, 0.6) !important;
+  color: #ff6b61 !important;
+}
+/* もともと枠のない小さなボタンは、枠を足さない */
+body.line-mode .ctrl-btn,
+body.line-mode .si-head-btn,
+body.line-mode .si-icon-btn,
+body.line-mode .si-chip,
+body.line-mode .rl-btn,
+body.line-mode .fg-len {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* 設定 */
+body.line-mode .st-sidebar {
+  background: transparent !important;
+  border-right: 1px solid var(--line-faint) !important;
+}
+body.line-mode .st-tab-btn.active {
+  background: transparent !important;
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+}
+body.line-mode .st-tab-btn:hover {
+  background: transparent !important;
+}
+body.line-mode .st-row {
+  background: transparent !important;
+  border-color: var(--line-faint) !important;
+}
+
+/* スイッチ：輪郭の中を点が動く。オンは点と線がアクセント色になる */
+body.line-mode .toggle-switch .slider {
+  background: transparent !important;
+  border: 1px solid var(--line-soft) !important;
+}
+body.line-mode .toggle-switch .slider::before {
+  background: transparent !important;
+  border: 1px solid #fff;
+  box-shadow: none !important;
+  box-sizing: border-box;
+}
+body.line-mode .toggle-switch input:checked + .slider {
+  background: transparent !important;
+  border-color: var(--accent) !important;
+}
+body.line-mode .toggle-switch input:checked + .slider::before {
+  background: var(--accent) !important;
+  border-color: var(--accent);
+}
+body.line-mode .st-range {
+  background: transparent !important;
+  height: 1px !important;
+  background-color: var(--line-soft) !important;
+}
+body.line-mode .st-range::-webkit-slider-thumb {
+  background: transparent !important;
+  border: 1px solid #fff !important;
+  box-shadow: none !important;
+}
+
+/* 今日・選択中：塗らずに線で囲む */
+body.line-mode .cal-today {
+  background: transparent !important;
+  color: var(--accent) !important;
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+body.line-mode .cal-cell:hover {
+  background: transparent !important;
+  box-shadow: inset 0 0 0 1px var(--line-soft);
+}
+body.line-mode .todo-item .todo-check {
+  background: transparent !important;
+  border: 1px solid var(--line) !important;
+}
+body.line-mode .wg-th {
+  background: transparent !important;
+  border: 1px solid var(--line-soft) !important;
+  box-shadow: none !important;
+}
+body.line-mode .si-wg-slot:hover .wg-th,
+body.line-mode .si-wg-tile:hover .wg-th {
+  border-color: var(--line) !important;
+}
+body.line-mode .si-wg-slot.active .wg-th,
+body.line-mode .si-wg-tile.current .wg-th {
+  border-color: var(--accent) !important;
+}
+body.line-mode .wiz-theme-card {
+  background: transparent !important;
+  border: 1px solid var(--line-faint) !important;
+}
+body.line-mode .wiz-theme-card.selected {
+  border-color: var(--accent) !important;
+}
+body.line-mode .wiz-dot {
+  height: 1px;
+  background: var(--line-soft) !important;
+}
+body.line-mode .wiz-dot.active {
+  background: var(--accent) !important;
+}
+
+/* 進み具合のバー：細い線 */
+body.line-mode .np-progress,
+body.line-mode .fg-bar,
+body.line-mode .timer-progress-bar {
+  background: var(--line-faint) !important;
+}
+body.line-mode .album-art-wrapper {
+  box-shadow: none !important;
+}
+body.line-mode .particle-percent,
+body.line-mode .cnt-sub-wrapper {
+  background: transparent !important;
+  backdrop-filter: none !important;
+}
+
+/* 年の進み具合（全テーマ共通）：52 週を縦線の目盛りで見せる。
+   過ぎた週は長い線、今週はアクセント色、残りは短く薄い線。色は文字色に合わせる */
+#card-particle .p-ruler {
+  display: flex;
+  position: absolute;
+  left: 22px;
+  right: 22px;
+  bottom: 22px;
+  height: 34px;
+  align-items: flex-end;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.p-ruler i {
+  width: 1px;
+  height: 38%;
+  background: currentColor;
+  opacity: 0.32;
+}
+.p-ruler i.done {
+  height: 100%;
+  opacity: 0.85;
+}
+.p-ruler i.now {
+  height: 100%;
+  background: var(--accent);
+  opacity: 1;
+}
+.p-ruler i.month:not(.done):not(.now) {
+  height: 58%;
+}
+#card-particle .particle-footer {
+  bottom: 66px;
+}
+/* 割合は目盛りの右上に、小さな数字だけで置く（バッジにしない） */
+#card-particle .particle-percent {
+  background: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  color: inherit !important;
+  opacity: 0.7;
+}
+body.line-mode .particle-days {
+  font-weight: 200 !important;
+}
+body.line-mode .particle-percent {
+  font-family: 'Inter', sans-serif;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+.wiz-theme-card[data-theme='line'] .wiz-theme-swatch {
+  background: transparent !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.85);
+}
+
+/* リキッドグラスの縦長時計：元の時計と同じく、数字の形に切り抜いた壁紙を白く曇らせて見せる
+   （マスクは features/tall-clock.js が数字の線から作る） */
+body.liquidglass-mode.lg-has-wall #clock-tall svg {
+  visibility: hidden;
+}
+body.liquidglass-mode.lg-has-wall #clock-tall {
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.55)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35))
+    drop-shadow(0 8px 18px rgba(0, 0, 0, 0.4));
+}
+.ct-glass {
+  display: none;
+}
+body.liquidglass-mode.lg-has-wall .ct-glass {
+  display: block;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.12)), var(--lg-wall);
+  background-size: auto, var(--lg-w-size, cover);
+  background-position: center, var(--lg-pos, center);
+  background-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+body.liquidglass-mode #clock-tall .clock-tall-suffix {
+  color: rgba(255, 255, 255, 0.75);
+}
+body.yarn-mode .p-ruler i.now {
+  background: var(--yarn-accent, #e69191);
+}

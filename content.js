@@ -1,3 +1,72 @@
+/* ------------------------------------------------------------ 線画アイコン
+   絵文字は OS ごとに字形・色・大きさが変わり、画面の一部だけ別の世界になる。
+   UI の記号はすべてここの線画に揃える（24px グリッド・線幅 1.8・角丸）。 */
+const SI_ICON_PATHS = {
+  refresh: '<path d="M19.5 11.5a7.5 7.5 0 1 0-2.2 5.3"/><path d="M19.5 4.5v7h-7"/>',
+  external: '<path d="M14 4.5h5.5V10"/><path d="M19.5 4.5 11 13"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/>',
+  close: '<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+  chevL: '<path d="m14.5 5.5-6.5 6.5 6.5 6.5"/>',
+  chevR: '<path d="m9.5 5.5 6.5 6.5-6.5 6.5"/>',
+  chevU: '<path d="m5.5 14.5 6.5-6.5 6.5 6.5"/>',
+  chevD: '<path d="m5.5 9.5 6.5 6.5 6.5-6.5"/>',
+  plus: '<path d="M12 5.5v13M5.5 12h13"/>',
+  play: '<path d="M8.5 5.8v12.4a.8.8 0 0 0 1.2.7l9.8-6.2a.8.8 0 0 0 0-1.4L9.7 5.1a.8.8 0 0 0-1.2.7Z" fill="currentColor" stroke="none"/>',
+  pause: '<rect x="7" y="5.5" width="3.4" height="13" rx="1.1" fill="currentColor" stroke="none"/><rect x="13.6" y="5.5" width="3.4" height="13" rx="1.1" fill="currentColor" stroke="none"/>',
+  stop: '<rect x="6.5" y="6.5" width="11" height="11" rx="2.2" fill="currentColor" stroke="none"/>',
+  check: '<path d="m5.5 12.5 4.2 4.2 8.8-9.2"/>',
+  undo: '<path d="M9 13.5 4.5 9 9 4.5"/><path d="M4.5 9h10a5 5 0 0 1 0 10H11"/>',
+  star: '<path d="m12 4 2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 16.4l-4.8 2.5.9-5.4-3.9-3.8 5.4-.8Z"/>',
+  starFill: '<path d="m12 4 2.4 4.9 5.4.8-3.9 3.8.9 5.4L12 16.4l-4.8 2.5.9-5.4-3.9-3.8 5.4-.8Z" fill="currentColor"/>',
+  scissors: '<circle cx="6.5" cy="6.5" r="2.7"/><circle cx="6.5" cy="17.5" r="2.7"/><path d="M8.7 8.2 19.5 17.5M8.7 15.8 19.5 6.5"/>',
+  text: '<path d="M5 6.5h14M5 10.5h14M5 14.5h10M5 18.5h6"/>',
+  image: '<rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="10" r="1.7"/><path d="m4 17 4.8-4.3 3.7 3.2 2.8-2.3 4.2 3.4"/>',
+  timer: '<circle cx="12" cy="13.5" r="7"/><path d="M12 10v3.5l2.3 1.5M9.5 3.5h5"/>',
+  rain: '<path d="M7.6 14.5h8.9a3.4 3.4 0 0 0 .4-6.8 5.2 5.2 0 0 0-10-.9 3.9 3.9 0 0 0 .7 7.7Z"/><path d="m9 17.5-.8 2.2M12.5 17.5l-.8 2.2M16 17.5l-.8 2.2"/>',
+  wind: '<path d="M3.5 9h10.2a2.8 2.8 0 1 0-2.8-2.8"/><path d="M3.5 13h14.3a2.8 2.8 0 1 1-2.8 2.8"/><path d="M3.5 17h6"/>',
+  waves: '<path d="M3 8.5c1.8 0 1.8-1.4 3.6-1.4s1.8 1.4 3.6 1.4 1.8-1.4 3.6-1.4 1.8 1.4 3.6 1.4 1.8-1.4 3.6-1.4"/><path d="M3 13c1.8 0 1.8-1.4 3.6-1.4s1.8 1.4 3.6 1.4 1.8-1.4 3.6-1.4 1.8 1.4 3.6 1.4 1.8-1.4 3.6-1.4"/><path d="M3 17.5c1.8 0 1.8-1.4 3.6-1.4s1.8 1.4 3.6 1.4 1.8-1.4 3.6-1.4 1.8 1.4 3.6 1.4 1.8-1.4 3.6-1.4"/>',
+  flame: '<path d="M12 20.5c-3.4 0-5.7-2.3-5.7-5.4 0-3.3 2.5-5 3.2-8 .8 1.2 1.2 2.3 1.2 3.4 1.4-1 2.5-3 2.5-6.3 3 2.2 4.5 6.1 4.5 9.6 0 3.5-2.3 6.7-5.7 6.7Z"/>',
+  droplet: '<path d="M12 3.8c2.9 3.8 5.3 6.8 5.3 9.9a5.3 5.3 0 0 1-10.6 0c0-3.1 2.4-6.1 5.3-9.9Z"/>',
+  moon: '<path d="M18.5 14.6A7.2 7.2 0 0 1 9.4 5.5a7.2 7.2 0 1 0 9.1 9.1Z"/><path d="M16.5 4v3M15 5.5h3"/>',
+  noise: '<path d="M3 12h2.2l1.9-4.6 2.8 9.2 2.8-11.2 2.8 11.2 1.9-4.6H21"/>',
+  command: '<path d="m5.5 8 4 4-4 4M11.5 16h7"/>',
+  arrow: '<path d="M5 12h13.5M13 6.5l5.5 5.5-5.5 5.5"/>',
+  calc: '<rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M8.5 7.5h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 15.8h.01M12 15.8h.01M15.5 15.8h.01"/>',
+  book: '<path d="M4.5 5h5a2.5 2.5 0 0 1 2.5 2.5V20a1.8 1.8 0 0 0-1.8-1.8H4.5Z"/><path d="M19.5 5h-5A2.5 2.5 0 0 0 12 7.5V20a1.8 1.8 0 0 1 1.8-1.8h5.7Z"/>',
+  globe: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.3 2.4 3.4 5.2 3.4 8.5s-1.1 6.1-3.4 8.5c-2.3-2.4-3.4-5.2-3.4-8.5S9.7 5.9 12 3.5Z"/>',
+  bolt: '<path d="M13 3.5 5.5 13.5h6l-1 7 7.5-10h-6Z"/>',
+  sprout: '<path d="M12 20.5V12"/><path d="M12 12c0-3.8-2.8-6-6.8-6 0 3.8 2.8 6 6.8 6Z"/><path d="M12 14.2c0-3.3 2.5-5.4 6.3-5.4 0 3.3-2.5 5.4-6.3 5.4Z"/>',
+  headphones: '<path d="M4.5 15.5V12a7.5 7.5 0 0 1 15 0v3.5"/><rect x="3.5" y="14" width="4" height="6" rx="1.5"/><rect x="16.5" y="14" width="4" height="6" rx="1.5"/>',
+  layers: '<path d="m12 4.5 8.5 4.3L12 13 3.5 8.8Z"/><path d="m3.5 12.6 8.5 4.3 8.5-4.3"/><path d="m3.5 16.3 8.5 4.2 8.5-4.2"/>',
+  pencil: '<path d="M15.2 4.8a2 2 0 0 1 2.8 0l1.2 1.2a2 2 0 0 1 0 2.8L8.8 19.2 4.5 19.5l.3-4.3Z"/><path d="m13.5 6.5 4 4"/>',
+  trash: '<path d="M4.5 7h15M9.5 7V4.8h5V7M6.5 7l.9 12.5h9.2l.9-12.5"/>',
+  link: '<path d="M10.5 13.5a3.8 3.8 0 0 0 5.4 0l2.8-2.8a3.8 3.8 0 0 0-5.4-5.4l-.9.9"/><path d="M13.5 10.5a3.8 3.8 0 0 0-5.4 0l-2.8 2.8a3.8 3.8 0 0 0 5.4 5.4l.9-.9"/>',
+  alert: '<path d="M10.3 4.9a2 2 0 0 1 3.4 0l7 12.2a2 2 0 0 1-1.7 3H5a2 2 0 0 1-1.7-3Z"/><path d="M12 10v4M12 17v.01"/>',
+  seismo: '<path d="M3 12.5h3.5L8.5 7l3 11 2.6-8.5 1.9 3H21"/>',
+  download: '<path d="M12 4.5v10.5M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/>',
+  sparkle: '<path d="M12 4c.6 3.9 2.1 5.4 6 6-3.9.6-5.4 2.1-6 6-.6-3.9-2.1-5.4-6-6 3.9-.6 5.4-2.1 6-6Z"/><path d="M18.5 15.5c.2 1.4.8 2 2.2 2.2-1.4.2-2 .8-2.2 2.2-.2-1.4-.8-2-2.2-2.2 1.4-.2 2-.8 2.2-2.2Z"/>',
+  clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 1.8"/>',
+  search: '<circle cx="11" cy="11" r="6.5"/><path d="M15.8 15.8 20 20"/>',
+  tab: '<rect x="3" y="5" width="18" height="14" rx="2.2"/><path d="M3 9.2h18M8.2 5v4.2"/>',
+  bookmark: '<path d="M7 3.5h10a1 1 0 0 1 1 1V21l-6-4-6 4V4.5a1 1 0 0 1 1-1Z"/>',
+  cloud: '<path d="M7.4 18.5h9.4a3.9 3.9 0 0 0 .5-7.8 5.6 5.6 0 0 0-10.8-1 4.4 4.4 0 0 0 .9 8.8Z"/>',
+  news: '<rect x="3.5" y="5" width="13.5" height="14.5" rx="2"/><path d="M17 9h2.5a1 1 0 0 1 1 1v7.2a2.3 2.3 0 0 1-2.3 2.3H17"/><path d="M7 9h6.5M7 12.5h6.5M7 16h4"/>',
+  calendar: '<rect x="4" y="5.5" width="16" height="14.5" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/>',
+  checklist: '<path d="m4 7.3 1.7 1.7 3-3.1M4 15.3 5.7 17l3-3.1"/><path d="M12 7.8h8M12 15.8h8"/>',
+  progress: '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5V12h8.5"/>',
+  brush: '<path d="m13.8 4.6 5.6 5.6-7.6 7.6-5.6-5.6Z"/><path d="M6.2 12.2c-2.1.9-2.7 3.4-2.7 7.3 3.9 0 6.4-.6 7.3-2.7"/>',
+  grid: '<rect x="4" y="4" width="7" height="7" rx="1.8"/><rect x="13" y="4" width="7" height="7" rx="1.8"/><rect x="4" y="13" width="7" height="7" rx="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.8"/>',
+  swap: '<path d="M16.5 3.5 20 7l-3.5 3.5M20 7H8"/><path d="M7.5 20.5 4 17l3.5-3.5M4 17h12"/>',
+};
+const SI_LINK_ICON =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+  SI_ICON_PATHS.link +
+  '</svg>';
+function siIcon(name, cls) {
+  const body = SI_ICON_PATHS[name] || '';
+  return `<svg class="si-ic${cls ? ' ' + cls : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+}
+
+
 let burnInInterval = null;
 let currentEventKey = null;
 let calendarDisplayDate = new Date();
@@ -11,6 +80,7 @@ const defaultSettings = {
   bgOpacity: '1.0',
   glassOpacity: '0.55',
   clockSize: '10',
+  clockStretch: '1',
   idleImgUrl: '',
   cntTitle: 'イベント',
   cntDate: '',
@@ -53,7 +123,7 @@ const defaultSettings = {
   ambientNightBrightness: '65',
   themeMode: 'glass',
   language: 'auto',
-  bgBlur: '50',
+  bgBlur: '24',
   calendarUrls: [],
   use12hFormat: false,
   module1: 'weather',
@@ -93,7 +163,7 @@ const MODULE_DEFS = {
       <div class="glass-card tilt-card module-card english-card" id="card-english">
         <div class="eng-header">
           <span class="label-std">WORD OF THE MOMENT</span>
-          <button class="eng-reload-btn" title="Next Word">↻</button>
+          <button class="eng-reload-btn" title="Next Word">${siIcon('refresh')}</button>
         </div>
 
         <div class="eng-content-wrapper">
@@ -124,7 +194,7 @@ const MODULE_DEFS = {
       <div class="glass-card tilt-card module-card japanese-card" id="card-japanese">
         <div class="jp-header">
           <span class="label-std">今日の言葉</span>
-          <button class="jp-reload-btn" title="次の言葉">↻</button>
+          <button class="jp-reload-btn" title="次の言葉">${siIcon('refresh')}</button>
         </div>
 
         <div class="jp-content-wrapper">
@@ -153,8 +223,6 @@ const MODULE_DEFS = {
           <div class="particle-days"><span class="p-days-val">--</span></div>
           <div class="p-days-unit">DAYS LEFT</div>
         </div>
-
-        <canvas id="particle-canvas"></canvas>
 
         <div class="particle-footer">
           <div class="particle-percent">--%</div>
@@ -242,7 +310,7 @@ const MODULE_DEFS = {
     html: `
       <div class="glass-card tilt-card module-card eq-card" id="card-earthquake">
         <div class="label-std">EARTHQUAKE INFO</div>
-        <div class="eq-status-icon">🌊</div>
+        <div class="eq-status-icon">${siIcon('seismo')}</div>
         <div class="eq-main-wrapper">
           <div class="eq-shindo-label">最大震度</div>
           <div class="eq-shindo-value">--</div>
@@ -261,27 +329,6 @@ const MODULE_DEFS = {
     `,
   },
 
-  currency: {
-    id: 'currency',
-    html: `
-      <div class="glass-card tilt-card module-card currency-card" id="card-currency">
-        <div class="label-std">USD/JPY RATE</div>
-        <div class="curr-icon-bg">$</div>
-        <div class="curr-main-wrapper">
-          <div class="curr-row">
-            <span class="curr-symbol">¥</span>
-            <span class="curr-value">---.--</span>
-          </div>
-        </div>
-        <div class="curr-footer">
-          <span class="curr-update">Updating...</span>
-        </div>
-        <div class="eq-source">
-          Rates By <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer">ExchangeRate-API.com</a>
-        </div>
-        </div>
-    `,
-  },
   none: {
     id: 'none',
     html: '',
@@ -290,13 +337,168 @@ const MODULE_DEFS = {
 
 let googleEventsCache = {};
 
+/* ------------------------------------------------------------------ v28 共通
+   文字列は必ずここを通してから HTML に入れる。履歴・検索候補・ToDo・インポート値など、
+   外から来た文字列をそのまま innerHTML に入れていた箇所があった。 */
+function escapeHTML(value) {
+  return String(value ?? '').replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
+  );
+}
+
+/* 設定は 1 画面で何百回も読まれる（t() は呼ばれるたびに JSON.parse していた）。
+   文字列が変わったときだけ解析し直す。 */
+const __prefsCache = { raw: null, value: null };
+function getPrefs() {
+  let raw = null;
+  try {
+    raw = localStorage.getItem('immersion_prefs');
+  } catch (e) {}
+  if (raw === __prefsCache.raw && __prefsCache.value) return __prefsCache.value;
+  let parsed = null;
+  try {
+    parsed = raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    parsed = null;
+  }
+  __prefsCache.raw = raw;
+  __prefsCache.value = parsed && typeof parsed === 'object' ? { ...defaultSettings, ...parsed } : { ...defaultSettings };
+  return __prefsCache.value;
+}
+
+function setPrefs(patch) {
+  const next = { ...getPrefs(), ...patch };
+  localStorage.setItem('immersion_prefs', JSON.stringify(next));
+  return next;
+}
+
+/* 周期処理は、タブが裏にある間は休み、戻ってきたときに 1 回すぐ動かす。
+   裏のタブでも毎秒 DOM を書き換えたり、3 秒ごとに音楽タブへ問い合わせたりしていた */
+function siEvery(fn, ms) {
+  let last = Date.now();
+  const run = () => {
+    last = Date.now();
+    fn();
+  };
+  const id = setInterval(() => {
+    if (!document.hidden) run();
+  }, ms);
+  /* 通信を伴う長い周期のもの（地震・カレンダー）は、戻るたびに取り直さないよう間隔の半分は空ける */
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && (ms <= 5000 || Date.now() - last >= ms / 2)) run();
+  });
+  return id;
+}
+
+/* カードで取得に失敗したときの表示。理由を一行と、次にすることのボタンひとつ */
+function siCardNotice(text, actionLabel, onAction) {
+  const wrap = document.createElement('div');
+  wrap.className = 'si-card-empty';
+  wrap.appendChild(document.createTextNode(text));
+  if (actionLabel && onAction) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'si-ht-link';
+    b.textContent = actionLabel;
+    b.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onAction();
+    };
+    wrap.appendChild(b);
+  }
+  return wrap;
+}
+function siOpenSettings(tab) {
+  document.getElementById('settings-btn')?.click();
+  if (tab) document.querySelector(`.st-tab-btn[data-tab="${tab}"]`)?.click();
+}
+
+/* 新機能は features/*.js に分け、ここへ登録してもらう。
+   init は画面の組み立てが終わったあとに順に呼ばれる。 */
+window.SI = window.SI || { features: [], suggestProviders: [], commands: [] };
+function siRegister(feature) {
+  window.SI.features.push(feature);
+  if (feature.modules) Object.assign(MODULE_DEFS, feature.modules);
+}
+function siRunFeatures() {
+  window.SI.features.forEach((f) => {
+    try {
+      f.init && f.init();
+    } catch (e) {
+      console.warn('[Search Immersion] feature init failed:', f.id, e);
+    }
+  });
+}
+
+/* ------------------------------------------------------------ Web フォント
+   以前は styles.css 先頭の @import で 19 書体をまとめて要求していた。
+   @import は描画を止めるうえ、オフラインだと待たされる。
+   今の設定で使う書体だけを、描画を止めない <link> で足す。 */
+const SI_FONT_QUERY = {
+  Inter: 'Inter:wght@200;400;600;800',
+  'JetBrains Mono': 'JetBrains+Mono:wght@400;700',
+  'Shippori Mincho': 'Shippori+Mincho:wght@400;700',
+  'Noto Sans JP': 'Noto+Sans+JP:wght@100..900',
+  'M PLUS Rounded 1c': 'M+PLUS+Rounded+1c:wght@400;700;800',
+  DotGothic16: 'DotGothic16',
+  Antonio: 'Antonio:wght@100..700',
+  'Bebas Neue': 'Bebas+Neue',
+  Orbitron: 'Orbitron:wght@400;700;900',
+  Rajdhani: 'Rajdhani:wght@300;500;700',
+  Audiowide: 'Audiowide',
+  'Exo 2': 'Exo+2:wght@300;600;800',
+  Saira: 'Saira:wght@300;500;700',
+  Righteous: 'Righteous',
+  Monoton: 'Monoton',
+  'Russo One': 'Russo+One',
+  Bungee: 'Bungee',
+  'Fredoka One': 'Fredoka+One',
+  Ubuntu: 'Ubuntu:wght@300;500;700',
+  'Chakra Petch': 'Chakra+Petch:wght@400;600;700',
+  Teko: 'Teko:wght@400;600;700',
+  Fraunces: 'Fraunces:opsz,wght@9..144,300..700',
+};
+const __siFontsLoaded = new Set();
+function siLoadFonts(extra) {
+  const prefs = getPrefs();
+  const want = new Set(['Inter', 'JetBrains Mono']);
+  const theme = prefs.themeMode;
+  if (theme === 'retro' || theme === 'terminal') want.add('DotGothic16');
+  if (theme === 'yarn') want.add('M PLUS Rounded 1c');
+  if (theme === 'paper') {
+    want.add('Shippori Mincho');
+    want.add('Fraunces');
+  }
+  const mods = [prefs.module1, prefs.module2, prefs.module3];
+  if (mods.includes('japanese')) want.add('Shippori Mincho');
+  if (!/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) want.add('Noto Sans JP');
+  const clock = String(prefs.clockFont || '');
+  Object.keys(SI_FONT_QUERY).forEach((fam) => {
+    if (clock.includes(fam)) want.add(fam);
+  });
+  (extra || []).forEach((f) => want.add(f));
+
+  const missing = [...want].filter((f) => SI_FONT_QUERY[f] && !__siFontsLoaded.has(f));
+  if (!missing.length) return;
+  missing.forEach((f) => __siFontsLoaded.add(f));
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href =
+    'https://fonts.googleapis.com/css2?' +
+    missing.map((f) => 'family=' + SI_FONT_QUERY[f]).join('&') +
+    '&display=swap';
+  document.head.appendChild(link);
+}
+
 function t(key, params = {}) {
   const translations = window.immersion_i18n || {};
-  const prefs = JSON.parse(localStorage.getItem('immersion_prefs')) || defaultSettings;
+  const prefs = getPrefs();
   let lang = prefs.language || 'auto';
   if (lang === 'auto') {
     const navLang = navigator.language.slice(0, 2);
-    lang = navLang === 'ja' || navLang === 'ko' || navLang === 'zh' ? navLang : 'en';
+    lang = navLang === 'ja' || navLang === 'ko' ? navLang : navLang === 'zh' ? 'zh_cn' : 'en';
   }
   const dict = translations[lang] || translations.en || {};
   const enDict = translations.en || {};
@@ -456,7 +658,7 @@ function lgFilterForSize(w, h, radius) {
 const __lg = { iw: 0, ih: 0, wallKey: '', wired: false, alignQueued: false, revealed: false };
 
 const __lgSizeMemo = new WeakMap();
-const LG_SURFACE_SEL = '.glass-card, .dock-item, #search-input, #clock-time';
+const LG_SURFACE_SEL = '.glass-card, .dock-item, #search-input, #clock-time, #clock-tall';
 
 function lgCurrentWallUrl() {
   const bg = document.getElementById('bg-layer-original');
@@ -587,7 +789,7 @@ function setupLiquidGlass() {
   if ('ResizeObserver' in window) {
     const ro = new ResizeObserver(() => lgRequestAlign());
     const observeAll = () =>
-      document.querySelectorAll('.glass-card, .dock-item, #clock-time, .col').forEach((el) => {
+      document.querySelectorAll('.glass-card, .dock-item, #clock-time, #clock-tall, .col').forEach((el) => {
         try {
           ro.observe(el);
         } catch (e) {}
@@ -618,6 +820,9 @@ const defaultWallpapers = [
   'wallpapers/bg3.webp',
   'wallpapers/bg4.webp',
   'wallpapers/bg5.webp',
+  'wallpapers/bg6.webp',
+  'wallpapers/bg7.webp',
+  'wallpapers/bg8.webp',
 ].map((path) => chrome.runtime.getURL(path));
 
 const defaultDockItems = [
@@ -680,9 +885,11 @@ function initNestHub() {
 
   let leftColumnHTML = '';
 
-  activeModules.forEach((key) => {
-    if (MODULE_DEFS[key]) {
-      leftColumnHTML += MODULE_DEFS[key].html;
+  /* 各カードの外枠に、どの枠のカードかを書いておく。
+     Now Playing の舞台ではカードが列をまたいで動くため、並び順では枠を特定できない。 */
+  activeModules.forEach((key, i) => {
+    if (MODULE_DEFS[key] && MODULE_DEFS[key].html) {
+      leftColumnHTML += MODULE_DEFS[key].html.replace('<div ', `<div data-si-slot="${i + 1}" `);
     }
   });
 
@@ -699,6 +906,7 @@ function initNestHub() {
     <video id="bg-video" autoplay loop muted playsinline style="position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: -3; opacity: 0; transition: opacity 1s ease-in-out;"></video>
     <div id="bg-layer-original" class="bg-layer"></div>
     <div id="bg-layer-blurred" class="bg-layer"></div>
+    <div id="np-wash"></div>
 
     <div class="col col-left">
       ${leftColumnHTML}
@@ -716,7 +924,7 @@ function initNestHub() {
       </div>
 
       <div id="memo-area">
-        <input type="text" id="memo-input" placeholder="${t('memo_placeholder')}" value="${savedMemo}" autocomplete="off">
+        <input type="text" id="memo-input" placeholder="${t('memo_placeholder')}" value="${escapeHTML(savedMemo)}" autocomplete="off">
       </div>
 
       <div class="search-wrapper">
@@ -742,21 +950,26 @@ function initNestHub() {
       <div id="music-card-container" class="glass-card tilt-card music-idle">
         <div class="music-source-indicator" id="music-source-indicator"></div>
         <div class="music-panel">
-          <div class="album-art-wrapper">
+          <div class="album-art-wrapper" id="album-art-wrapper">
             <div class="album-art" id="album-art"></div>
             <div class="lyrics-overlay" id="lyrics-overlay">
               <div class="lyrics-text" id="lyrics-text"></div>
             </div>
-            <div class="lyrics-toggle-btn" id="lyrics-toggle-btn" title="Lyrics">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.54.36 2.98.97 4.29L2 22l5.71-1.97A9.957 9.957 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-1.28 0-2.5-.27-3.61-.75l-2.43.84.84-2.43C6.27 16.5 6 15.28 6 14c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8z"/><path d="M8 11h8v2H8zm0-3h8v2H8zm0 6h5v2H8z"/></svg>
-            </div>
           </div>
           <div class="track-info-wrap"><span class="track-title" id="track-title">Title</span></div>
           <div class="track-artist" id="track-artist">Artist</div>
+          <div class="np-progress" id="np-progress">
+            <span class="np-time" id="np-elapsed">0:00</span>
+            <div class="np-track"><div class="np-fill" id="np-fill"></div></div>
+            <span class="np-time" id="np-remain">-0:00</span>
+          </div>
           <div class="controls">
              <div class="ctrl-btn" id="btn-prev"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M11.22 11.15 19.3 5.76c.72-.48 1.7.04 1.7.9v10.68c0 .86-.98 1.38-1.7.9l-8.08-5.39a1.01 1.01 0 0 1 0-1.7ZM2.22 11.15 10.3 5.76c.72-.48 1.7.04 1.7.9v10.68c0 .86-.98 1.38-1.7.9L2.22 12.85a1.01 1.01 0 0 1 0-1.7Z"/></svg></div>
              <div class="ctrl-btn play-btn" id="btn-play"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 5.224v13.552a1.5 1.5 0 0 0 2.296 1.272l10.842-6.776a1.5 1.5 0 0 0 0-2.544L9.296 3.952A1.5 1.5 0 0 0 7 5.224Z"/></svg></div>
              <div class="ctrl-btn" id="btn-next"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12.78 12.85 4.7 18.24c-.72.48-1.7-.04-1.7-.9V6.66c0-.86.98-1.38 1.7-.9l8.08 5.39a1.01 1.01 0 0 1 0 1.7ZM21.78 12.85l-8.08 5.39c-.72.48-1.7-.04-1.7-.9V6.66c0-.86.98-1.38 1.7-.9l8.08 5.39a1.01 1.01 0 0 1 0 1.7Z"/></svg></div>
+             <div class="ctrl-btn lyrics-toggle-btn" id="lyrics-toggle-btn" title="${t('np_lyrics')}">
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 11h16M4 16h9"/></svg>
+             </div>
           </div>
         </div>
         <div class="idle-mode-content">
@@ -961,6 +1174,8 @@ function initNestHub() {
                 </button>
                 <input type="file" id="file-import-settings" accept=".json" style="display: none;">
               </div>
+              <button id="btn-undo-import" class="st-btn" style="width:100%; margin-top:8px; display:none;">${t('btn_undo_import')}</button>
+              <div class="st-desc" style="margin-top:8px;">${t('backup_scope_desc')}</div>
 
               <div class="st-group-title" style="margin-top:22px;">${t('reset_group')}</div>
               <div class="st-desc" style="margin:-8px 0 12px;">${t('reset_desc')}</div>
@@ -980,6 +1195,9 @@ function initNestHub() {
                 <select id="set-theme-mode" class="st-select">
                   <option value="glass">${t('theme_glass')}</option>
                   <option value="liquidglass">${t('theme_liquidglass')}</option>
+                  <option value="rain">${t('theme_rain')}</option>
+                  <option value="paper">${t('theme_paper')}</option>
+                  <option value="line">${t('theme_line')}</option>
                   <option value="yarn">${t('theme_yarn')}</option>
                   <option value="terminal">${t('theme_terminal')}</option>
                   <option value="retro">${t('theme_retro')}</option>
@@ -987,6 +1205,13 @@ function initNestHub() {
                   <option value="mono">${t('theme_mono')}</option>
                 </select>
                 <div class="st-desc">${t('desc_theme')}</div>
+              </div>
+              <div class="st-row column-layout">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                  <span>${t('rain_auto_label')}</span>
+                  <label class="toggle-switch"><input type="checkbox" id="set-rain-auto"><span class="slider"></span></label>
+                </div>
+                <div class="st-desc">${t('rain_auto_desc')}</div>
               </div>
               <div class="st-row"><span>${t('accent_color')}</span><input type="color" id="set-accent" class="st-color"></div>
 
@@ -1057,6 +1282,7 @@ function initNestHub() {
               </div>
               <div class="st-row"><span>${t('size_label')}</span><input type="range" id="set-size" min="4" max="20" step="0.5" class="st-range"></div>
               <div class="st-row"><span>${t('weight_label')}</span><input type="range" id="set-clock-weight" min="100" max="900" step="100" class="st-range"></div>
+              <div class="st-row"><span>${t('clock_stretch_label')}</span><input type="range" id="set-clock-stretch" min="1" max="2.2" step="0.05" class="st-range"></div>
 
               <details class="st-advanced">
                 <summary>${t('advanced_toggle')}</summary>
@@ -1264,8 +1490,8 @@ function initNestHub() {
     </div>
 
     <div id="dock-context-menu" class="dock-context-menu">
-      <div class="dock-context-item" id="ctx-edit"><span>✎</span> ${t('ctx_edit')}</div>
-      <div class="dock-context-item danger" id="ctx-del"><span>🗑</span> ${t('ctx_del')}</div>
+      <div class="dock-context-item" id="ctx-edit"><span>${siIcon('pencil')}</span> ${t('ctx_edit')}</div>
+      <div class="dock-context-item danger" id="ctx-del"><span>${siIcon('trash')}</span> ${t('ctx_del')}</div>
     </div>
 
     <div id="dock-edit-modal" class="overlay-modal">
@@ -1312,6 +1538,7 @@ function initNestHub() {
   setupCountdown();
   setupZenMode();
   setupAmbientMode();
+  setupNowPlayingStage();
   setupBurnInProtection();
   renderCalendarSystem();
   fetchWeather(city);
@@ -1329,6 +1556,7 @@ function initNestHub() {
   setupBackupSystem();
   setupProfileSystem();
   setupIOSFocusSwitcher();
+  siRunFeatures();
 
   const lyricsBtn = document.getElementById('lyrics-toggle-btn');
   const lyricsOverlay = document.getElementById('lyrics-overlay');
@@ -1498,6 +1726,7 @@ function openDockEditModal(index) {
 function applyPreferences() {
   const prefs = JSON.parse(localStorage.getItem('immersion_prefs')) || defaultSettings;
   const rootStyle = document.documentElement.style;
+  siLoadFonts();
 
   rootStyle.setProperty('--accent', prefs.accent);
   rootStyle.setProperty('--clock-font', prefs.clockFont);
@@ -1537,6 +1766,10 @@ function applyPreferences() {
     document.body.classList.remove('glass-opacity-zero');
   }
   rootStyle.setProperty('--clock-size', (prefs.clockSize || '10') + 'rem');
+  /* 時計の縦の長さ（iOS 26 のロック画面のように、数字を縦に伸ばす） */
+  const stretch = Math.min(2.2, Math.max(1, parseFloat(prefs.clockStretch) || 1));
+  rootStyle.setProperty('--clock-stretch', String(stretch));
+  document.body.classList.toggle('clock-tall', stretch > 1.001);
 
   applyThemeClass(prefs.themeMode);
 
@@ -1590,6 +1823,7 @@ function applyPreferences() {
   setVal('set-bright', prefs.bgBrightness);
   setVal('set-blur', prefs.bgBlur || '50');
   setVal('set-size', prefs.clockSize || '10');
+  setVal('set-clock-stretch', prefs.clockStretch || '1');
   setVal('set-opacity', prefs.bgOpacity || '1.0');
   setVal('set-glass-opacity', prefs.glassOpacity || '0.55');
   setVal('set-img', prefs.idleImgUrl || '');
@@ -1666,7 +1900,10 @@ function savePreferences() {
   const oldMods = (oldPrefs.module1 || '') + (oldPrefs.module2 || '') + (oldPrefs.module3 || '');
   const oldLang = oldPrefs.language;
 
+  /* 以前は、ここに列挙していない項目が保存のたびに消えていた。
+     新しい設定（検索・新ウィジェット）を足しても残るよう、古い値の上に重ねる。 */
   const prefs = {
+    ...oldPrefs,
     userName: getVal('set-user-name'),
     accent: getVal('set-accent'),
     clockFont: getVal('set-font') === 'custom' ? getVal('set-custom-font') : getVal('set-font'),
@@ -1678,6 +1915,7 @@ function savePreferences() {
     glassOpacity: getVal('set-glass-opacity'),
     clockSize: getVal('set-size'),
     clockWeight: getVal('set-clock-weight'),
+    clockStretch: getVal('set-clock-stretch') || '1',
     idleImgUrl: getVal('set-img'),
     cntTitle: getVal('set-cnt-title'),
     cntDate: getVal('set-cnt-date'),
@@ -1746,10 +1984,13 @@ function savePreferences() {
   const newMods = prefs.module1 + prefs.module2 + prefs.module3;
 
   if (oldLang !== prefs.language || oldMods !== newMods) {
-    document.getElementById('immersion-root')?.remove();
-    initNestHub();
-    document.getElementById('settings-btn').click();
-    document.getElementById('settings-modal').classList.add('show');
+    /* 画面を作り直すと、各カードのタイマーやリスナーが二重に残っていた。
+       読み込み直して、設定画面の同じタブを開き直す。 */
+    try {
+      const activeTab = document.querySelector('.st-tab-btn.active')?.getAttribute('data-tab');
+      sessionStorage.setItem('si_reopen_settings', activeTab || 'tab-general');
+    } catch (e) {}
+    location.reload();
     return;
   }
 
@@ -1814,6 +2055,7 @@ function initSettingsLogic() {
     'set-blur',
     'set-size',
     'set-clock-weight',
+    'set-clock-stretch',
     'set-opacity',
     'set-glass-opacity',
     'set-amb-night-bright',
@@ -1901,39 +2143,6 @@ function initSettingsLogic() {
     'set-media-bg',
     'set-show-profile-switcher',
   ].forEach((id) => document.getElementById(id)?.addEventListener('change', savePreferences));
-
-  const widgetStackToggle = document.getElementById('set-widget-stack-enabled');
-  if (widgetStackToggle) {
-    widgetStackToggle.addEventListener('change', (e) => {
-      const settingsArea = document.getElementById('widget-stack-settings');
-      if (settingsArea) {
-        settingsArea.style.display = e.target.checked ? 'block' : 'none';
-      }
-      savePreferences();
-      location.reload();
-    });
-  }
-
-  ['widget-weather', 'widget-news', 'widget-countdown', 'widget-music', 'widget-calendar'].forEach(
-    (id) => {
-      const checkbox = document.getElementById(id);
-      if (checkbox) {
-        checkbox.addEventListener('change', () => {
-          savePreferences();
-          location.reload();
-        });
-      }
-    },
-  );
-
-  const autoSwitchSelect = document.getElementById('set-widget-auto-switch');
-  if (autoSwitchSelect) {
-    autoSwitchSelect.addEventListener('change', () => {
-      savePreferences();
-      if (typeof stopWidgetAutoSwitch === 'function') stopWidgetAutoSwitch();
-      if (typeof startWidgetAutoSwitch === 'function') startWidgetAutoSwitch();
-    });
-  }
 
   document.getElementById('btn-apply-img').onclick = () => {
     savePreferences();
@@ -2131,6 +2340,18 @@ function initSettingsLogic() {
 
     wrapper.appendChild(numInput);
   });
+
+  let reopen = null;
+  try {
+    reopen = sessionStorage.getItem('si_reopen_settings');
+    sessionStorage.removeItem('si_reopen_settings');
+  } catch (e) {}
+  if (reopen) {
+    setTimeout(() => {
+      openBtn.click();
+      document.querySelector(`.st-tab-btn[data-tab="${CSS.escape(reopen)}"]`)?.click();
+    }, 0);
+  }
 }
 function setupBurnInProtection() {
   if (burnInInterval) clearInterval(burnInInterval);
@@ -2222,7 +2443,7 @@ function setupCountdown() {
       }
     });
   };
-  setInterval(update, 1000);
+  siEvery(update, 1000);
   update();
 }
 
@@ -2349,8 +2570,8 @@ function renderDockSettingsList() {
             ${t('folder_label')} - ${item.name}
           </span>
           <div class="ds-controls" style="display:flex; gap: 5px;">
-            ${index > 0 ? '<span class="ds-move-btn ds-up">↑</span>' : ''}
-            ${index < items.length - 1 ? '<span class="ds-move-btn ds-down">↓</span>' : ''}
+            ${index > 0 ? '<span class="ds-move-btn ds-up">' + siIcon('chevU') + '</span>' : ''}
+            ${index < items.length - 1 ? '<span class="ds-move-btn ds-down">' + siIcon('chevD') + '</span>' : ''}
             <span class="ds-move-btn ds-del-inline" style="color:#ff453a;">×</span>
           </div>
         </div>
@@ -2391,7 +2612,7 @@ function renderDockSettingsList() {
           subRow.innerHTML = `
             <input type="text" class="st-input" placeholder="Icon" style="flex:0 0 60px; font-size:0.8rem; padding:4px 6px;">
             <input type="text" class="st-input" placeholder="URL" style="flex:1; font-size:0.8rem; padding:4px 6px;">
-            <span class="ds-move-btn sub-favicon-btn" title="${t('fetch_favicon_btn')}" style="flex:0 0 24px; font-size:0.9rem;">★</span>
+            <span class="ds-move-btn sub-favicon-btn" title="${t('fetch_favicon_btn')}" style="flex:0 0 24px; font-size:0.9rem;">${siIcon('sparkle')}</span>
             <span class="ds-move-btn" style="color:#ff453a; flex:0 0 24px; font-size:1rem;">×</span>
           `;
 
@@ -2439,7 +2660,7 @@ function renderDockSettingsList() {
       renderFolderItems();
 
       addBtn.onclick = () => {
-        items[index].items.push({ icon: '🔗', url: 'https://example.com' });
+        items[index].items.push({ icon: SI_LINK_ICON, url: 'https://example.com' });
         localStorage.setItem('immersion_dock_items', JSON.stringify(items));
         renderFolderItems();
         renderDock();
@@ -2459,8 +2680,8 @@ function renderDockSettingsList() {
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
           <span class="ds-label">${t('icon_label')}</span>
           <div class="ds-controls" style="display:flex; gap: 5px;">
-             ${index > 0 ? '<span class="ds-move-btn ds-up">↑</span>' : ''}
-             ${index < items.length - 1 ? '<span class="ds-move-btn ds-down">↓</span>' : ''}
+             ${index > 0 ? '<span class="ds-move-btn ds-up">' + siIcon('chevU') + '</span>' : ''}
+             ${index < items.length - 1 ? '<span class="ds-move-btn ds-down">' + siIcon('chevD') + '</span>' : ''}
              <span class="ds-move-btn ds-del-inline" style="color:#ff453a;">×</span>
           </div>
         </div>
@@ -2534,7 +2755,7 @@ function renderDockSettingsList() {
 }
 function addDockItem() {
   const items = getDockItems();
-  items.push({ icon: '🔗', url: 'https://example.com' });
+  items.push({ icon: SI_LINK_ICON, url: 'https://example.com' });
   localStorage.setItem('immersion_dock_items', JSON.stringify(items));
   renderDockSettingsList();
   renderDock();
@@ -2583,6 +2804,9 @@ function setupSearch() {
     }
   };
 
+  /* 候補一覧の Enter（選択中の項目を実行）を先に受けたいので、こちらより先に登録する */
+  setupSearchAutocomplete(input);
+
   input.addEventListener('keydown', (e) => {
     if (e.isComposing) return;
 
@@ -2594,6 +2818,9 @@ function setupSearch() {
       }
 
       const val = input.value.trim();
+
+      /* !bang・> コマンド・計算などは features/search-plus.js が受け持つ */
+      if (window.SI.handleEnter && window.SI.handleEnter(val, e)) return;
 
       const hasProtocol = /^[a-zA-Z]+:\/\//.test(val);
       const isDomain = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(:[0-9]+)?(\/.*)?$/.test(val);
@@ -2612,141 +2839,220 @@ function setupSearch() {
       chrome.search.query({ text: val, disposition: 'CURRENT_TAB' });
     }
   });
-
-  setupSearchAutocomplete(input);
 }
 
 function setupSearchAutocomplete(input) {
   const container = document.getElementById('search-suggestions');
   let currentFocus = -1;
+  /* 入力のたびに番号を振り、最後の入力に対する応答だけを描く。
+     遅れて届いた古い候補で一覧が巻き戻るのを防ぐ。 */
+  let requestSeq = 0;
+  let lastItems = [];
 
-  const fetchSuggestions = debounce((query) => {
-    const isEmp = !query || query.trim() === '';
-
-    const historyPromise = new Promise((resolve) => {
+  const askBackground = (msg) =>
+    new Promise((resolve) => {
       try {
-        if (!chrome.runtime?.id) {
-          resolve([]);
-          return;
-        }
-        chrome.runtime.sendMessage({ action: 'searchHistory', query: query || '' }, (res) => {
-          if (chrome.runtime.lastError) {
-            resolve([]);
-            return;
-          }
-          resolve(res?.data || []);
+        if (!chrome.runtime?.id) return resolve(null);
+        chrome.runtime.sendMessage(msg, (res) => {
+          if (chrome.runtime.lastError) return resolve(null);
+          resolve(res);
         });
       } catch (e) {
-        resolve([]);
+        resolve(null);
       }
     });
 
-    const googlePromise = isEmp
-      ? Promise.resolve([])
-      : new Promise((resolve) => {
-          try {
-            chrome.runtime.sendMessage(
-              { action: 'fetchGoogleSuggestions', query: query },
-              (res) => {
-                if (chrome.runtime.lastError || !res || !res.data) {
-                  resolve([]);
-                } else {
-                  resolve(res.data);
-                }
-              },
-            );
-          } catch (e) {
-            resolve([]);
-          }
-        });
+  const fetchSuggestions = debounce(async (query) => {
+    const seq = ++requestSeq;
+    const prefs = getPrefs();
+    const q = query || '';
+    const isEmp = q.trim() === '';
+    const providers = window.SI.suggestProviders || [];
 
-    Promise.all([historyPromise, googlePromise]).then(([historyItems, googleItems]) => {
-      const combined = [];
-      const seenTitles = new Set();
-      const maxHistory = 8;
+    /* コマンド（> で始まる）や !bang の入力中は、外部へ候補を問い合わせない */
+    const exclusive = providers.some((p) => p.exclusive && p.exclusive(q));
 
-      const extractSearchTerm = (url) => {
-        try {
-          const u = new URL(url);
-          if (u.hostname.includes('google') && u.pathname === '/search') {
-            return u.searchParams.get('q');
-          }
-        } catch (e) {}
-        return null;
-      };
+    const historyPromise =
+      prefs.searchSuggestHistory === false || exclusive
+        ? Promise.resolve([])
+        : askBackground({ action: 'searchHistory', query: q }).then((r) => r?.data || []);
+    const googlePromise =
+      isEmp || exclusive || prefs.searchSuggestGoogle === false
+        ? Promise.resolve([])
+        : askBackground({ action: 'fetchGoogleSuggestions', query: q }).then((r) => r?.data || []);
+    const providerPromise = Promise.all(
+      providers.map((p) =>
+        Promise.resolve()
+          .then(() => p.suggest(q))
+          .catch(() => []),
+      ),
+    );
 
-      historyItems.forEach((h) => {
-        if (combined.length >= maxHistory) return;
+    const [historyItems, googleItems, providerGroups] = await Promise.all([
+      historyPromise,
+      googlePromise,
+      providerPromise,
+    ]);
+    if (seq !== requestSeq) return;
 
-        const term = extractSearchTerm(h.url);
-        if (term && !seenTitles.has(term)) {
-          combined.push({ text: term, type: 'history', url: h.url });
-          seenTitles.add(term);
+    const top = [];
+    const bottom = [];
+    providerGroups.forEach((group, i) => {
+      (group || []).forEach((item) => (providers[i].position === 'bottom' ? bottom : top).push(item));
+    });
+
+    const combined = [];
+    /* 計算の答えなど、上に出したものと同じ文字列の候補（Google も「= 40」を返す）は重ねない */
+    const seenTitles = new Set(top.map((x) => x.text));
+    const maxHistory = isEmp ? 8 : 4;
+
+    const extractSearchTerm = (url) => {
+      try {
+        const u = new URL(url);
+        if (u.hostname.includes('google') && u.pathname === '/search') {
+          return u.searchParams.get('q');
         }
-      });
+      } catch (e) {}
+      return null;
+    };
 
-      googleItems.forEach((g) => {
-        if (combined.length < 8 && !seenTitles.has(g)) {
-          combined.push({ text: g, type: 'search' });
-          seenTitles.add(g);
-        }
-      });
-
-      if (combined.length > 0) {
-        renderSuggestions(combined);
-      } else {
-        container.style.display = 'none';
+    (historyItems || []).forEach((h) => {
+      if (combined.length >= maxHistory) return;
+      const term = extractSearchTerm(h.url);
+      if (term && !seenTitles.has(term)) {
+        combined.push({ text: term, type: 'history', url: h.url });
+        seenTitles.add(term);
       }
     });
-  }, 200);
+
+    (googleItems || []).forEach((g) => {
+      if (typeof g !== 'string') return;
+      if (combined.length < 8 && !seenTitles.has(g)) {
+        combined.push({ text: g, type: 'search' });
+        seenTitles.add(g);
+      }
+    });
+
+    const all = [...top, ...combined, ...bottom].slice(0, 12);
+    if (all.length > 0) {
+      renderSuggestions(all);
+    } else {
+      lastItems = [];
+      container.style.display = 'none';
+    }
+  }, 120);
+
+  /* 候補を出す向きを決める。既定は下だが、入らなければ上へ開く。
+     背の低い画面では通常表示でも下にこぼれていた（1280x800 で 108px）。
+     アートワークを展開すると検索欄がさらに下へ来るので、なおさら要る。
+
+     getBoundingClientRect は zoom 後の座標を返すので、
+     innerHeight（同じく画面の実寸）とそのまま比べられる。 */
+  const placeSuggestions = (box) => {
+    box.classList.remove('drop-up');
+    const wrap = box.parentElement;
+    if (!wrap) return;
+    const w = wrap.getBoundingClientRect();
+    const h = box.getBoundingClientRect().height;
+    const below = window.innerHeight - w.bottom;
+    if (below < h + 12 && w.top > below) box.classList.add('drop-up');
+  };
+
+  /* 履歴＝時計、候補＝虫めがね。線の太さはドックや歌詞ボタンと揃えてある */
+  const SUGGEST_ICON = {
+    history:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.2V12l3.2 1.9"/></svg>',
+    search:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M15.8 15.8 20 20"/></svg>',
+  };
+
+  const runItem = (item, ev) => {
+    if (typeof item.run === 'function') {
+      item.run(ev || {});
+      return;
+    }
+    input.value = item.text;
+    chrome.search.query({ text: item.text, disposition: 'CURRENT_TAB' });
+  };
 
   const renderSuggestions = (items) => {
-    container.innerHTML = '';
-    items.forEach((item) => {
+    lastItems = items;
+    container.textContent = '';
+    items.forEach((item, idx) => {
       const div = document.createElement('div');
-      div.className = 'suggestion-item';
-      div.setAttribute('data-val', item.text);
-      const icon = item.type === 'history' ? '🕒' : '🔍';
+      div.className = 'suggestion-item' + (item.kind ? ' sg-' + item.kind : '');
+      div.setAttribute('data-val', item.fill != null ? item.fill : item.text);
+      div.dataset.idx = String(idx);
 
-      let innerHTML = `<div style="display:flex; align-items:center; flex:1; min-width:0;">
-        <span style="opacity:0.6; margin-right:10px; flex-shrink:0;">${icon}</span>
-        <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.text}</span>
-      </div>`;
+      const left = document.createElement('div');
+      left.className = 'sg-main';
 
-      if (item.type === 'history') {
-        innerHTML += `<span class="suggestion-del" title="${t('ctx_del')}" style="opacity:0.4; padding:0 10px; cursor:pointer;">×</span>`;
-      }
-      div.innerHTML = innerHTML;
-
-      div.onclick = () => {
-        input.value = item.text;
-
-        chrome.search.query({ text: item.text, disposition: 'CURRENT_TAB' });
-      };
-
-      if (item.type === 'history') {
-        const delBtn = div.querySelector('.suggestion-del');
-        if (delBtn) {
-          delBtn.onclick = (e) => {
-            e.stopPropagation();
-            chrome.runtime.sendMessage({ action: 'deleteHistory', url: item.url }, () => {
-              fetchSuggestions(input.value || '');
-            });
-          };
-          delBtn.onmouseenter = () => (delBtn.style.opacity = '1');
-          delBtn.onmouseleave = () => (delBtn.style.opacity = '0.4');
-        }
+      const iconWrap = document.createElement('span');
+      iconWrap.className = 'suggestion-icon';
+      if (item.img) {
+        const im = document.createElement('img');
+        im.src = item.img;
+        im.alt = '';
+        im.className = 'sg-favicon';
+        im.onerror = () => (iconWrap.innerHTML = SUGGEST_ICON.search);
+        iconWrap.appendChild(im);
+      } else {
+        /* アイコンは拡張内の定数 SVG だけ。外から来た文字列はここに入らない */
+        iconWrap.innerHTML =
+          item.iconSvg || (item.type === 'history' ? SUGGEST_ICON.history : SUGGEST_ICON.search);
       }
 
+      const textWrap = document.createElement('span');
+      textWrap.className = 'sg-text';
+      const main = document.createElement('span');
+      main.className = 'sg-title';
+      main.textContent = item.text;
+      textWrap.appendChild(main);
+      if (item.sub) {
+        const sub = document.createElement('span');
+        sub.className = 'sg-sub';
+        sub.textContent = item.sub;
+        textWrap.appendChild(sub);
+      }
+      left.append(iconWrap, textWrap);
+      div.appendChild(left);
+
+      if (item.badge) {
+        const badge = document.createElement('span');
+        badge.className = 'sg-badge';
+        badge.textContent = item.badge;
+        div.appendChild(badge);
+      }
+
+      if (item.type === 'history') {
+        const delBtn = document.createElement('span');
+        delBtn.className = 'suggestion-del';
+        delBtn.title = t('ctx_del');
+        delBtn.textContent = '×';
+        delBtn.onclick = (e) => {
+          e.stopPropagation();
+          chrome.runtime.sendMessage({ action: 'deleteHistory', url: item.url }, () => {
+            fetchSuggestions(input.value || '');
+          });
+        };
+        div.appendChild(delBtn);
+      }
+
+      div.onclick = (e) => runItem(item, e);
       container.appendChild(div);
     });
     container.style.display = 'block';
+    placeSuggestions(container);
     currentFocus = -1;
+  };
+
+  window.SI.refreshSuggestions = () => fetchSuggestions(input.value || '');
+  window.SI.hideSuggestions = () => {
+    container.style.display = 'none';
   };
 
   input.addEventListener('input', () => {
     fetchSuggestions(input.value);
-    if (!input.value) fetchSuggestions('');
   });
   const trigger = () => {
     if (!input.value) fetchSuggestions('');
@@ -2755,19 +3061,24 @@ function setupSearchAutocomplete(input) {
   input.addEventListener('click', trigger);
 
   input.addEventListener('keydown', (e) => {
+    if (e.isComposing) return;
     const items = container.querySelectorAll('.suggestion-item');
     if (e.key === 'ArrowDown') {
+      e.preventDefault();
       currentFocus++;
       if (currentFocus >= items.length) currentFocus = 0;
       setActive(items);
     } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
       currentFocus--;
       if (currentFocus < 0) currentFocus = items.length - 1;
       setActive(items);
     } else if (e.key === 'Enter') {
-      if (currentFocus > -1 && items[currentFocus]) {
+      if (currentFocus > -1 && items[currentFocus] && container.style.display !== 'none') {
         e.preventDefault();
-        items[currentFocus].click();
+        e.stopImmediatePropagation();
+        const item = lastItems[Number(items[currentFocus].dataset.idx)];
+        if (item) runItem(item, e);
       }
     } else if (e.key === 'Escape') {
       container.style.display = 'none';
@@ -2780,12 +3091,14 @@ function setupSearchAutocomplete(input) {
     items.forEach((item) => item.classList.remove('active'));
     if (currentFocus >= 0 && items[currentFocus]) {
       items[currentFocus].classList.add('active');
-      input.value = items[currentFocus].getAttribute('data-val');
+      items[currentFocus].scrollIntoView({ block: 'nearest' });
+      const item = lastItems[Number(items[currentFocus].dataset.idx)];
+      if (!item || item.keepInput !== true) input.value = items[currentFocus].getAttribute('data-val');
     }
   };
 
   document.addEventListener('click', (e) => {
-    if (e.target !== input && e.target !== container) {
+    if (e.target !== input && !container.contains(e.target)) {
       container.style.display = 'none';
     }
   });
@@ -4267,6 +4580,858 @@ function setupAmbientMode() {
   });
 }
 
+/* =========================================================================
+   NOW PLAYING STAGE — アートワークを真ん中に出す
+
+   別モードではない。全画面で覆うと検索もウィジェットも使えなくなるので、
+   要素を動かすだけにする。
+
+     ・.music-panel   → 中央列の検索バーの直前へ
+     ・左列の最後の1枚 → 右列へ（音楽カードが抜けた穴を埋めて 2枚 + 2枚 にする）
+     ・時計           → CSS で上へ、横並びに
+
+   移動そのものは DOM の入れ替えで済ませ、見た目の動きは npFlip() が
+   transform だけで描く。作り直さないので、タイマーや ToDo の状態も、
+   貼ってあるハンドラも生きたまま運ばれる。
+   ========================================================================= */
+
+const NP = {
+  on: false,
+  wired: false,
+  home: new Map() /* 要素 → 元いた場所 */,
+  moved: null /* 右へ引っ越した左列のカード */,
+  artKey: '' /* 色を抜き直す必要があるかの判定 */,
+  tick: null,
+  ro: null /* ジャケットの箱を見張る ResizeObserver */,
+  moveAnim: null /* 引っ越しカードの明滅 */,
+  moveTimer: null /* 開け閉めの段取り。隠れたタブでも進むようタイマーで持つ */,
+  cardAnim: null /* 音楽カードの枠の開け閉め */,
+  ghostAnim: null /* 抜けた穴を閉じる影武者 */,
+  ghost: null,
+};
+
+/* 動きの尺と曲線はひとつに揃える。以前は FLIP が 560ms、
+   カードの開け閉めが 340ms で、終わる時刻が違うぶん
+   「二度動いた」ように見えていた。 */
+const NP_DUR = 480;
+/* 立ち上がりが穏やかで、終わりに向かって静かに止まる曲線。
+   以前の cubic-bezier(.4,0,.2,1) は出だしが強く、
+   短い尺と相まって「パッと入れ替わった」感じになっていた。 */
+const NP_EASE = 'cubic-bezier(.32,.72,0,1)';
+
+/* 動きを減らす設定のときは、間を取らずに切り替える */
+function npReduced() {
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  } catch (e) {
+    return false;
+  }
+}
+
+/* #immersion-root は zoom:var(--ui-scale) を持つ。applyUiScale() は
+   1600x1000 より小さい窓で必ず 1 未満を入れるので、getBoundingClientRect
+   （zoom 後の座標）と transform（zoom 前の座標）のずれを割り戻さないと、
+   アニメの開始位置がずれて「カクッ」と飛ぶ。 */
+function npScale() {
+  const r = document.getElementById('immersion-root');
+  const z = r && parseFloat(getComputedStyle(r).zoom);
+  return z && z > 0 ? z : 1;
+}
+
+/* FLIP。差を打ち消してから 0 に戻すだけ。
+   transform しか触らないので、毎フレームのレイアウトが無い。 */
+function npFlip(els, mutate, ms) {
+  ms = npReduced() ? 0 : ms || NP_DUR;
+  const Z = npScale();
+  const first = els.map((el) => el.getBoundingClientRect());
+
+  /* 印は mutate の前に付ける。#clock-time は自前で transition: all .3s を
+     持っており、np-stage で 10rem → 2.6rem に変わるとき font-size が
+     ゆっくり縮む。すると時計の箱が 154px → 60px と遅れて詰まり、
+     空いた分をジャケットが後から吸収して育ってしまう（504px → 598px）。
+     FLIP は「動く前と動いた後の姿」を先に測って組み立てるので、
+     後から寸法が変わると最後に帳尻を合わせる跳ねが出る。
+     出入りのあいだだけ、各要素が自前で持つ transition を止める。 */
+  document.body.classList.add('np-flipping');
+
+  mutate();
+
+  /* 行き先を測る前に、幅を配り終えておく。
+     --np-w は題・アーティスト・進捗バーの幅そのものなので、
+     測ったあとに変えると FLIP の着地点が狂い、
+     動き終わったところで一拍ずれる（これが「最後のかくっ」だった）。
+     いったん組み直しを確定させてから読む。 */
+  void document.body.offsetWidth;
+  npSyncWidth();
+  void document.body.offsetWidth;
+
+  const moving = [];
+  els.forEach((el, i) => {
+    const f = first[i];
+    const l = el.getBoundingClientRect();
+    if (!f.width || !l.width) return;
+    const dx = (f.left - l.left) / Z;
+    const dy = (f.top - l.top) / Z;
+    const sx = f.width / l.width;
+    const sy = f.height / l.height;
+    if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5 && Math.abs(sx - 1) < 0.005) return;
+    el.style.transition = 'none';
+    el.style.transformOrigin = 'top left';
+    /* 先に層へ上げておく。動き出してから昇格すると、その一瞬で
+       描き直しが入って引っかかる。ジャケットは大きな box-shadow を
+       持っているので、層に載せて影を焼き直さない効果も大きい。 */
+    el.style.willChange = 'transform';
+    el.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+    moving.push(el);
+  });
+
+  void document.body.offsetWidth; /* 一度確定させる */
+
+  moving.forEach((el) => {
+    el.style.transition = `transform ${ms}ms ${NP_EASE}`;
+    el.style.transform = '';
+  });
+
+  setTimeout(() => {
+    moving.forEach((el) => {
+      el.style.transition = '';
+      el.style.transform = '';
+      el.style.transformOrigin = '';
+      el.style.willChange = ''; /* 層は持ちっぱなしにしない */
+    });
+    document.body.classList.remove('np-flipping');
+    /* 落ち着いたところでもう一度だけ幅を合わせる。入場の一発目は
+       ResizeObserver が拾い切れないことがある（432px のまま
+       526px に追いつかない例を確認）。ここはただのタイマーなので、
+       観測のループガードに握り潰されない。 */
+    npSyncWidth();
+    npSyncTitleScroll();
+    /* リキッドグラスは要素ごとに --lg-pos を焼き付けている。
+       .glass-card と #clock-time が動いたので、屈折の原点を取り直す */
+    if (document.body.classList.contains('liquidglass-mode')) lgRequestAlign();
+  }, ms + 40);
+}
+
+function npRemember(el) {
+  if (el && !NP.home.has(el)) {
+    NP.home.set(el, { parent: el.parentNode, next: el.nextSibling });
+  }
+}
+
+function npGoHome(el) {
+  const h = el && NP.home.get(el);
+  if (h && h.parent) h.parent.insertBefore(el, h.next);
+}
+
+/* 右へ引っ越させる1枚。左が2枚未満なら動かさない
+   （モジュールを1つしか置いていない人の左列を空にしないため） */
+function npSpareModule() {
+  const left = document.querySelector('.col-left');
+  if (!left) return null;
+  const cards = Array.from(left.children).filter((el) => el.offsetParent !== null);
+  return cards.length >= 2 ? cards[cards.length - 1] : null;
+}
+
+function npFlipTargets() {
+  return [
+    document.getElementById('album-art-wrapper'),
+    document.getElementById('clock-time'),
+    document.getElementById('clock-date'),
+    document.querySelector('.track-info-wrap'),
+    document.getElementById('track-artist'),
+    document.querySelector('.controls'),
+    /* ドックが消えるぶん検索欄が下へずれる。一緒に滑らせないと
+       ここだけ瞬間移動して見える */
+    document.querySelector('.search-wrapper'),
+    /* 右へ引っ越すカードはここに入れない。飛ばさず、
+       npMoveSpare() が消してから現す（対角線の移動は読めない） */
+  ].filter(Boolean);
+}
+
+/* タイトルを流すかどうかは、曲が変わったときにしか判定されない
+   （startMediaSync の中で scrollWidth と親の clientWidth を比べている）。
+   展開すると入れ物が 310px の枠から 560px に変わるので、
+   収まるようになった題でも .scroll-active が残り、
+   padding-left:100% のまま画面の外へ流れていってしまう。
+   出入りのたびに測り直す。 */
+function npSyncTitleScroll() {
+  const el = document.getElementById('track-title');
+  if (!el || !el.parentElement) return;
+  el.classList.remove('scroll-active');
+  if (el.scrollWidth > el.parentElement.clientWidth) el.classList.add('scroll-active');
+}
+
+/* 題・アーティスト・進捗の幅をアートワークに揃える。
+   固定値にすると、ジャケットが正方形か 16:9 かで横幅が倍近く変わるため、
+   下の行だけ絵からはみ出したり内側に引っ込んだりして、
+   ひとかたまりのものに見えなくなる。実測して配る。
+
+   幅は flex で決まった高さ × aspect-ratio から出るので、
+   この値を題の幅に返しても高さは変わらない（各行1行に固定してある）。
+   循環はしない。 */
+function npSyncWidth() {
+  const root = document.getElementById('immersion-root');
+  const art = document.getElementById('album-art-wrapper');
+  if (!root || !art) return;
+  if (!document.body.classList.contains('np-stage')) {
+    root.style.removeProperty('--np-w');
+    return;
+  }
+  /* getBoundingClientRect は transform 込みの見かけの大きさを返すので、
+     FLIP が動いている最中に測ると縮んだ値を拾ってしまう（537px のものが
+     441px に見えた）。offsetWidth はレイアウト上の幅で、transform にも
+     zoom にも影響されない ── ここで欲しいのはちょうどそれ。 */
+  const w = art.offsetWidth;
+  if (w > 0 && root.style.getPropertyValue('--np-w') !== w + 'px') {
+    root.style.setProperty('--np-w', w + 'px');
+  }
+}
+
+function npApplyStage(on) {
+  const panel = document.querySelector('.music-panel');
+  const card = document.getElementById('music-card-container');
+  const right = document.querySelector('.col-right');
+  const center = document.querySelector('.col-center');
+  const search = document.querySelector('.search-wrapper');
+  if (!panel || !card || !right || !center || !search) return;
+
+  document.body.classList.toggle('np-stage', on);
+
+  if (on) {
+    npRemember(panel);
+    center.insertBefore(panel, search);
+  } else {
+    npGoHome(panel);
+    const ov = document.getElementById('lyrics-overlay');
+    const btn = document.getElementById('lyrics-toggle-btn');
+    if (ov) ov.classList.remove('show');
+    if (btn) btn.classList.remove('active');
+  }
+
+  const art = document.getElementById('album-art-wrapper');
+  if (art) art.setAttribute('title', t(on ? 'np_collapse' : 'np_expand'));
+
+  /* 題の marquee を先に片付けてから測る。カードから持ってきた
+     .scroll-active は padding-left:100% を持っていて、
+     残したまま測ると幅が実際と食い違う。 */
+  /* 幅合わせ（npSyncWidth）はここでは呼ばない。
+     この時点ではまだ組み直しが済んでおらず、504px と読めてしまう
+     （確定値は 598px）。FLIP が行き先を測る直前に呼ぶ。 */
+  npSyncTitleScroll();
+}
+
+/* 左列の最後の1枚を右列へ（戻すときはその逆）。
+
+   飛ばさない。左下から右上まで画面を対角線に横切ると、
+   何のための移動なのかが読めない。
+   その場で閉じて、移った先で開く。
+
+   ただし「消して現す」だけでは足りなかった。カードが1枚抜けた瞬間、
+   flex:1 の兄弟が一気に伸びる（実測で 319px → 487px）。
+   これが「かくん」の正体で、消え方より目立つ。
+   height は flex に負けて動かせないが、flex-grow は渡せる
+   （1→0 のあいだ兄弟が 319→458 と連続的に伸びるのを確認）。
+   余白と負のマージンも一緒に畳んで、隙間ごと閉じる。 */
+
+const NP_GAP = 15; /* .col の gap。畳むときに負のマージンで打ち消す */
+const NP_CARD_PROPS = [
+  'flex-grow',
+  'max-height',
+  'opacity',
+  'padding-top',
+  'padding-bottom',
+  'margin-bottom',
+];
+
+/* 自然な余白を最初に控える。畳んでいる最中に読むと 0 が返る */
+function npCardPad(el) {
+  if (!el.dataset.npPadT) {
+    const cs = getComputedStyle(el);
+    el.dataset.npPadT = cs.paddingTop;
+    el.dataset.npPadB = cs.paddingBottom;
+  }
+  return [el.dataset.npPadT, el.dataset.npPadB];
+}
+
+/* 畳む前の高さ。開くときの行き先として使う */
+function npCardTall(el) {
+  if (!el.dataset.npTall) el.dataset.npTall = Math.round(el.offsetHeight) + 'px';
+  return el.dataset.npTall;
+}
+
+/* 伸縮するカード（.module-card は flex:1 1 0%）は flex-grow を渡す。
+   音楽カードだけは flex:0 0 auto !important / height:320px で寸法が
+   固定されており、flex-grow を 0 にしても縮まない（実測で 362→322 止まり）。
+   こちらは max-height で押し潰す。 */
+/* 判定はインラインを当てる前に一度だけ。あとから読むと、
+   こちらが置いた flex-grow:0 を見て「固定カードだ」と誤認し、
+   開くときに max-height 0→2px などという動きになる。 */
+function npCardFixed(el) {
+  if (!el.dataset.npKind) {
+    el.dataset.npKind = parseFloat(getComputedStyle(el).flexGrow) === 0 ? 'fixed' : 'flex';
+  }
+  return el.dataset.npKind === 'fixed';
+}
+
+/* カードの素性・余白・高さを、いじる前にまとめて控える */
+function npCardPrep(el) {
+  if (!el) return;
+  npCardFixed(el);
+  npCardPad(el);
+  npCardTall(el);
+}
+
+function npCardShutStyle(el) {
+  const base = {
+    opacity: 0,
+    paddingTop: '0px',
+    paddingBottom: '0px',
+    marginBottom: `-${NP_GAP}px`,
+  };
+  if (npCardFixed(el)) return { ...base, maxHeight: '0px' };
+  return { ...base, flexGrow: 0 };
+}
+
+function npCardOpenStyle(el) {
+  const [pt, pb] = npCardPad(el);
+  const base = { opacity: 1, paddingTop: pt, paddingBottom: pb, marginBottom: '0px' };
+  if (npCardFixed(el)) return { ...base, maxHeight: npCardTall(el) };
+  return { ...base, flexGrow: 1 };
+}
+
+function npCardInline(el, style) {
+  if (style) Object.assign(el.style, style);
+  else NP_CARD_PROPS.forEach((p) => el.style.removeProperty(p));
+}
+
+/* 閉じる／開く。fill:forwards で終わった形のまま留め、
+   次の段取りへ移るときに手で外す。 */
+function npCardAnimate(el, open, dur) {
+  npCardPad(el);
+  const frames = open
+    ? [npCardShutStyle(el), npCardOpenStyle(el)]
+    : [npCardOpenStyle(el), npCardShutStyle(el)];
+  return el.animate?.(frames, {
+    duration: dur,
+    /* 開くほうと閉じるほうで曲線を変えない。開きが先行すると、
+       譲る側と受け取る側の合計が合わず、隣のカレンダーが
+       いったん縮んでから戻る（約100px の揺れ）。 */
+    easing: NP_EASE,
+    fill: 'forwards',
+  });
+}
+
+function npMoveSpare(on) {
+  const target = on ? npSpareModule() : NP.moved;
+  const card = document.getElementById('music-card-container');
+
+  NP.moveAnim?.cancel();
+  NP.cardAnim?.cancel();
+  NP.ghostAnim?.cancel();
+  clearTimeout(NP.moveTimer);
+  NP.ghost?.remove();
+  NP.ghost = null;
+  document.querySelectorAll('.np-anim').forEach((el) => el.classList.remove('np-anim'));
+
+  if (!target) {
+    NP.moved = null;
+    if (card) card.classList.toggle('np-card-gone', on);
+    return;
+  }
+  if (on) npRemember(target);
+  npCardPrep(target);
+  npCardPrep(card);
+
+  const DUR = npReduced() ? 0 : NP_DUR;
+
+  /* 抜けた側に影武者を置いて、そこを閉じながら移った先を開く。
+     閉じ切ってから開くと、あいだでカレンダーが 610→1008→500 と
+     往復してしまう ── 意味のない 500px の旅になる。
+     同時に動かせば、片方が譲った分を片方が受け取るだけに見える。 */
+  const ghost = document.createElement('div');
+  ghost.setAttribute('aria-hidden', 'true');
+  ghost.style.cssText = 'flex:1 1 0%; min-height:0; pointer-events:none;';
+  target.parentNode.insertBefore(ghost, target);
+  NP.ghost = ghost;
+
+  if (on) {
+    document.querySelector('.col-right')?.insertBefore(target, card);
+    NP.moved = target;
+  } else {
+    npGoHome(target);
+    NP.moved = null;
+  }
+
+  /* 移した先では閉じた姿から始める。インラインで置いてから animate に渡す */
+  npCardInline(target, npCardShutStyle(target));
+
+  /* 動いている2枚だけ、重い描画を外す（下の .np-anim）。
+     flex-grow や max-height は毎フレーム再レイアウトを起こし、
+     そのたびに backdrop-filter のぼかしを引き直すことになる。 */
+  target.classList.add('np-anim');
+  card?.classList.add('np-anim');
+
+  NP.ghostAnim = ghost.animate?.(
+    [
+      { flexGrow: 1, marginBottom: '0px' },
+      { flexGrow: 0, marginBottom: `-${NP_GAP}px` },
+    ],
+    /* 影武者も同じ曲線で閉じる。ここだけ別の曲線だと、
+       閉じる速さと開く速さが食い違って隣が揺れる。 */
+    { duration: DUR, easing: NP_EASE, fill: 'forwards' },
+  );
+
+  NP.moveAnim = npCardAnimate(target, true, DUR);
+
+  /* 音楽カードの枠は、引っ越しカードが開くのと同じ間に閉じる（戻すときは逆） */
+  if (card) {
+    card.classList.remove('np-card-gone');
+    if (!on) npCardInline(card, npCardShutStyle(card));
+    NP.cardAnim = npCardAnimate(card, !on, DUR);
+  }
+
+  /* 段取りはタイマーで持つ。animation.finished を待つと、タブが隠れている
+     あいだアニメーションは時計ごと止まるので（150ms のものが 600ms 経っても
+     currentTime:0 のまま）、約束が果たされず後片付けが走らない。 */
+  NP.moveTimer = setTimeout(() => {
+    NP.ghostAnim?.cancel();
+    ghost.remove();
+    NP.ghost = null;
+
+    npCardInline(target, null);
+    NP.moveAnim?.cancel();
+    NP.moveAnim = null;
+    target.classList.remove('np-anim');
+
+    if (card) {
+      npCardInline(card, null);
+      NP.cardAnim?.cancel();
+      NP.cardAnim = null;
+      card.classList.remove('np-anim');
+      card.classList.toggle('np-card-gone', on);
+    }
+  }, DUR);
+}
+
+function npEnter() {
+  if (NP.on) return;
+  const box = document.getElementById('music-card-container');
+  if (!box || !box.classList.contains('music-active')) return; /* 鳴っていないときは開かない */
+  NP.on = true;
+  npFlip(npFlipTargets(), () => npApplyStage(true));
+  npMoveSpare(true);
+  npTick();
+  NP.tick = setInterval(npTick, 1000);
+}
+
+function npExit() {
+  if (!NP.on) return;
+  NP.on = false;
+  clearInterval(NP.tick);
+  NP.tick = null;
+  npFlip(npFlipTargets(), () => npApplyStage(false));
+  npMoveSpare(false);
+}
+
+function npToggle() {
+  NP.on ? npExit() : npEnter();
+}
+
+/* --- 進捗。3秒に1度しか届かないので、読んだ時刻からの経過を足して補う --- */
+
+function npFmt(s) {
+  if (!isFinite(s) || s < 0) s = 0;
+  return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+}
+
+function npTick() {
+  if (!NP.on) return;
+  const box = document.getElementById('music-card-container');
+  const row = document.getElementById('np-progress');
+  if (!box || !row) return;
+
+  const dur = parseFloat(box.dataset.dur);
+  const at = parseFloat(box.dataset.at);
+  let pos = parseFloat(box.dataset.pos);
+
+  /* 長さの取れない生配信では、線も数字も出さずただの区切りに戻す */
+  if (!(dur > 0) || !isFinite(pos) || pos < 0) {
+    row.classList.add('np-nodur');
+    row.style.visibility = 'hidden';
+    return;
+  }
+  row.classList.remove('np-nodur');
+  row.style.visibility = '';
+
+  if (box.classList.contains('music-playing') && isFinite(at)) {
+    pos += (Date.now() - at) / 1000;
+  }
+  pos = Math.max(0, Math.min(dur, pos));
+
+  const fill = document.getElementById('np-fill');
+  if (fill) fill.style.width = ((pos / dur) * 100).toFixed(2) + '%';
+  const el = document.getElementById('np-elapsed');
+  const re = document.getElementById('np-remain');
+  if (el) el.textContent = npFmt(pos);
+  if (re) re.textContent = '-' + npFmt(dur - pos);
+}
+
+/* --- アートワークから地の色を作る -------------------------------------
+   48x48 まで落として色相24分割で投票する。単純平均だと必ず泥色になる。
+   crossOrigin='anonymous' で読めない配信元だったときは、
+   何もせずぼかし背景のままにしておく。 */
+
+function npPalette(img) {
+  const N = 48;
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = N;
+  const cx = cv.getContext('2d', { willReadFrequently: true });
+  cx.drawImage(img, 0, 0, N, N);
+  const d = cx.getImageData(0, 0, N, N).data;
+
+  const bins = Array.from({ length: 25 }, () => ({ w: 0, r: 0, g: 0, b: 0 }));
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i] / 255,
+      g = d[i + 1] / 255,
+      b = d[i + 2] / 255;
+    const mx = Math.max(r, g, b),
+      mn = Math.min(r, g, b);
+    const l = (mx + mn) / 2,
+      c = mx - mn;
+    if (l < 0.06 || l > 0.97) continue; /* 潰れた黒白は数えない */
+    const s = c === 0 ? 0 : c / (1 - Math.abs(2 * l - 1));
+    let h = 0;
+    if (c > 0) {
+      if (mx === r) h = ((g - b) / c + 6) % 6;
+      else if (mx === g) h = (b - r) / c + 2;
+      else h = (r - g) / c + 4;
+      h *= 60;
+    }
+    const idx = s < 0.12 ? 24 : Math.floor(h / 15) % 24;
+    const w = (0.25 + s) * (1 - Math.abs(l - 0.5) * 1.1);
+    const bn = bins[idx];
+    bn.w += w;
+    bn.r += d[i] * w;
+    bn.g += d[i + 1] * w;
+    bn.b += d[i + 2] * w;
+  }
+
+  const rank = bins
+    .map((b, i) => ({ i, w: b.w, r: b.r, g: b.g, b: b.b }))
+    .filter((b) => b.w > 0)
+    .sort((a, b) => b.w - a.w);
+  if (!rank.length) return null;
+  const mk = (b) => [b.r / b.w, b.g / b.w, b.b / b.w];
+  const top = rank[0];
+
+  /* 色相の輪は端でつながっている。0 番と 23 番はどちらも赤で隣同士なのに、
+     単純な引き算だと「23 も離れている」と出てしまう。 */
+  const hueGap = (a, b) => {
+    const d = Math.abs(a - b) % 24;
+    return Math.min(d, 24 - d);
+  };
+
+  /* 2色目は「その絵の中で実際に目立っている色」に限る。
+     色相が離れてさえいれば採用、としていたので、隅に少しあるだけの
+     反対色が地の半分を占め、元の絵と似ていない配色になっていた
+     （青いジャケットから 青 + 茶 が出るなど）。
+     いちばん多い色の 3割以上を占めることを条件に足す。
+     見つからなければ同じ色を明るくして、色味を一家系にまとめる。 */
+  const alt = rank
+    .slice(1)
+    .find((b) => b.i !== 24 && hueGap(b.i, top.i) >= 2 && b.w >= top.w * 0.3);
+
+  const topRgb = mk(top);
+  if (!alt) return { top: topRgb, sec: topRgb.map((v) => Math.min(255, v * 1.22)) };
+
+  /* 2色目はそのまま使わず、主色の側へ寄せる。
+     この地は「絵をぼかしたもの」ではなく、決め打ちの位置に置いた円形の
+     グラデーションなので、絵の中では隅にあるだけの色でも画面の左上に
+     まるまる出てしまう。半分ほど混ぜると、色の変化は残しつつ
+     一家系にまとまる。 */
+  const altRgb = mk(alt);
+  const MIX = 0.45; /* 主色へ寄せる量 */
+  return {
+    top: topRgb,
+    sec: altRgb.map((v, i) => v * (1 - MIX) + topRgb[i] * MIX),
+  };
+}
+
+/* 彩度は残して明度だけ狙った値に寄せる。そのままだと明るすぎて字が読めない */
+function npTone(rgb, L, satMul) {
+  const r = rgb[0] / 255,
+    g = rgb[1] / 255,
+    b = rgb[2] / 255;
+  const mx = Math.max(r, g, b),
+    mn = Math.min(r, g, b);
+  const l = (mx + mn) / 2,
+    c = mx - mn;
+  const s = c === 0 ? 0 : c / (1 - Math.abs(2 * l - 1));
+  let h = 0;
+  if (c > 0) {
+    if (mx === r) h = ((g - b) / c + 6) % 6;
+    else if (mx === g) h = (b - r) / c + 2;
+    else h = (r - g) / c + 4;
+    h *= 60;
+  }
+  const S = Math.min(1, s * satMul);
+  const C = (1 - Math.abs(2 * L - 1)) * S;
+  const X = C * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = L - C / 2;
+  let p;
+  if (h < 60) p = [C, X, 0];
+  else if (h < 120) p = [X, C, 0];
+  else if (h < 180) p = [0, C, X];
+  else if (h < 240) p = [0, X, C];
+  else if (h < 300) p = [X, 0, C];
+  else p = [C, 0, X];
+  return 'rgb(' + p.map((v) => Math.round((v + m) * 255)).join(',') + ')';
+}
+
+/* maxresdefault.jpg は、その動画に無くても 404 と一緒に 120x90 の灰色を
+   本文で返してくる。<img> も background-image も本文があれば描いてしまうので、
+   小さなカードでは気づかないまま、展開すると灰色の霞が画面を占める。
+
+   一度掴んだ差し替え先は覚えておく。再生位置の更新は3秒ごとに届き、
+   そのたびにここを通るので、覚えないと毎回元の URL に戻してしまう。
+
+   hqdefault.jpg は必ずあるが 480x360 で、上下に 45px ずつの黒帯が入る
+   （実測）。帯を除いた中身は 480x270 = ちょうど 16:9 なので、
+   下の npOnArtwork が枠を 16:9 にし、background-size:cover が
+   帯をきっかり切り落とす。 */
+const NP_ART_FIX = new Map();
+/* YouTube のサムネイルは、どの大きさで届いても動画 ID を取り出して大きい方へ寄せる。
+   mediaSession が渡してくるのは hqdefault（480x360）や mqdefault（320x180）が多く、
+   展開表示で引き伸ばすと粗くなっていた */
+const NP_YT_ANY = /^https?:\/\/(?:i\d?\.ytimg\.com|img\.youtube\.com)\/vi(?:_webp)?\/([\w-]{6,})\//;
+/* YouTube Music・Google 系の画像は URL の末尾で大きさを指定できる（=w544-h544 / =s120 など） */
+const NP_GOOGLE_ART = /^https:\/\/(?:lh\d|yt\d)\.(?:googleusercontent|ggpht)\.com\//;
+
+function npResolveArtwork(url) {
+  if (!url) return url;
+  const known = NP_ART_FIX.get(url);
+  if (known !== undefined) return known;
+
+  if (NP_GOOGLE_ART.test(url)) {
+    const big = url.replace(/=w\d+-h\d+/, '=w1200-h1200').replace(/=s\d+(?=[-?]|$)/, '=s1200');
+    NP_ART_FIX.set(url, big);
+    return big;
+  }
+
+  const m = url.match(NP_YT_ANY);
+  /* hq720（1280x720）は YouTube 自身が渡してくるときは必ず実在するので、そのまま使う */
+  if (!m || /\/hq720\.(?:jpg|webp)/.test(url)) {
+    NP_ART_FIX.set(url, url);
+    return url;
+  }
+
+  /* 確実にある方（hqdefault）を先に出し、もっと大きいものが「在る」と分かってから上げる。
+     逆にすると、maxresdefault が無い動画で灰色の代替画像（120x90）が
+     そのまま画面と背景を占める。
+     上げる順は maxresdefault（1280x720）→ sddefault（640x480）。 */
+  const base = 'https://i.ytimg.com/vi/' + m[1] + '/';
+  const safe = base + 'hqdefault.jpg';
+  NP_ART_FIX.set(url, safe);
+  NP_ART_FIX.set(safe, safe);
+
+  const upgrade = (better) => {
+    NP_ART_FIX.set(url, better);
+    NP_ART_FIX.set(safe, better);
+    /* 次の再生情報（3 秒ごと）を待たずに、表示中の画像も差し替える */
+    const art = document.getElementById('album-art');
+    if (art && art.style.backgroundImage.includes(safe)) art.style.backgroundImage = `url('${better}')`;
+    const bg = document.getElementById('bg-layer-original');
+    if (bg && bg.style.backgroundImage.includes(safe)) bg.style.backgroundImage = `url('${better}')`;
+    if (NP.artKey === safe) {
+      NP.artKey = '';
+      npOnArtwork(better);
+    }
+  };
+  const tryLoad = (list) => {
+    if (!list.length) return;
+    const probe = new Image();
+    probe.onload = () => {
+      if (probe.naturalWidth > 120) upgrade(list[0]);
+      else tryLoad(list.slice(1));
+    };
+    probe.onerror = () => tryLoad(list.slice(1));
+    probe.src = list[0];
+  };
+  tryLoad([base + 'maxresdefault.jpg', base + 'sddefault.jpg']);
+  return safe;
+}
+
+/* 曲が変わるたびに呼ばれる。縦横比と地の色をここで決める */
+function npOnArtwork(url) {
+  if (!url || NP.artKey === url) return;
+  NP.artKey = url;
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    /* maxresdefault.jpg が無い動画は、404 なのに 120x90 の灰色を本文で返す。
+       <img> はそれを描いてしまうので、大きさで弾く。
+       展開すると画面の半分が灰色の霞になる */
+    if (img.naturalWidth <= 120) return;
+
+    const root = document.getElementById('immersion-root');
+    if (!root) return;
+
+    /* 素の YouTube は 16:9。正方形の枠に入れると顔が切れるので、
+       枠のほうを実寸に合わせる（1:1 〜 16:9 でクランプ）。
+
+       ただし YouTube のサムネイルだけは実寸ではなく常に 16:9 にする。
+       hqdefault / sddefault は中身が 16:9 でも 4:3 の画像に黒帯を足した
+       形で返ってくるため、実寸に合わせると帯まで律儀に表示してしまう。
+       16:9 の枠に cover で載せれば帯はちょうど画面外に出る。 */
+    const isYtThumb = /\/vi\/[^/]+\/[a-z]+default\.jpg/.test(url);
+    const ar = isYtThumb
+      ? 16 / 9
+      : Math.min(16 / 9, Math.max(1, img.naturalWidth / img.naturalHeight));
+    root.style.setProperty('--np-ar', ar.toFixed(4));
+    /* 正方形から 16:9 に変わると横幅が倍近く動く。下の行も追随させる */
+    npSyncWidth();
+
+    try {
+      const p = npPalette(img);
+      if (!p) return;
+      root.style.setProperty('--np-c1', npTone(p.top, 0.3, 1.0));
+      /* 2色目は彩度を上げない。主役はあくまで主色 */
+      root.style.setProperty('--np-c2', npTone(p.sec, 0.38, 0.95));
+      root.style.setProperty('--np-c3', npTone(p.top, 0.12, 0.9));
+    } catch (e) {
+      /* canvas が汚染されて読めない配信元。ぼかし背景のままにする */
+    }
+  };
+  img.src = url;
+}
+
+/* 歌詞が取れたかどうかは body の印で持つ。
+   取れていない曲では歌詞ボタンが出ないだけで、他はどこも動かない。 */
+function npSetLyricsState(found) {
+  document.body.dataset.npLyrics = found ? 'ok' : 'none';
+  if (found) return;
+  const ov = document.getElementById('lyrics-overlay');
+  const btn = document.getElementById('lyrics-toggle-btn');
+  if (ov) ov.classList.remove('show');
+  if (btn) btn.classList.remove('active');
+}
+
+function setupNowPlayingStage() {
+  /* 言語やモジュールを変えると initNestHub がやり直しになり、
+     DOM ごと作り直される。状態は持ち越さない */
+  NP.on = false;
+  NP.home = new Map();
+  NP.moved = null;
+  NP.artKey = '';
+  clearInterval(NP.tick);
+  clearTimeout(NP.moveTimer);
+  NP.moveAnim?.cancel();
+  NP.cardAnim?.cancel();
+  NP.ghostAnim?.cancel();
+  NP.ghost?.remove();
+  document.querySelectorAll('.np-anim').forEach((el) => el.classList.remove('np-anim'));
+  NP.tick = null;
+  NP.moveTimer = null;
+  NP.moveAnim = null;
+  NP.cardAnim = null;
+  NP.ghostAnim = null;
+  NP.ghost = null;
+  document.getElementById('music-card-container')?.classList.remove('np-card-gone');
+  document.body.classList.remove('np-stage', 'np-flipping');
+  if (!document.body.dataset.npLyrics) document.body.dataset.npLyrics = 'none';
+
+  const art = document.getElementById('album-art-wrapper');
+
+  /* ジャケットの箱が実際に変わったときにだけ幅を配り直す。
+     フレーム数を数えるより確実で、出入り・窓のリサイズ・
+     正方形から 16:9 への切り替わりを一手に引き受ける。
+     transform は観測されないので、FLIP の最中には走らない。 */
+  NP.ro?.disconnect();
+  if (art && 'ResizeObserver' in window) {
+    /* 観測中に幅を書き戻すと、その変化は「同じ配信サイクル内の変更」と
+       見なされてブラウザのループガードに握り潰される（1回で止まり、
+       432px のまま 526px に追いつかなかった）。
+       書き込みを次のタスクへ逃がすと、あらためて観測が回って収束する。
+       npSyncWidth 側に「変わっていなければ書かない」を入れてあるので、
+       行ったり来たりはしない。 */
+    let t = null;
+    NP.ro = new ResizeObserver(() => {
+      clearTimeout(t);
+      t = setTimeout(npSyncWidth, 0);
+    });
+    NP.ro.observe(art);
+  }
+
+  if (art) {
+    art.setAttribute('role', 'button');
+    art.setAttribute('tabindex', '0');
+    art.setAttribute('title', t('np_expand'));
+    art.addEventListener('click', (e) => {
+      e.stopPropagation();
+      npToggle(); /* 押して開き、押して閉じる */
+    });
+    art.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      npToggle();
+    });
+  }
+
+  /* 展開中は曲名を押しても畳める */
+  const info = document.querySelector('.track-info-wrap');
+  if (info) {
+    info.addEventListener('click', (e) => {
+      if (!NP.on) return;
+      e.stopPropagation();
+      npExit();
+    });
+  }
+
+  /* 歌詞を開いているあいだは、アートワークの上に歌詞が乗っている。
+     そこを押したら「まず歌詞を閉じる」── いきなり畳むと、
+     読んでいる途中に画面ごと戻ってしまう。もう一度押せば畳む。 */
+  const ov = document.getElementById('lyrics-overlay');
+  if (ov) {
+    ov.addEventListener('click', (e) => {
+      if (!ov.classList.contains('show')) return;
+      e.stopPropagation();
+      ov.classList.remove('show');
+      document.getElementById('lyrics-toggle-btn')?.classList.remove('active');
+    });
+  }
+
+  if (NP.wired) return;
+  NP.wired = true;
+
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    if (!NP.on) return;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      npSyncWidth();
+      npSyncTitleScroll();
+    }, 120);
+  });
+
+  document.addEventListener(
+    'keydown',
+    (e) => {
+      if (e.key !== 'Escape' || !NP.on) return;
+      const ov = document.getElementById('lyrics-overlay');
+      if (ov && ov.classList.contains('show')) {
+        /* まず歌詞を閉じる。2度目で畳む */
+        ov.classList.remove('show');
+        document.getElementById('lyrics-toggle-btn')?.classList.remove('active');
+      } else {
+        npExit();
+      }
+      e.preventDefault();
+    },
+    true,
+  );
+}
+
 function setupMemo() {
   const input = document.getElementById('memo-input');
   input.addEventListener('input', () => {
@@ -4368,7 +5533,7 @@ function startClock() {
     if (timeEl && timeEl.innerHTML !== timeStr) timeEl.innerHTML = timeStr;
     if (dateEl && dateEl.innerText !== dateStr) dateEl.innerText = dateStr;
   };
-  setInterval(update, 1000);
+  siEvery(update, 1000);
   update();
 }
 function fetchNews() {
@@ -4391,8 +5556,19 @@ function fetchNews() {
     if (currentLists.length === 0) return;
 
     if (!res || res.error || !res.data) {
+      const err = (res && res.error) || 'network';
       currentLists.forEach((list) => {
-        list.innerHTML = `<div style="padding:10px; opacity:0.7; text-align:center;">${t('news_error')}</div>`;
+        if (err === 'noperm') {
+          list.replaceChildren(
+            siCardNotice(t('news_need_perm'), t('allow_btn'), () =>
+              chrome.permissions.request({ origins: [res.origin] }, (ok) => ok && fetchNews()),
+            ),
+          );
+        } else if (err === 'badurl' || err === 'http') {
+          list.replaceChildren(siCardNotice(t('news_rss_error'), t('open_settings_btn'), () => siOpenSettings('tab-widgets')));
+        } else {
+          list.replaceChildren(siCardNotice(t('news_error_net'), t('retry_btn'), fetchNews));
+        }
       });
       return;
     }
@@ -4403,9 +5579,9 @@ function fetchNews() {
       const items = doc.querySelectorAll('item');
 
       if (items.length === 0) {
-        currentLists.forEach((list) => {
-          list.innerHTML = `<div style="padding:10px; opacity:0.7; text-align:center;">${t('news_no_articles')}</div>`;
-        });
+        currentLists.forEach((list) =>
+          list.replaceChildren(siCardNotice(t('news_rss_error'), t('open_settings_btn'), () => siOpenSettings('tab-widgets'))),
+        );
         return;
       }
 
@@ -4741,6 +5917,8 @@ function startMediaSync() {
       clearInterval(loop);
       return;
     }
+    /* 裏のタブでは音楽タブへの問い合わせを休む（戻れば 3 秒以内に再開する） */
+    if (document.hidden) return;
     try {
       const prefs = JSON.parse(localStorage.getItem('immersion_prefs')) || defaultSettings;
 
@@ -4789,31 +5967,31 @@ function startMediaSync() {
             const newArtist = d.artist || 'Unknown';
             if (artistEl && artistEl.innerText !== newArtist) artistEl.innerText = newArtist;
 
-            const lyricsBtn = document.getElementById('lyrics-toggle-btn');
+            /* 歌詞ボタンの出し入れは CSS（body[data-np-lyrics]）に任せる。
+               インラインの display を書くと、展開中だけ出すという条件を
+               スタイル側で表現できなくなる */
             if (prefs.showLyrics) {
-              lyricsBtn.style.display = 'flex';
               if (d.title + d.artist !== currentLyricsTrack) {
                 currentLyricsTrack = d.title + d.artist;
+                npSetLyricsState(false); /* 取れるまでは無いものとして扱う */
                 const lyricsTextEl = document.getElementById('lyrics-text');
                 if (lyricsTextEl) {
-                  lyricsTextEl.innerText = 'Loading lyrics...';
+                  lyricsTextEl.innerText = '';
                   lyricsTextEl.scrollTop = 0;
                   chrome.runtime.sendMessage(
                     { action: 'fetchLyrics', title: d.title, artist: d.artist },
                     (lRes) => {
                       if (chrome.runtime.lastError) return;
-                      if (lRes && lRes.lyrics && lRes.lyrics !== 'No lyrics found.') {
-                        lyricsTextEl.innerText = lRes.lyrics;
-                      } else {
-                        lyricsTextEl.innerText = '歌詞が見つかりませんでした。';
-                      }
+                      const ok = !!(lRes && lRes.lyrics && lRes.lyrics !== 'No lyrics found.');
+                      lyricsTextEl.innerText = ok ? lRes.lyrics : '';
+                      npSetLyricsState(ok);
                     },
                   );
                 }
               }
             } else {
-              lyricsBtn.style.display = 'none';
-              document.getElementById('lyrics-overlay').classList.remove('show');
+              currentLyricsTrack = '';
+              npSetLyricsState(false);
             }
             const playBtn = document.getElementById('btn-play');
             if (playBtn) {
@@ -4840,11 +6018,20 @@ function startMediaSync() {
               }
             }
             if (d.artwork) {
+              /* 使える URL に直してから配る。maxresdefault.jpg が無い動画は
+                 404 でも 120x90 の灰色を本文で返すので、そのままだと
+                 小さなカードでは気づかないまま、展開したときに
+                 画面の真ん中が灰色の霞になる */
+              d.artwork = npResolveArtwork(d.artwork);
+
               const artEl = document.getElementById('album-art');
               const artUrl = `url('${d.artwork}')`;
               if (artEl && artEl.style.backgroundImage !== artUrl) {
                 artEl.style.backgroundImage = artUrl;
               }
+
+              /* 展開表示のための縦横比と地の色。曲が変わったときだけ走る */
+              npOnArtwork(d.artwork);
 
               const bgOriginal = document.getElementById('bg-layer-original');
               const bgBlurred = document.getElementById('bg-layer-blurred');
@@ -4917,6 +6104,12 @@ function startMediaSync() {
               }
             }
           } else {
+            /* 鳴っていないのに大きなアートワークだけ残ると宙に浮く。
+               カードが idle に戻るときは展開も畳む */
+            if (NP.on) npExit();
+            npSetLyricsState(false);
+            currentLyricsTrack = '';
+
             container?.classList.remove('music-active');
             container?.classList.add('music-idle');
             const sourceEl = document.getElementById('music-source-indicator');
@@ -5163,7 +6356,12 @@ function syncGoogleCalendar() {
     return new Promise((resolve) => {
       chrome.runtime.sendMessage({ action: 'fetchCalendar', url: targetUrl }, (res) => {
         if (!res || res.error || !res.data) {
-          console.warn('Calendar fetch failed:', targetUrl);
+          /* 非公開カレンダーの URL は鍵そのもの。ログには出さず、ホスト名だけ残す。 */
+          let host = '';
+          try {
+            host = new URL(targetUrl).hostname;
+          } catch (e) {}
+          console.warn('Calendar fetch failed:', host);
           resolve(null);
         } else {
           resolve(res.data);
@@ -5305,9 +6503,9 @@ function renderCalendarSystem() {
       headerParent.style.padding = '0';
 
       headerParent.innerHTML = `
-          <div id="cal-prev" style="cursor:pointer; opacity:0.6; padding: 8px 20px; font-family:var(--clock-font); user-select: none; font-size: 1.2rem;">◀</div>
+          <div id="cal-prev" style="cursor:pointer; opacity:0.6; padding: 8px 20px; font-family:var(--clock-font); user-select: none; font-size: 1.2rem;">${siIcon('chevL')}</div>
           <span id="cal-title" style="font-weight:600; user-select: none; cursor: pointer;" title="Open Google Calendar (Month View)">${myStr}</span>
-          <div id="cal-next" style="cursor:pointer; opacity:0.6; padding: 8px 20px; font-family:var(--clock-font); user-select: none; font-size: 1.2rem;">▶</div>
+          <div id="cal-next" style="cursor:pointer; opacity:0.6; padding: 8px 20px; font-family:var(--clock-font); user-select: none; font-size: 1.2rem;">${siIcon('chevR')}</div>
         `;
 
       document.getElementById('cal-prev').onclick = (e) => {
@@ -5387,7 +6585,7 @@ function renderCalendarSystem() {
       }
 
       hasEvent = true;
-      const rawText = localVal ? `📝 ${localVal}` : googleVal;
+      const rawText = localVal || googleVal;
       const eventsArray = rawText.split(' / ');
 
       const r = document.createElement('div');
@@ -5485,7 +6683,7 @@ function openEventModal(year, month, day, localVal, googleVal) {
 
   const googleBtn = document.createElement('button');
   googleBtn.className = 'st-btn';
-  googleBtn.innerHTML = 'Google ↗';
+  googleBtn.innerHTML = 'Google ' + siIcon('external');
   googleBtn.title = 'Googleカレンダーに追加';
   googleBtn.style.flex = '1';
   googleBtn.onclick = () => {
@@ -5499,7 +6697,7 @@ function openEventModal(year, month, day, localVal, googleVal) {
 
   const appleBtn = document.createElement('button');
   appleBtn.className = 'st-btn';
-  appleBtn.innerHTML = 'Apple / PC ⬇';
+  appleBtn.innerHTML = 'Apple / PC ' + siIcon('download');
   appleBtn.title = 'カレンダーアプリに追加 (.ics)';
   appleBtn.style.flex = '1';
   appleBtn.onclick = () => {
@@ -5564,7 +6762,7 @@ END:VCALENDAR`;
 }
 
 setTimeout(syncGoogleCalendar, 2000);
-setInterval(syncGoogleCalendar, 5 * 60 * 1000);
+siEvery(syncGoogleCalendar, 5 * 60 * 1000);
 window.addEventListener('focus', syncGoogleCalendar);
 
 const defaultGoogleApps = [
@@ -5733,6 +6931,10 @@ function getModuleOptionsHTML() {
                   <option value="english">${t('mod_english')}</option>
                   <option value="earthquake">${t('mod_earthquake')}</option>
                   <option value="year_progress">${t('mod_year_progress')}</option>
+                  ${Object.values(MODULE_DEFS)
+                    .filter((m) => m.label)
+                    .map((m) => `<option value="${m.id}">${t(m.label)}</option>`)
+                    .join('')}
                   <option value="none">${t('mod_none')}</option>`;
 }
 
@@ -5745,6 +6947,9 @@ function applyThemeClass(themeMode) {
     'mono-mode',
     'liquidglass-mode',
     'lg-aligned',
+    'rain-mode',
+    'paper-mode',
+    'line-mode',
   );
 
   if (themeMode === 'yarn') {
@@ -5760,7 +6965,14 @@ function applyThemeClass(themeMode) {
   } else if (themeMode === 'liquidglass') {
     document.body.classList.add('liquidglass-mode');
     setupLiquidGlass();
+  } else if (themeMode === 'rain') {
+    document.body.classList.add('rain-mode');
+  } else if (themeMode === 'paper') {
+    document.body.classList.add('paper-mode');
+  } else if (themeMode === 'line') {
+    document.body.classList.add('line-mode');
   }
+  document.dispatchEvent(new CustomEvent('si:theme', { detail: themeMode }));
 }
 
 function adjustLayoutScale() {
@@ -5790,6 +7002,7 @@ function showSetupWizard() {
     ['retro', '#e7e3d8', 'theme_retro'],
     ['lite', '#3a3a40', 'theme_lite'],
     ['mono', '#d9d9d9', 'theme_mono'],
+    ['line', 'transparent', 'theme_line'],
   ];
   const shortLabel = (s) => s.replace(/[（(].*$/, '').trim();
   const themeCardsHTML = wizThemes
@@ -5808,10 +7021,10 @@ function showSetupWizard() {
 
       <div style="position:absolute; top:24px; right:24px; z-index:10;">
         <div class="lang-selector-container">
-          <span style="font-size:1rem; line-height:1;">🌐</span>
+          <span style="display:inline-flex; width:16px; height:16px;">${siIcon('globe')}</span>
           <div style="position:relative; display:flex; align-items:center;">
             <span style="font-size:0.8rem; font-weight:500; color:rgba(255,255,255,0.9); margin-right:4px;">${currentLangLabel}</span>
-            <span style="font-size:0.6rem; opacity:0.5;">▼</span>
+            <span style="display:inline-flex; width:12px; height:12px; opacity:0.5;">${siIcon('chevD')}</span>
             <select id="wiz-lang" style="position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer; appearance:none;">
               <option value="auto" ${currentLang === 'auto' ? 'selected' : ''}>Auto (System)</option>
               <option value="ja" ${currentLang === 'ja' ? 'selected' : ''}>日本語</option>
@@ -5958,10 +7171,7 @@ function showSetupWizard() {
     if (modules.includes('news')) {
       try {
         await new Promise((resolve) => {
-          chrome.permissions.request(
-            { origins: ['https://news.yahoo.co.jp/*'] },
-            () => resolve(),
-          );
+          chrome.permissions.request({ origins: ['https://news.yahoo.co.jp/*'] }, () => resolve());
         });
       } catch (e) {
         console.error('news permission request failed', e);
@@ -5985,44 +7195,6 @@ function showSetupWizard() {
   };
 }
 
-function setupCurrency() {
-  const card = document.getElementById('card-currency');
-  if (!card) return;
-
-  const update = async () => {
-    try {
-      const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-      const data = await res.json();
-
-      if (!data || !data.rates || !data.rates.JPY) return;
-
-      const rate = data.rates.JPY;
-      const rateStr = rate.toFixed(2);
-
-      const valEl = card.querySelector('.curr-value');
-      valEl.innerText = rateStr;
-
-      const now = new Date();
-      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-      card.querySelector('.curr-update').innerText = `Updated: ${timeStr}`;
-
-      const prevRate = parseFloat(localStorage.getItem('immersion_prev_rate'));
-      if (prevRate) {
-        card.classList.remove('rate-up', 'rate-down');
-        if (rate > prevRate)
-          card.classList.add('rate-up');
-        else if (rate < prevRate) card.classList.add('rate-down');
-      }
-      localStorage.setItem('immersion_prev_rate', rate);
-    } catch (e) {
-      console.error('Currency fetch error:', e);
-      card.querySelector('.curr-update').innerText = 'Update Failed';
-    }
-  };
-
-  update();
-  setInterval(update, 600000);
-}
 function setupEarthquake() {
   const card = document.getElementById('card-earthquake');
   if (!card) return;
@@ -6082,13 +7254,13 @@ function setupEarthquake() {
       const tsunami = eq.earthquake.domesticTsunami;
       const icon = card.querySelector('.eq-status-icon');
       if (tsunami === 'None') {
-        icon.innerText = '✓';
+        icon.innerHTML = siIcon('check');
         icon.style.color = '';
       } else if (tsunami === 'Checking') {
-        icon.innerText = '⚠';
+        icon.innerHTML = siIcon('alert');
         icon.style.color = '#FFD700';
       } else {
-        icon.innerText = '🌊';
+        icon.innerHTML = siIcon('waves');
         icon.style.color = '#ff453a';
       }
 
@@ -6107,44 +7279,142 @@ function setupEarthquake() {
     }
   };
   update();
-  setInterval(update, 60000);
+  siEvery(update, 60000);
 }
 
 function setupNewModules() {
   setupTodo();
   setupCalculator();
   setupEarthquake();
-  setupCurrency();
   setupEnglishWidget();
   setupJapaneseWidget();
   setupParticleVoid();
 }
 
+/* AudioContext は 1 つを使い回す。アラームのたびに作り直すと、
+   ブラウザの上限（数個）に達して音が鳴らなくなることがある。 */
+let __siAudioCtx = null;
+function siAudio() {
+  if (!__siAudioCtx || __siAudioCtx.state === 'closed') {
+    __siAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (__siAudioCtx.state === 'suspended') __siAudioCtx.resume().catch(() => {});
+  return __siAudioCtx;
+}
+
+function siLoadTodos() {
+  let list = [];
+  try {
+    list = JSON.parse(localStorage.getItem('immersion_todos')) || [];
+  } catch (e) {
+    list = [];
+  }
+  if (!Array.isArray(list)) list = [];
+  return list
+    .filter((x) => x && typeof x.text === 'string')
+    .map((x) => ({
+      id: x.id || 'td' + Math.random().toString(36).slice(2, 9),
+      text: x.text.slice(0, 500),
+      done: !!x.done,
+      star: !!x.star,
+      doneAt: x.doneAt || (x.done ? Date.now() : 0),
+    }));
+}
+
+function siSaveTodos(list) {
+  localStorage.setItem('immersion_todos', JSON.stringify(list));
+  document.dispatchEvent(new CustomEvent('si:todos-changed'));
+}
+
 function setupTodo() {
   const cards = document.querySelectorAll('.todo-card');
-  if (cards.length === 0) return;
 
-  let savedTodos = JSON.parse(localStorage.getItem('immersion_todos')) || [];
-  savedTodos = savedTodos.filter((todo) => !todo.done);
-  localStorage.setItem('immersion_todos', JSON.stringify(savedTodos));
+  /* 完了した項目は、起動のたびに黙って消していた。
+     完了から 1 日たったものだけ片付け、それまでは取り消せるようにする。 */
+  let savedTodos = siLoadTodos();
+  const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+  savedTodos = savedTodos.filter((todo) => !todo.done || todo.doneAt > dayAgo);
+  siSaveTodos(savedTodos);
+  siRenderTodayFocus();
+  if (cards.length === 0) return;
 
   const renderAll = () => {
     document.querySelectorAll('.todo-card').forEach((card) => {
       const list = card.querySelector('.todo-list');
       if (!list) return;
-      list.innerHTML = '';
-      savedTodos.forEach((todo, index) => {
+      list.textContent = '';
+      const ordered = [...savedTodos].sort((a, b) => a.done - b.done || b.star - a.star);
+      ordered.forEach((todo) => {
         const li = document.createElement('li');
-        li.className = `todo-item ${todo.done ? 'checked' : ''}`;
-        li.innerHTML = `<span class="todo-check">${todo.done ? '✅' : '⬜'}</span> <span>${todo.text}</span>`;
-        li.onclick = (e) => {
-          if (e.shiftKey) savedTodos.splice(index, 1);
-          else todo.done = !todo.done;
-          localStorage.setItem('immersion_todos', JSON.stringify(savedTodos));
+        li.className = `todo-item${todo.done ? ' checked' : ''}${todo.star ? ' starred' : ''}`;
+
+        const check = document.createElement('span');
+        check.className = 'todo-check';
+        check.innerHTML = todo.done ? siIcon('check') : '';
+
+        const label = document.createElement('span');
+        label.className = 'todo-text';
+        label.textContent = todo.text;
+
+        const star = document.createElement('button');
+        star.className = 'todo-star';
+        star.type = 'button';
+        star.title = t('todo_star');
+        star.innerHTML = siIcon(todo.star ? 'starFill' : 'star');
+        star.onclick = (e) => {
+          e.stopPropagation();
+          const was = todo.star;
+          savedTodos.forEach((x) => (x.star = false));
+          todo.star = !was;
+          siSaveTodos(savedTodos);
           renderAll();
+          siRenderTodayFocus();
+        };
+
+        const del = document.createElement('button');
+        del.className = 'todo-del';
+        del.type = 'button';
+        del.title = t('ctx_del');
+        del.textContent = '×';
+        del.onclick = (e) => {
+          e.stopPropagation();
+          savedTodos = savedTodos.filter((x) => x !== todo);
+          siSaveTodos(savedTodos);
+          renderAll();
+          siRenderTodayFocus();
+        };
+
+        li.append(check, label, star, del);
+        li.onclick = (e) => {
+          if (e.shiftKey) {
+            savedTodos = savedTodos.filter((x) => x !== todo);
+          } else {
+            todo.done = !todo.done;
+            todo.doneAt = todo.done ? Date.now() : 0;
+            if (todo.done) todo.star = false;
+          }
+          siSaveTodos(savedTodos);
+          renderAll();
+          siRenderTodayFocus();
         };
         list.appendChild(li);
       });
+
+      let clear = card.querySelector('.todo-clear-done');
+      const doneCount = savedTodos.filter((x) => x.done).length;
+      if (!clear) {
+        clear = document.createElement('button');
+        clear.type = 'button';
+        clear.className = 'todo-clear-done';
+        clear.onclick = () => {
+          savedTodos = savedTodos.filter((x) => !x.done);
+          siSaveTodos(savedTodos);
+          renderAll();
+        };
+        card.appendChild(clear);
+      }
+      clear.textContent = t('todo_clear_done', { n: doneCount });
+      clear.style.display = doneCount ? '' : 'none';
     });
   };
 
@@ -6152,16 +7422,65 @@ function setupTodo() {
     const input = card.querySelector('.todo-input');
     if (input.dataset.initDone) return;
     input.dataset.initDone = 'true';
+    input.placeholder = t('todo_placeholder');
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.isComposing && input.value.trim()) {
-        savedTodos.push({ text: input.value, done: false });
-        localStorage.setItem('immersion_todos', JSON.stringify(savedTodos));
+        savedTodos.push({
+          id: 'td' + Date.now().toString(36),
+          text: input.value.trim().slice(0, 500),
+          done: false,
+          star: false,
+          doneAt: 0,
+        });
+        siSaveTodos(savedTodos);
         document.querySelectorAll('.todo-input').forEach((i) => (i.value = ''));
         renderAll();
       }
     });
   });
+  document.addEventListener('si:todos-external', () => {
+    savedTodos = siLoadTodos();
+    renderAll();
+    siRenderTodayFocus();
+  });
   renderAll();
+}
+
+/* 「今日の一つ」: ★を付けた ToDo を、時計の下に小さく出す */
+function siRenderTodayFocus() {
+  const host = document.querySelector('.clock-container');
+  if (!host) return;
+  let line = document.getElementById('si-today-focus');
+  const top = siLoadTodos().find((x) => x.star && !x.done);
+  if (!top) {
+    line?.remove();
+    return;
+  }
+  if (!line) {
+    line = document.createElement('div');
+    line.id = 'si-today-focus';
+    line.title = t('todo_focus_done_hint');
+    line.onclick = () => {
+      const list = siLoadTodos();
+      const hit = list.find((x) => x.star && !x.done);
+      if (!hit) return;
+      hit.done = true;
+      hit.star = false;
+      hit.doneAt = Date.now();
+      siSaveTodos(list);
+      document.dispatchEvent(new CustomEvent('si:todos-external'));
+      siRenderTodayFocus();
+    };
+    host.appendChild(line);
+  }
+  line.textContent = '';
+  const tag = document.createElement('span');
+  tag.className = 'si-tf-tag';
+  tag.textContent = t('todo_focus_label');
+  const txt = document.createElement('span');
+  txt.className = 'si-tf-text';
+  txt.textContent = top.text;
+  line.append(tag, txt);
 }
 
 function setupCalculator() {
@@ -6239,6 +7558,7 @@ function setupTimer() {
     const progressBar = card.querySelector('.timer-progress-bar');
 
     let timerInterval = null,
+      endAt = 0,
       alarmLoopInterval = null,
       totalSeconds = 0,
       remainingSeconds = 0,
@@ -6247,7 +7567,7 @@ function setupTimer() {
     const pad = (n) => String(n).padStart(2, '0');
 
     const playOneSequence = () => {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const ctx = siAudio();
       const beep = (freq, s, d) => {
         const o = ctx.createOscillator(),
           g = ctx.createGain();
@@ -6255,7 +7575,7 @@ function setupTimer() {
         g.connect(ctx.destination);
         o.type = 'sine';
         o.frequency.value = freq;
-        g.gain.setValueAtTime(1.0, s);
+        g.gain.setValueAtTime(0.6, s);
         g.gain.exponentialRampToValueAtTime(0.01, s + d);
         o.start(s);
         o.stop(s + d);
@@ -6312,6 +7632,7 @@ function setupTimer() {
       }
       if (isRunning) {
         clearInterval(timerInterval);
+        remainingSeconds = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
         isRunning = false;
         toggleBtn.innerText = 'Resume';
         toggleBtn.classList.remove('active-state');
@@ -6328,16 +7649,20 @@ function setupTimer() {
         toggleBtn.innerText = 'Pause';
         toggleBtn.classList.add('active-state');
         isRunning = true;
+        /* 1 秒ごとに 1 を引く方式は、タブが裏に回ると間引かれて遅れていた。
+           終了時刻を決めておき、毎回そこから残りを計算する。 */
+        endAt = Date.now() + remainingSeconds * 1000;
         updateDisplay();
-        timerInterval = setInterval(() => {
-          remainingSeconds--;
+        const tick = () => {
+          remainingSeconds = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
           updateDisplay();
           if (remainingSeconds <= 0) {
             clearInterval(timerInterval);
             isRunning = false;
             startAlarm();
           }
-        }, 1000);
+        };
+        timerInterval = setInterval(tick, 250);
       }
     };
 
@@ -6540,6 +7865,8 @@ function setupVideoIdleHandler() {
   );
 
   setInterval(() => {
+    /* 動画の壁紙を使っていないとき、裏のタブにいるときは何もしない */
+    if (document.hidden || !document.body.classList.contains('has-video')) return;
     idleTime++;
     if (idleTime >= idleLimit) {
       const v = document.getElementById('bg-video');
@@ -6550,6 +7877,52 @@ function setupVideoIdleHandler() {
     }
   }, 1000);
 }
+/* バックアップの中身を確かめてから反映する。
+   - 鍵は immersion_ / event_ で始まるものだけ
+   - 値は文字列のみ（オブジェクトが混ざると各所の JSON.parse が壊れる）
+   - 設定・ドック・ToDo など JSON の項目は、形まで確かめる */
+const SI_JSON_KEYS = {
+  immersion_prefs: (v) => v && typeof v === 'object' && !Array.isArray(v),
+  immersion_dock_items: Array.isArray,
+  immersion_todos: Array.isArray,
+  immersion_profiles: (v) => v && typeof v === 'object',
+  immersion_search_bangs: Array.isArray,
+  immersion_worldclock: Array.isArray,
+  immersion_readlater: Array.isArray,
+  immersion_focus: (v) => v && typeof v === 'object',
+  immersion_sounds: (v) => v && typeof v === 'object',
+};
+function siValidateBackup(data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return { ok: false, reason: 'not an object' };
+  const entries = {};
+  let total = 0;
+  for (const [key, value] of Object.entries(data)) {
+    if (!/^(immersion_|event_)[\w\-.:]{1,120}$/.test(key)) continue;
+    if (typeof value !== 'string') return { ok: false, reason: 'non-string value: ' + key };
+    total += value.length;
+    if (total > 8 * 1024 * 1024) return { ok: false, reason: 'too large' };
+    if (SI_JSON_KEYS[key]) {
+      let parsed;
+      try {
+        parsed = JSON.parse(value);
+      } catch (e) {
+        return { ok: false, reason: 'broken json: ' + key };
+      }
+      if (!SI_JSON_KEYS[key](parsed)) return { ok: false, reason: 'unexpected shape: ' + key };
+      if (key === 'immersion_prefs') {
+        const allowedThemes = ['glass', 'liquidglass', 'yarn', 'terminal', 'retro', 'lite', 'mono', 'rain', 'paper', 'line'];
+        if (parsed.themeMode && !allowedThemes.includes(parsed.themeMode)) parsed.themeMode = 'glass';
+        if (parsed.accent && !/^#[0-9a-fA-F]{3,8}$/.test(parsed.accent)) delete parsed.accent;
+        entries[key] = JSON.stringify(parsed);
+        continue;
+      }
+    }
+    entries[key] = value;
+  }
+  if (!Object.keys(entries).length) return { ok: false, reason: 'no entries' };
+  return { ok: true, entries };
+}
+
 function setupBackupSystem() {
   const exportBtn = document.getElementById('btn-export-settings');
   const importTrigger = document.getElementById('btn-import-settings-trigger');
@@ -6587,27 +7960,67 @@ function setupBackupSystem() {
   fileInput.onchange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      alert(t('import_error'));
+      fileInput.value = '';
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
         const data = JSON.parse(event.target.result);
-        if (!data || typeof data !== 'object') throw new Error('Invalid JSON');
+        const checked = siValidateBackup(data);
+        if (!checked.ok) throw new Error(checked.reason);
 
-        Object.keys(data).forEach((key) => {
+        /* 反映の前に今の状態を控えておく。読み込んだ結果が気に入らなければ
+           「データ・保存」から 1 回だけ元に戻せる。 */
+        const snapshot = {};
+        Object.keys(localStorage).forEach((key) => {
           if (key.startsWith('immersion_') || key.startsWith('event_')) {
-            localStorage.setItem(key, data[key]);
+            snapshot[key] = localStorage.getItem(key);
           }
         });
+        try {
+          localStorage.setItem('si_restore_point', JSON.stringify(snapshot));
+        } catch (e) {}
+
+        Object.entries(checked.entries).forEach(([key, value]) => localStorage.setItem(key, value));
         alert(t('import_success'));
         location.reload();
       } catch (err) {
-        console.error(err);
+        console.warn('[Search Immersion] import rejected:', err && err.message);
         alert(t('import_error'));
       }
     };
     reader.readAsText(file);
     fileInput.value = '';
   };
+
+  const undoBtn = document.getElementById('btn-undo-import');
+  if (undoBtn) {
+    const hasPoint = () => {
+      try {
+        return !!localStorage.getItem('si_restore_point');
+      } catch (e) {
+        return false;
+      }
+    };
+    undoBtn.style.display = hasPoint() ? '' : 'none';
+    undoBtn.onclick = () => {
+      if (!hasPoint() || !confirm(t('import_undo_confirm'))) return;
+      try {
+        const snap = JSON.parse(localStorage.getItem('si_restore_point'));
+        Object.keys(localStorage).forEach((key) => {
+          if (key.startsWith('immersion_') || key.startsWith('event_')) localStorage.removeItem(key);
+        });
+        Object.entries(snap).forEach(([k, v]) => localStorage.setItem(k, v));
+        localStorage.removeItem('si_restore_point');
+        location.reload();
+      } catch (e) {
+        alert(t('import_error'));
+      }
+    };
+  }
 
   const resetBtn = document.getElementById('btn-reset-all');
   if (resetBtn) {
@@ -6892,7 +8305,7 @@ function setupIOSFocusSwitcher() {
       item.innerHTML = `
         <div class="focus-indicator" style="${bgStyle}"></div>
         <div class="focus-name">${p.name}</div>
-        <div class="focus-check">✓</div>
+        <div class="focus-check">${siIcon('check')}</div>
       `;
 
       item.onclick = async (e) => {
@@ -7163,8 +8576,6 @@ function setupParticleVoid() {
   const card = document.getElementById('card-particle');
   if (!card) return;
 
-  const canvas = document.getElementById('particle-canvas');
-  const ctx = canvas.getContext('2d');
   const daysValEl = card.querySelector('.p-days-val');
   const percentEl = card.querySelector('.particle-percent');
   const yearLabel = document.getElementById('p-year-label');
@@ -7184,209 +8595,22 @@ function setupParticleVoid() {
   if (daysValEl) daysValEl.innerText = remainingDays;
   if (percentEl) percentEl.innerText = `${percent.toFixed(1)}%`;
 
-  let particles = [];
-  const particleRadius = 4.0;
-  let width, height;
-
-  let gravityX = 0;
-  let gravityY = 0.25;
-
-  function resize() {
-    const rect = card.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-    width = canvas.width;
-    height = canvas.height;
+  /* 1 年を 52 週の縦線の目盛りで見せる（見た目は features.css の .p-ruler）。
+     以前は過ぎた日数ぶんの粒を物理計算で降らせていたが、どのテーマでも
+     この目盛りに揃えた。過ぎた週は長い線、今週はアクセント色、残りは短く薄い線 */
+  card.querySelector('.p-ruler')?.remove();
+  const ruler = document.createElement('div');
+  ruler.className = 'p-ruler';
+  ruler.setAttribute('aria-hidden', 'true');
+  const nowWeek = Math.min(51, Math.floor((passedDays - 1) / 7));
+  for (let w = 0; w < 52; w++) {
+    const tick = document.createElement('i');
+    if (w < nowWeek) tick.className = 'done';
+    else if (w === nowWeek) tick.className = 'now';
+    /* 各月の最初の週を少し長くして、目安にする */
+    const d = new Date(currentYear, 0, 1 + w * 7);
+    if (d.getDate() <= 7) tick.classList.add('month');
+    ruler.appendChild(tick);
   }
-  window.addEventListener('resize', resize);
-  resize();
-
-  card.addEventListener('mousemove', (e) => {
-    const rect = card.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left - width / 2;
-    const mouseY = e.clientY - rect.top - height / 2;
-
-    gravityX = mouseX * 0.005;
-    gravityY = 0.25 + mouseY * 0.005;
-  });
-
-  card.addEventListener('mouseleave', () => {
-    gravityX = 0;
-    gravityY = 0.25;
-  });
-
-  class Particle {
-    constructor(x, y) {
-      this.x = x;
-      this.y = y;
-
-      this.vx = (Math.random() - 0.5) * 3;
-      this.vy = Math.random() * 5 + 2;
-      this.radius = particleRadius;
-      this.friction = 0.95;
-      this.restitution = 0.4;
-    }
-
-    update() {
-      this.vx += gravityX;
-      this.vy += gravityY;
-
-      this.vx *= 0.99;
-      this.vy *= 0.99;
-
-      this.x += this.vx;
-      this.y += this.vy;
-
-      if (this.y + this.radius > height) {
-        this.y = height - this.radius;
-        this.vy *= -this.restitution;
-        this.vx *= this.friction;
-      } else if (this.y - this.radius < 0) {
-        this.y = this.radius;
-        this.vy *= -this.restitution;
-      }
-
-      if (this.x + this.radius > width) {
-        this.x = width - this.radius;
-        this.vx *= -this.restitution;
-      } else if (this.x - this.radius < 0) {
-        this.x = this.radius;
-        this.vx *= -this.restitution;
-      }
-    }
-
-    draw() {
-      ctx.beginPath();
-      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-      ctx.fillStyle =
-        getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#50E3C2';
-      ctx.fill();
-
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
-      ctx.beginPath();
-      ctx.arc(this.x - 1, this.y - 1, this.radius * 0.4, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
-
-  function resolveCollisions() {
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const p1 = particles[i];
-        const p2 = particles[j];
-        const dx = p2.x - p1.x;
-        const dy = p2.y - p1.y;
-        const distSq = dx * dx + dy * dy;
-        const minDist = p1.radius + p2.radius;
-
-        if (distSq < minDist * minDist) {
-          const dist = Math.sqrt(distSq);
-
-          const overlap = (minDist - dist) / 2;
-          const nx = dx / dist;
-          const ny = dy / dist;
-
-          p1.x -= nx * overlap;
-          p1.y -= ny * overlap;
-          p2.x += nx * overlap;
-          p2.y += ny * overlap;
-
-          const jitter = (Math.random() - 0.5) * 0.1;
-          const tx = p1.vx;
-          p1.vx = p2.vx * 0.9 + jitter;
-          p2.vx = tx * 0.9 - jitter;
-
-          const ty = p1.vy;
-          p1.vy = p2.vy * 0.9;
-          p2.vy = ty * 0.9;
-        }
-      }
-    }
-  }
-
-  for (let i = 0; i < passedDays; i++) {
-    particles.push(
-      new Particle(
-        Math.random() * width,
-        Math.random() * -height * 1.5 - 50,
-      ),
-    );
-  }
-
-  function animate() {
-    ctx.clearRect(0, 0, width, height);
-
-    particles.forEach((p) => p.update());
-
-    for (let k = 0; k < 3; k++) resolveCollisions();
-
-    particles.forEach((p) => p.draw());
-    requestAnimationFrame(animate);
-  }
-
-  animate();
-}
-
-function setupTvClock() {
-  const card = document.getElementById('card-tv-clock');
-  if (!card) return;
-
-  const update = () => {
-    const now = new Date();
-    const h = String(now.getHours()).padStart(2, '0');
-    const m = String(now.getMinutes()).padStart(2, '0');
-    const s = String(now.getSeconds()).padStart(2, '0');
-
-    const mStr = now.getMonth() + 1;
-    const dStr = now.getDate();
-    const days = ['日', '月', '火', '水', '木', '金', '土'];
-    const dayStr = days[now.getDay()];
-
-    const hhmmEl = card.querySelector('.tvc-hhmm');
-    const ssEl = card.querySelector('.tvc-ss');
-    const dateEl = card.querySelector('.tvc-date');
-
-    if (hhmmEl) hhmmEl.innerText = `${h}:${m}`;
-    if (ssEl) ssEl.innerText = s;
-    if (dateEl) dateEl.innerText = `${mStr}/${dStr} (${dayStr})`;
-  };
-
-  update();
-  setInterval(update, 1000);
-}
-
-const originalSetupNewModules = setupNewModules;
-setupNewModules = function () {
-  originalSetupNewModules();
-  setupTvClock();
-  setupCurrencyWidget();
-};
-
-function setupCurrencyWidget() {
-  const card = document.getElementById('card-currency');
-  if (!card) return;
-
-  const update = () => {
-    chrome.runtime.sendMessage({ action: 'fetchCurrency' }, (res) => {
-      const valEl = card.querySelector('.curr-value');
-      const updateEl = card.querySelector('.curr-update');
-
-      if (!res || res.error || !res.data) {
-        if (valEl) valEl.innerText = 'Error';
-        return;
-      }
-
-      const rate = res.data.rates.JPY;
-      if (rate) {
-        if (valEl) valEl.innerText = rate.toFixed(2);
-
-        const now = new Date();
-        const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
-        if (updateEl) updateEl.innerText = `Updated: ${timeStr}`;
-      }
-    });
-  };
-
-  update();
-  setInterval(update, 30 * 60 * 1000);
+  card.appendChild(ruler);
 }

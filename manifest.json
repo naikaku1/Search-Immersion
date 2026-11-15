@@ -6,14 +6,17 @@
     "128": "icons/icon128.png"
   },
   "name": "Search Immersion",
-  "version": "26.1.0",
-  "description": "新しいタブを『スマートディスプレイ』に変える拡張機能。ベータ版",
+  "version": "28.0.0",
+  "description": "新しいタブを『スマートディスプレイ』に変える拡張機能。検索・Web Clip・環境音・集中タイマー・雨窓テーマ",
   "permissions": [
     "storage",
     "tabs",
     "scripting",
     "history",
-    "search"
+    "search",
+    "contextMenus",
+    "activeTab",
+    "favicon"
   ],
   "host_permissions": [
     "https://calendar.google.com/*",
@@ -52,5 +55,8 @@
       },
       "description": "Horizon"
     }
-  }
+  },
+  "optional_permissions": [
+    "bookmarks"
+  ]
 }
