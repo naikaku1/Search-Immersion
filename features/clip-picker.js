@@ -241,7 +241,10 @@
     window.removeEventListener('mousemove', onMove, true);
     window.removeEventListener('mousedown', onDown, true);
     window.removeEventListener('mouseup', onUp, true);
-    window.removeEventListener('click', swallow, true);
+    /* クリックで決めたときは、mouseup の直後に同じクリックの click が届く。
+       ここですぐ外すと、その click がページに渡り、リンクの上で決めたときにリンク先へ移ってしまう。
+       少しだけ残して、その click も止めてから外す */
+    setTimeout(() => window.removeEventListener('click', swallow, true), 400);
     window.removeEventListener('wheel', onWheel, { capture: true });
     window.removeEventListener('keydown', onKey, true);
     host.remove();
