@@ -135,6 +135,7 @@
   lang_en: 'English',
   lang_ko: '한국어',
   lang_zh_cn: '简体中文',
+  lang_es: 'Español',
   spotify_web_tab: 'Spotify (Webタブ監視)',
   spotify_api_label: 'Spotify API連携',
   spotify_recommended: '推奨',

@@ -134,6 +134,7 @@
   lang_en: '英语',
   lang_ko: '韩语',
   lang_zh_cn: '简体中文',
+  lang_es: '西班牙语',
   spotify_web_tab: 'Spotify (Web标签页)',
   spotify_api_label: 'Spotify API 关联',
   spotify_recommended: '推荐',

@@ -713,6 +713,7 @@ const SI_MENU_TEXT = {
   ja: { clip: 'Search Immersion に切り抜く', page: 'あとで読むに追加', link: 'リンクをあとで読むに追加' },
   ko: { clip: 'Search Immersion으로 잘라내기', page: '나중에 읽기에 추가', link: '링크를 나중에 읽기에 추가' },
   zh: { clip: '裁剪到 Search Immersion', page: '添加到稍后阅读', link: '将链接添加到稍后阅读' },
+  es: { clip: 'Recortar en Search Immersion', page: 'Añadir a Leer más tarde', link: 'Añadir enlace a Leer más tarde' },
   en: { clip: 'Clip to Search Immersion', page: 'Add to Read Later', link: 'Add link to Read Later' },
 };
 

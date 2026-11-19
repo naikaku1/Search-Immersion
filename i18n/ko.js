@@ -134,6 +134,7 @@
   lang_en: 'English',
   lang_ko: '한국어',
   lang_zh_cn: '简体中文',
+  lang_es: 'Español',
   spotify_web_tab: 'Spotify (웹 탭)',
   spotify_api_label: 'Spotify API 연동',
   spotify_recommended: '추천',

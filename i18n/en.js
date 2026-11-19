@@ -135,6 +135,7 @@
   lang_en: 'English',
   lang_ko: 'Korean',
   lang_zh_cn: 'Simplified Chinese',
+  lang_es: 'Spanish',
   spotify_web_tab: 'Spotify (Web Tab)',
   spotify_api_label: 'Spotify API Integration',
   spotify_recommended: 'RECOMMENDED',
