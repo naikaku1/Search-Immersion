@@ -498,7 +498,7 @@ function t(key, params = {}) {
   let lang = prefs.language || 'auto';
   if (lang === 'auto') {
     const navLang = navigator.language.slice(0, 2);
-    lang = navLang === 'ja' || navLang === 'ko' ? navLang : navLang === 'zh' ? 'zh_cn' : 'en';
+    lang = navLang === 'ja' || navLang === 'ko' || navLang === 'es' ? navLang : navLang === 'zh' ? 'zh_cn' : 'en';
   }
   const dict = translations[lang] || translations.en || {};
   const enDict = translations.en || {};
@@ -1051,6 +1051,7 @@ function initNestHub() {
                   <option value="en">English</option>
                   <option value="ko">한국어</option>
                   <option value="zh_cn">简体中文</option>
+                  <option value="es">Español</option>
                 </select>
                 <div class="st-desc">${t('desc_language')}</div>
               </div>
@@ -3159,7 +3160,7 @@ function ambLang() {
   let lang = prefs.language || 'auto';
   if (lang === 'auto') {
     const nav = navigator.language.slice(0, 2);
-    lang = nav === 'ja' || nav === 'ko' || nav === 'zh' ? nav : 'en';
+    lang = nav === 'ja' || nav === 'ko' || nav === 'zh' || nav === 'es' ? nav : 'en';
   }
   return lang;
 }
@@ -3618,6 +3619,7 @@ function ambDateText(date) {
   const lang = ambLang();
   if (lang === 'ja' || lang === 'zh') return `${mStr}${date.getDate()}日 (${dStr})`;
   if (lang === 'ko') return `${mStr} ${date.getDate()}일 (${dStr})`;
+  if (lang === 'es') return `${date.getDate()} ${mStr} (${dStr})`;
   return `${mStr} ${date.getDate()} (${dStr})`;
 }
 
@@ -5515,7 +5517,7 @@ function startClock() {
     let lang = prefs.language || 'auto';
     if (lang === 'auto') {
       const navLang = navigator.language.slice(0, 2);
-      lang = navLang === 'ja' || navLang === 'ko' || navLang === 'zh' ? navLang : 'en';
+      lang = navLang === 'ja' || navLang === 'ko' || navLang === 'zh' || navLang === 'es' ? navLang : 'en';
     }
 
     let dateStr = `${mStr} ${now.getDate()} (${dStr})`;
@@ -5526,6 +5528,8 @@ function startClock() {
       dateStr = `${mStr} ${now.getDate()}일 (${dStr})`;
     } else if (lang === 'zh') {
       dateStr = `${mStr}${now.getDate()}日 (${dStr})`;
+    } else if (lang === 'es') {
+      dateStr = `${now.getDate()} ${mStr} (${dStr})`;
     }
 
     const timeEl = document.getElementById('clock-time');
@@ -6990,7 +6994,7 @@ function showSetupWizard() {
 
   const prefs = JSON.parse(localStorage.getItem('immersion_prefs')) || defaultSettings;
   const currentLang = prefs.language || 'auto';
-  const langLabelMap = { auto: 'Auto', ja: '日本語', en: 'English', ko: '한국어', zh_cn: '中文' };
+  const langLabelMap = { auto: 'Auto', ja: '日本語', en: 'English', ko: '한국어', zh_cn: '中文', es: 'Español' };
   const currentLangLabel = langLabelMap[currentLang] || 'Language';
 
   const currentTheme = prefs.themeMode || 'glass';
@@ -7031,6 +7035,7 @@ function showSetupWizard() {
               <option value="en" ${currentLang === 'en' ? 'selected' : ''}>English</option>
               <option value="ko" ${currentLang === 'ko' ? 'selected' : ''}>한국어</option>
               <option value="zh_cn" ${currentLang === 'zh_cn' ? 'selected' : ''}>简体中文</option>
+              <option value="es" ${currentLang === 'es' ? 'selected' : ''}>Español</option>
             </select>
           </div>
         </div>

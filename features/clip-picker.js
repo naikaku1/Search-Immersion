@@ -20,6 +20,10 @@
       done: '홈에 추가했습니다',
     },
     zh: { hint: '点击裁剪　滚轮 / ↑↓ 调整范围　拖动自由框选　Esc 取消', done: '已添加到主页' },
+    es: {
+      hint: 'Clic para recortar · Rueda / ↑↓ para ajustar el área · Arrastra para un recuadro libre · Esc para cancelar',
+      done: 'Añadido a tu inicio',
+    },
     en: { hint: 'Click to clip · Wheel / ↑↓ to resize · Drag for a free box · Esc to cancel', done: 'Added to your home' },
   }[lang] || null;
   const TXT = L || {
